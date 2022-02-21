@@ -2,10 +2,7 @@ package com.xyz.ean.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -25,4 +22,7 @@ public class Price {
     private double price;
 
     private Calendar created_at;
+
+    @OneToMany(mappedBy = "prices")
+    private Product product;
 }
