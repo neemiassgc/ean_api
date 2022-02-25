@@ -31,4 +31,18 @@ public class Product {
     public Product(final UUID id, final String name, final String eanCode) {
         this(id, name, new Vector<>(), eanCode);
     }
+
+    public void addPrice(final Price... prices) {
+        for (Price price : prices) {
+            this.prices.add(price);
+            price.setProduct(this);
+        }
+    }
+
+    public void remove(final Price... prices) {
+        for (Price price : prices) {
+            this.prices.remove(price);
+            price.setProduct(null);
+        }
+    }
 }
