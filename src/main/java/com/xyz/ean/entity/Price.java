@@ -3,7 +3,7 @@ package com.xyz.ean.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -21,8 +21,8 @@ public class Price {
 
     private double price;
 
-    private Calendar created_at;
+    private LocalDate created;
 
-    @OneToMany(mappedBy = "prices")
+    @ManyToOne
     private Product product;
 }
