@@ -25,4 +25,8 @@ public class Price {
 
     @ManyToOne
     private Product product;
+
+    public Price(final double price) {
+        this(null, price, LocalDate.now(), null);
+    }
 }
