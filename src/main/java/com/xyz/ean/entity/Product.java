@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "Product")
 @Table(name = "products")
 @Getter
 @Setter
@@ -16,12 +16,12 @@ import java.util.UUID;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = javax.persistence.GenerationType.AUTO)
     private UUID id;
 
+    @Column(nullable = false)
     private String name;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Price> prices;
 
     @Column(name = "ean_code", unique = true, nullable = false, length = 13)
