@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 @Entity(name = "Product")
 @Table(name = "products")
@@ -44,5 +45,17 @@ public class Product {
             this.prices.remove(price);
             price.setProduct(null);
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "Product{id=%s, description=%s, eanCode=%s, sequenceCode=%s, prices=%s}",
+            id,
+            description,
+            eanCode,
+            sequenceCode,
+            this.prices.stream().map(price -> price.getPrice().toString()).collect(Collectors.joining(","))
+        );
     }
 }
