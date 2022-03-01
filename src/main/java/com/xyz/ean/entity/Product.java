@@ -1,6 +1,8 @@
 package com.xyz.ean.entity;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
@@ -11,26 +13,24 @@ import java.util.Vector;
 @Table(name = "products")
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
-@AllArgsConstructor
 public class Product {
 
     @Id
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)
-    private String name;
+    private String description;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Price> prices;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Price> prices = new Vector<>();
 
     @Column(name = "ean_code", unique = true, nullable = false, length = 13)
     private String eanCode;
 
-    public Product(final UUID id, final String name, final String eanCode) {
-        this(id, name, new Vector<>(), eanCode);
-    }
+    @Column(name = "sequence_code", unique = true, nullable = false)
+    private Integer sequenceCode;
 
     public void addPrice(final Price... prices) {
         for (Price price : prices) {
