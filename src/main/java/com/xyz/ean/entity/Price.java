@@ -28,4 +28,9 @@ public class Price {
     public Price(final double price) {
         this(null, price, LocalDate.now(), null);
     }
+
+    @Override
+    public String toString() {
+        return String.format("Price{id=%s, price=%s, created=%s, product=%s}", id, price, created, product);
+    }
 }
