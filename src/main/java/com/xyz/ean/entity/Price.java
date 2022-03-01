@@ -10,7 +10,6 @@ import java.util.UUID;
 @Table(name = "prices")
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Price {
@@ -19,9 +18,9 @@ public class Price {
     @GeneratedValue
     private UUID id;
 
-    private double price;
+    private Double price;
 
-    private LocalDate created;
+    private LocalDate created = LocalDate.now();
 
     @ManyToOne
     private Product product;
