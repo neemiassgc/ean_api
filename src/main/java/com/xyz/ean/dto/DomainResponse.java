@@ -1,4 +1,4 @@
-package com.xyz.ean.pojo.dto;
+package com.xyz.ean.dto;
 
 import lombok.*;
 
