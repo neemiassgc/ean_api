@@ -1,8 +1,11 @@
 package com.xyz.ean.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xyz.ean.entity.Product;
 import com.xyz.ean.pojo.DomainUtils;
 import com.xyz.ean.pojo.SessionInstance;
+import com.xyz.ean.dto.DomainResponse;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -11,7 +14,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,5 +93,53 @@ public class ForeignProductHttpService {
 
         this.sessionInstance = new SessionInstance(instanceId, ajaxIdentifier);
 
+    }
+
+    public Optional<Product> fetchByEanCode(final String eanCode) {
+        final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+        headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+
+        final MultiValueMap<String, String> body = new LinkedMultiValueMap<>(6);
+        body.add("p_request", sessionInstance.getAjaxIdentifier());
+        body.add("p_flow_id", "171");
+        body.add("p_flow_step_id", "2");
+        body.add("p_instance", sessionInstance.getSessionId());
+        body.add("p_debug", "");
+        body.add("p_arg_names", "P2_COD1");
+        body.add("p_arg_values", eanCode);
+
+        final HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(body, headers);
+
+        return restTemplate.execute(
+            "/wwv_flow.show",
+            HttpMethod.POST,
+            restTemplate.httpEntityCallback(httpEntity, String.class),
+            (clientHttpResponse) -> {
+                final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
+                final DomainResponse domainResponse = new DomainResponse();
+                final JsonNode jsonNode = objectMapper.readTree(json).get("item");
+
+                if (jsonNode.isNull()) {
+                    this.createAnInstance();
+                    return fetchByEanCode(eanCode);
+                }
+
+                if (jsonNode.get(5).get("value").asText().length() == 0)
+                    return Optional.empty();
+
+                final String description = jsonNode.get(1).get("value").asText();
+                final int sequence = jsonNode.get(2).get("value").asInt();
+                final double priceValue = DomainUtils.parsePrice(jsonNode.get(4).get("value").asText());
+                final String eanCodeValue = jsonNode.get(5).get("value").asText();
+
+                domainResponse.setDescription(description);
+                domainResponse.setSequence(sequence);
+                domainResponse.setPrice(priceValue);
+                domainResponse.setEanCode(eanCodeValue);
+
+                return Optional.of(this.entityMapper.mapProduct(domainResponse));
+            }
+        );
     }
 }
