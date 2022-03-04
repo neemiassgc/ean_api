@@ -2,7 +2,7 @@ package com.xyz.ean.service;
 
 import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
-import com.xyz.ean.pojo.dto.DomainResponse;
+import com.xyz.ean.dto.DomainResponse;
 import org.springframework.stereotype.Service;
 
 @Service
