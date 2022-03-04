@@ -35,12 +35,12 @@ public class ForeignProductHttpService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final EntityMapper entityMapper;
+    private final DomainMapper domainMapper;
 
     private SessionInstance sessionInstance;
 
     @Autowired
-    public ForeignProductHttpService(final RestTemplateBuilder restTemplateBuilder, final ObjectMapper objectMapper, final EntityMapper entityMapper) {
+    public ForeignProductHttpService(final RestTemplateBuilder restTemplateBuilder, final ObjectMapper objectMapper, final DomainMapper domainMapper) {
         final Supplier<RestTemplate> restTemplateSupplier = () -> {
             final CloseableHttpClient httpClient =
                 HttpClientBuilder.create()
@@ -56,7 +56,7 @@ public class ForeignProductHttpService {
 
         this.restTemplate = restTemplateSupplier.get();
         this.objectMapper = objectMapper;
-        this.entityMapper = entityMapper;
+        this.domainMapper = domainMapper;
 
         this.createAnInstance();
     }
@@ -106,8 +106,8 @@ public class ForeignProductHttpService {
         body.add("p_flow_step_id", "2");
         body.add("p_instance", sessionInstance.getSessionId());
         body.add("p_debug", "");
-        body.add("p_arg_names", "P2_COD1");
-        body.add("p_arg_values", eanCode);
+        body.addAll("p_arg_names", List.of("P2_CURSOR", "P2_LOJA_ID", "P2_COD1"));
+        body.addAll("p_arg_values", List.of("B", "221", eanCode));
 
         final HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(body, headers);
 
@@ -138,7 +138,7 @@ public class ForeignProductHttpService {
                 domainResponse.setPrice(priceValue);
                 domainResponse.setEanCode(eanCodeValue);
 
-                return Optional.of(this.entityMapper.mapProduct(domainResponse));
+                return Optional.of(this.domainMapper.mapToProduct(domainResponse));
             }
         );
     }
