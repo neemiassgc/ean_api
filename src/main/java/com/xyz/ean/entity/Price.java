@@ -1,9 +1,12 @@
 package com.xyz.ean.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -20,13 +23,14 @@ public class Price {
 
     private Double price;
 
-    private LocalDate created = LocalDate.now();
+    @Column(columnDefinition = "TIMESTAMPTZ")
+    private LocalDateTime created = LocalDateTime.now();
 
     @ManyToOne
     private Product product;
 
     public Price(final double price) {
-        this(null, price, LocalDate.now(), null);
+        this(null, price, LocalDateTime.now(), null);
     }
 
     @Override
