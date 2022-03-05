@@ -2,6 +2,7 @@ package com.xyz.ean.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -9,10 +10,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductResponseDTO {
+public final class ProductResponseDTO {
 
     private String description;
-    private List<Double> prices;
+    private List<PriceDateTime> prices;
     private String eanCode;
     private Integer sequenceCode;
 
@@ -26,5 +27,20 @@ public class ProductResponseDTO {
             eanCode,
             sequenceCode
         );
+    }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class PriceDateTime {
+
+        private LocalDateTime dateTime;
+        private Double price;
+
+        @Override
+        public String toString() {
+            return String.format("dateTime=%s, price=%s", dateTime, price);
+        }
     }
 }
