@@ -11,7 +11,13 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 @Entity(name = "Product")
-@Table(name = "products")
+@Table(
+    name = "products",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_ean", columnNames = "ean_code"),
+        @UniqueConstraint(name = "uk_sequence_code", columnNames = "sequence_code")
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,10 +33,10 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Price> prices = new Vector<>();
 
-    @Column(name = "ean_code", unique = true, nullable = false, length = 13)
+    @Column(name = "ean_code", nullable = false, length = 13)
     private String eanCode;
 
-    @Column(name = "sequence_code", unique = true, nullable = false)
+    @Column(name = "sequence_code", nullable = false)
     private Integer sequenceCode;
 
     public void addPrice(final Price... prices) {
