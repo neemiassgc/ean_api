@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "prices")
+@Table(name = "products_prices")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,6 +27,7 @@ public class Price {
     private LocalDateTime created = LocalDateTime.now();
 
     @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices_product"))
     private Product product;
 
     public Price(final double price) {
