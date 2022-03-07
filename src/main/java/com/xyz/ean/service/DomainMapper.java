@@ -1,9 +1,9 @@
 package com.xyz.ean.service;
 
+import com.xyz.ean.dto.DomainResponse;
 import com.xyz.ean.dto.ProductResponseDTO;
 import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
-import com.xyz.ean.dto.DomainResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -27,7 +27,13 @@ public class DomainMapper {
             .description(product.getDescription())
             .eanCode(product.getEanCode())
             .sequenceCode(product.getSequenceCode())
-            .prices(product.getPrices().stream().map(Price::getPrice).collect(Collectors.toList()))
+            .prices(product
+                .getPrices()
+                .stream()
+                .map(ProductResponseDTO.PriceDateTime::new)
+                .limit(2)
+                .collect(Collectors.toList())
+            )
             .build();
     }
 }
