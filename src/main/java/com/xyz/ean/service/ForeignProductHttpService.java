@@ -57,7 +57,6 @@ public class ForeignProductHttpService {
         this.restTemplate = restTemplateSupplier.get();
         this.objectMapper = objectMapper;
         this.domainMapper = domainMapper;
-
         this.createAnInstance();
     }
 
@@ -120,7 +119,7 @@ public class ForeignProductHttpService {
                 final DomainResponse domainResponse = new DomainResponse();
                 final JsonNode jsonNode = objectMapper.readTree(json).get("item");
 
-                if (jsonNode.isNull()) {
+                if (Objects.isNull(jsonNode)) {
                     this.createAnInstance();
                     return fetchByEanCode(eanCode);
                 }
