@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/api")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -25,6 +27,11 @@ public class ProductController {
     public ProductResponseDTO createProduct(@RequestBody EanCodeRequestDTO eanCodeRequestDTO) {
         final Product fetchedProduct = productService.saveByEanCode(eanCodeRequestDTO.getEanCode());
         return domainMapper.mapToDto(fetchedProduct);
+    }
+
+    @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ProductResponseDTO> getAllProducts() {
+        return domainMapper.mapToDtoList(productService.findAll());
     }
 
     @ExceptionHandler(ResponseStatusException.class)
