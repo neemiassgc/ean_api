@@ -6,6 +6,8 @@ import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,5 +37,18 @@ public class DomainMapper {
                 .collect(Collectors.toList())
             )
             .build();
+    }
+
+    public List<ProductResponseDTO> mapToDtoList(final List<Product> products) {
+        return products.stream()
+            .map(product -> {
+                product.setPrices(
+                    product.getPrices().stream()
+                        .sorted(Comparator.comparing(Price::getCreated).reversed())
+                        .limit(2).collect(Collectors.toList())
+                );
+                return this.mapToDto(product);
+            })
+            .collect(Collectors.toList());
     }
 }
