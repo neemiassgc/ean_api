@@ -1,5 +1,6 @@
 package com.xyz.ean.dto;
 
+import com.xyz.ean.entity.Price;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -37,6 +38,11 @@ public final class ProductResponseDTO {
 
         private LocalDateTime dateTime;
         private Double price;
+
+        public PriceDateTime(final Price price) {
+            this.dateTime = price.getCreated();
+            this.price = price.getPrice();
+        }
 
         @Override
         public String toString() {
