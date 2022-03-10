@@ -32,6 +32,10 @@ public class ProductService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     }
 
+    public Product save(@NonNull final Product product) {
+        return productRepository.save(product);
+    }
+
     public Product findByEanCode(@NonNull final String eanCode) {
         return productRepository.findByEanCode(eanCode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
