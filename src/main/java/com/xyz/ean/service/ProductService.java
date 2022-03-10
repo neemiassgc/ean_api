@@ -23,13 +23,16 @@ public class ProductService {
     private final ForeignProductHttpService foreignProductHttpService;
 
     public Product saveByEanCode(@NonNull final String eanCode) {
-        return productRepository.findByEanCode(eanCode)
+        final Product productToReturn = productRepository.findByEanCode(eanCode)
             .or(() -> {
                 final Optional<Product> fetchedProduct = foreignProductHttpService.fetchByEanCode(eanCode);
                 fetchedProduct.ifPresent(productRepository::save);
                 return fetchedProduct;
             })
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+        this.pricesOrdering(productToReturn);
+        return productToReturn;
     }
 
     public Product save(@NonNull final Product product) {
@@ -42,7 +45,7 @@ public class ProductService {
     }
 
     public List<Product> findAll() {
-        return productRepository.findAll();
+        return productRepository.findAll().stream().peek(this::pricesOrdering).collect(Collectors.toList());
     }
 
     private void pricesOrdering(final Product product) {
