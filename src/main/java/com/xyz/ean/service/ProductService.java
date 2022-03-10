@@ -1,5 +1,6 @@
 package com.xyz.ean.service;
 
+import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
 import com.xyz.ean.repository.ProductRepository;
 import lombok.NonNull;
@@ -9,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -31,5 +34,16 @@ public class ProductService {
 
     public List<Product> findAll() {
         return productRepository.findAll();
+    }
+
+    private void pricesOrdering(final Product product) {
+        final List<Price> orderedPrices = product
+            .getPrices()
+            .stream()
+            .sorted(Comparator.comparing(Price::getCreated).reversed())
+            .limit(2)
+            .collect(Collectors.toList());
+
+        product.setPrices(orderedPrices);
     }
 }
