@@ -30,7 +30,7 @@ public class Product {
     @Column(nullable = false)
     private String description;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Price> prices = new Vector<>();
 
     @Column(name = "ean_code", nullable = false, length = 13)
