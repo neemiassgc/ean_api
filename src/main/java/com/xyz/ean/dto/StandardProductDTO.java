@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 public final class StandardProductDTO {
 
-    private double price;
+    private double currentPrice;
     private String description;
     private int sequence;
     private String eanCode;
