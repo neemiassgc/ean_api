@@ -18,7 +18,7 @@ public class DomainMapper {
         product.setDescription(standardProductDTO.getDescription());
         product.setSequenceCode(standardProductDTO.getSequence());
         product.setEanCode(standardProductDTO.getEanCode());
-        price.setPrice(standardProductDTO.getPrice());
+        price.setPrice(standardProductDTO.getCurrentPrice());
         product.addPrice(price);
         return product;
     }
