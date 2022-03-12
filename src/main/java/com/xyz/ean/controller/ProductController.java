@@ -34,6 +34,12 @@ public class ProductController {
         return domainMapper.mapToDtoList(productService.findAll());
     }
 
+    @GetMapping(path = "/products/{eanCode}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ProductResponseDTO getProductByEanCode(@PathVariable("eanCode") String eanCode) {
+        final Product fetchedProduct = productService.findByEanCode(eanCode);
+        return domainMapper.mapToDto(fetchedProduct);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorTemplate> handleException(final ResponseStatusException rse) {
         final ErrorTemplate errorTemplate = new ErrorTemplate(rse.getStatus());
