@@ -21,12 +21,17 @@ public class ProductService {
 
     private final ProductRepository  productRepository;
     private final ForeignProductHttpService foreignProductHttpService;
+    private final DomainMapper domainMapper;
 
     public Product saveByEanCode(@NonNull final String eanCode) {
         final Product productToReturn = productRepository.findByEanCode(eanCode)
             .or(() -> {
-                final Optional<Product> fetchedProduct = foreignProductHttpService.fetchByEanCode(eanCode);
+                final Optional<Product> fetchedProduct = this.foreignProductHttpService
+                    .fetchByEanCode(eanCode)
+                    .map(this.domainMapper::mapToProduct);
+
                 fetchedProduct.ifPresent(productRepository::save);
+
                 return fetchedProduct;
             })
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
