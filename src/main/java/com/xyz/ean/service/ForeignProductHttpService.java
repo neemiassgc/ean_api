@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xyz.ean.entity.Product;
 import com.xyz.ean.pojo.DomainUtils;
 import com.xyz.ean.pojo.SessionInstance;
-import com.xyz.ean.dto.DomainResponse;
+import com.xyz.ean.dto.StandardProductDTO;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -116,7 +116,7 @@ public class ForeignProductHttpService {
             restTemplate.httpEntityCallback(httpEntity, String.class),
             (clientHttpResponse) -> {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
-                final DomainResponse domainResponse = new DomainResponse();
+                final StandardProductDTO standardProductDTO = new StandardProductDTO();
                 final JsonNode jsonNode = objectMapper.readTree(json).get("item");
 
                 if (Objects.isNull(jsonNode)) {
@@ -132,12 +132,12 @@ public class ForeignProductHttpService {
                 final double priceValue = DomainUtils.parsePrice(jsonNode.get(4).get("value").asText());
                 final String eanCodeValue = jsonNode.get(5).get("value").asText();
 
-                domainResponse.setDescription(description);
-                domainResponse.setSequence(sequence);
-                domainResponse.setPrice(priceValue);
-                domainResponse.setEanCode(eanCodeValue);
+                standardProductDTO.setDescription(description);
+                standardProductDTO.setSequence(sequence);
+                standardProductDTO.setPrice(priceValue);
+                standardProductDTO.setEanCode(eanCodeValue);
 
-                return Optional.of(this.domainMapper.mapToProduct(domainResponse));
+                return Optional.of(this.domainMapper.mapToProduct(standardProductDTO));
             }
         );
     }

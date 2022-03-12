@@ -1,25 +1,24 @@
 package com.xyz.ean.service;
 
-import com.xyz.ean.dto.DomainResponse;
+import com.xyz.ean.dto.StandardProductDTO;
 import com.xyz.ean.dto.ProductResponseDTO;
 import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class DomainMapper {
 
-    public Product mapToProduct(final DomainResponse domainResponse) {
+    public Product mapToProduct(final StandardProductDTO standardProductDTO) {
         final Product product = new Product();
         final Price price = new Price();
-        product.setDescription(domainResponse.getDescription());
-        product.setSequenceCode(domainResponse.getSequence());
-        product.setEanCode(domainResponse.getEanCode());
-        price.setPrice(domainResponse.getPrice());
+        product.setDescription(standardProductDTO.getDescription());
+        product.setSequenceCode(standardProductDTO.getSequence());
+        product.setEanCode(standardProductDTO.getEanCode());
+        price.setPrice(standardProductDTO.getPrice());
         product.addPrice(price);
         return product;
     }
@@ -33,7 +32,6 @@ public class DomainMapper {
                 .getPrices()
                 .stream()
                 .map(ProductResponseDTO.PriceDateTime::new)
-                .limit(2)
                 .collect(Collectors.toList())
             )
             .build();
@@ -41,14 +39,7 @@ public class DomainMapper {
 
     public List<ProductResponseDTO> mapToDtoList(final List<Product> products) {
         return products.stream()
-            .map(product -> {
-                product.setPrices(
-                    product.getPrices().stream()
-                        .sorted(Comparator.comparing(Price::getCreated).reversed())
-                        .limit(2).collect(Collectors.toList())
-                );
-                return this.mapToDto(product);
-            })
+            .map(this::mapToDto)
             .collect(Collectors.toList());
     }
 }

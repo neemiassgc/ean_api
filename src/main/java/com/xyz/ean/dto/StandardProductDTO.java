@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public final class DomainResponse {
+public final class StandardProductDTO {
 
     private double price;
     private String description;
