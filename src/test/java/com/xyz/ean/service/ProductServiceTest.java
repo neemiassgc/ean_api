@@ -1,9 +1,16 @@
 package com.xyz.ean.service;
 
+import com.xyz.ean.dto.StandardProductDTO;
+import com.xyz.ean.entity.Price;
+import com.xyz.ean.entity.Product;
 import com.xyz.ean.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.mockito.BDDMockito.mock;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.*;
 
 class ProductServiceTest {
 
@@ -18,6 +25,27 @@ class ProductServiceTest {
         this.domainMapperMock = mock(DomainMapper.class);
         this.productRepositoryMock = mock(ProductRepository.class);
         this.productServiceUnderTest = new ProductService(this.productRepositoryMock, this.foreignProductHttpServiceMock, this.domainMapperMock);
+    }
+
+    @Test
+    public void shouldReturnAProductFromDBIfItExistsInTheDatabase() {
+        //given
+        final Product standardProduct = new Product();
+        standardProduct.setEanCode("1234567890123");
+        standardProduct.setDescription("Standard Product Description");
+        standardProduct.addPrice(new Price(10.0));
+        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(standardProduct));
+
+        //when
+        final Product actualProduct = productServiceUnderTest.saveByEanCode("1234567890123");
+
+        //then
+        assertThat(actualProduct).isNotNull();
+
+        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
+        verify(productRepositoryMock, only()).findByEanCode(anyString());
+        verify(foreignProductHttpServiceMock, never()).fetchByEanCode(anyString());
+        verify(domainMapperMock, never()).mapToProduct(any(StandardProductDTO.class));
     }
 
 }
