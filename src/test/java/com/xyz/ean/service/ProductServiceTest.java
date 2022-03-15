@@ -48,4 +48,22 @@ class ProductServiceTest {
         verify(domainMapperMock, never()).mapToProduct(any(StandardProductDTO.class));
     }
 
+    @Test
+    public void shouldReturnAProductFromExternalApiIfItDoesNotExistInTheDB() {
+        //given
+        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(new StandardProductDTO()));
+        given(domainMapperMock.mapToProduct(any(StandardProductDTO.class))).willReturn(new Product());
+
+        //when
+        final Product actualProduct = productServiceUnderTest.saveByEanCode("1234567890123");
+
+        //then
+        assertThat(actualProduct).isNotNull();
+
+        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
+        verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
+        verify(domainMapperMock, times(1)).mapToProduct(any(StandardProductDTO.class));
+    }
+
 }
