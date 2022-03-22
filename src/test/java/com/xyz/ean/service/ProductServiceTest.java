@@ -4,12 +4,14 @@ import com.xyz.ean.dto.StandardProductDTO;
 import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
 import com.xyz.ean.repository.ProductRepository;
+import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
 
 class ProductServiceTest {
@@ -28,7 +30,7 @@ class ProductServiceTest {
     }
 
     @Test
-    public void shouldReturnAProductFromDBIfItExistsInTheDatabase() {
+    public void shouldReturnAProductFromDBIfItExistsInTheDatabase_saveByEanCode() {
         //given
         final Product standardProduct = new Product();
         standardProduct.setEanCode("1234567890123");
@@ -49,7 +51,7 @@ class ProductServiceTest {
     }
 
     @Test
-    public void shouldReturnAProductFromExternalApiIfItDoesNotExistInTheDB() {
+    public void shouldReturnAProductFromExternalApiIfItDoesNotExistInTheDB_saveByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
         given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(new StandardProductDTO()));
@@ -65,5 +67,4 @@ class ProductServiceTest {
         verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
         verify(domainMapperMock, times(1)).mapToProduct(any(StandardProductDTO.class));
     }
-
 }
