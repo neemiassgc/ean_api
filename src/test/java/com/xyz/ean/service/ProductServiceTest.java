@@ -67,4 +67,24 @@ class ProductServiceTest {
         verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
         verify(domainMapperMock, times(1)).mapToProduct(any(StandardProductDTO.class));
     }
+
+    @Test
+    public void shouldThrowAnExceptionIfProductDoesNotExistInTheDBOrExternalApi_saveByEanCode() {
+        //given
+        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.empty());
+
+        //when
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.saveByEanCode("1234567890123"));
+
+        //then
+        assertThat(actualException).isNotNull();
+        assertThat(actualException).isInstanceOf(ResponseStatusException.class);
+        assertThat(((ResponseStatusException) actualException).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
+        verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
+        verify(domainMapperMock, never()).mapToProduct(any(StandardProductDTO.class));
+    }
+
 }
