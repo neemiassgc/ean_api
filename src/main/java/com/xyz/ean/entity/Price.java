@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -23,19 +23,19 @@ public class Price {
 
     private Double price;
 
-    @Column(columnDefinition = "TIMESTAMPTZ")
-    private LocalDateTime created = LocalDateTime.now();
+    @Column(name = "instant", columnDefinition = "TIMESTAMPTZ")
+    private Instant instant = Instant.now();
 
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices_product"))
     private Product product;
 
     public Price(final double price) {
-        this(null, price, LocalDateTime.now(), null);
+        this(null, price, Instant.now(), null);
     }
 
     @Override
     public String toString() {
-        return String.format("Price{id=%s, price=%s, created=%s, product=%s}", id, price, created, product);
+        return String.format("Price{id=%s, price=%s, created=%s, product=%s}", id, price, instant, product);
     }
 }
