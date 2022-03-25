@@ -57,7 +57,7 @@ public class ProductService {
         final List<Price> orderedPrices = product
             .getPrices()
             .stream()
-            .sorted(Comparator.comparing(Price::getCreated).reversed())
+            .sorted(Comparator.comparing(Price::getInstant).reversed())
             .limit(2)
             .collect(Collectors.toList());
 
