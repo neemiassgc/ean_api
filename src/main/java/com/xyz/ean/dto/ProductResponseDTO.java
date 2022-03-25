@@ -3,7 +3,7 @@ package com.xyz.ean.dto;
 import com.xyz.ean.entity.Price;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -14,7 +14,7 @@ import java.util.List;
 public final class ProductResponseDTO {
 
     private String description;
-    private List<PriceDateTime> prices;
+    private List<PriceInstant> prices;
     private String eanCode;
     private Integer sequenceCode;
 
@@ -34,19 +34,19 @@ public final class ProductResponseDTO {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class PriceDateTime {
+    public static class PriceInstant {
 
-        private LocalDateTime dateTime;
+        private Instant instant;
         private Double price;
 
-        public PriceDateTime(final Price price) {
-            this.dateTime = price.getCreated();
+        public PriceInstant(final Price price) {
+            this.instant = price.getInstant();
             this.price = price.getPrice();
         }
 
         @Override
         public String toString() {
-            return String.format("dateTime=%s, price=%s", dateTime, price);
+            return String.format("dateTime=%s, price=%s", instant, price);
         }
     }
 }
