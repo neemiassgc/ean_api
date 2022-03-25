@@ -21,6 +21,15 @@ class ProductServiceTest {
     private DomainMapper domainMapperMock;
     private ProductRepository productRepositoryMock;
 
+    private static Product getDefaultProduct() {
+        final Product product = new Product();
+        product.setEanCode("1234567890123");
+        product.setDescription("Default Product Description");
+        product.addPrice(new Price(10.0));
+        product.setSequenceCode(417304);
+        return product;
+    }
+
     @BeforeEach
     void setUp() {
         this.foreignProductHttpServiceMock = mock(ForeignProductHttpService.class);
@@ -32,11 +41,7 @@ class ProductServiceTest {
     @Test
     public void shouldReturnAProductFromDBIfItExistsInTheDatabase_saveByEanCode() {
         //given
-        final Product standardProduct = new Product();
-        standardProduct.setEanCode("1234567890123");
-        standardProduct.setDescription("Standard Product Description");
-        standardProduct.addPrice(new Price(10.0));
-        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(standardProduct));
+        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
 
         //when
         final Product actualProduct = productServiceUnderTest.saveByEanCode("1234567890123");
@@ -85,6 +90,11 @@ class ProductServiceTest {
         verify(productRepositoryMock, times(1)).findByEanCode(anyString());
         verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
         verify(domainMapperMock, never()).mapToProduct(any(StandardProductDTO.class));
+    }
+
+    @Test
+    public void givenAValidProductShouldSaveTheProduct_save() {
+
     }
 
 }
