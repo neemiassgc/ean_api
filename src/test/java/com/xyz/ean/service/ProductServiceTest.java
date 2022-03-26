@@ -104,4 +104,19 @@ class ProductServiceTest {
         verify(productRepositoryMock, times(1)).save(defaultProduct);
     }
 
+    @Test
+    public void givenANullProductShouldThrowAnException_save() {
+        //given
+        final Product defaultProduct = null;
+
+        //when
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.save(defaultProduct));
+
+        //then
+        assertThat(actualException).isNotNull();
+        assertThat(actualException).isInstanceOf(NullPointerException.class);
+
+        verify(productRepositoryMock, never()).save(any(Product.class));
+    }
+
 }
