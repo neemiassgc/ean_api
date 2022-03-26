@@ -153,4 +153,21 @@ class ProductServiceTest {
         verify(productRepositoryMock, only()).findByEanCode(anyString());
     }
 
+    @Test
+    public void givenANullEanCodeShouldThrowAnException_findByEanCode() {
+        //given
+        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+
+        //when
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByEanCode(null));
+
+        //then
+        assertThat(actualException).satisfies(throwable -> {
+            assertThat(throwable).isNotNull();
+            assertThat(throwable).isInstanceOf(NullPointerException.class);
+        });
+
+        verify(productRepositoryMock, never()).findByEanCode(anyString());
+    }
+
 }
