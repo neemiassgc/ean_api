@@ -134,4 +134,23 @@ class ProductServiceTest {
         verify(productRepositoryMock, only()).findByEanCode(anyString());
     }
 
+    @Test
+    public void givenAnNonExistentEanCodeShouldThrowAnException_findByEanCode() {
+        //given
+        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+
+        //when
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByEanCode("1234567890123"));
+
+        //then
+        assertThat(actualException).satisfies(throwable -> {
+            assertThat(throwable).isNotNull();
+            assertThat(throwable).isInstanceOf(ResponseStatusException.class);
+            assertThat(((ResponseStatusException) throwable).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        });
+
+        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
+        verify(productRepositoryMock, only()).findByEanCode(anyString());
+    }
+
 }
