@@ -94,7 +94,14 @@ class ProductServiceTest {
 
     @Test
     public void givenAValidProductShouldSaveTheProduct_save() {
+        //given
+        final Product defaultProduct = getDefaultProduct();
 
+        //when
+        productServiceUnderTest.save(defaultProduct);
+
+        //then
+        verify(productRepositoryMock, times(1)).save(defaultProduct);
     }
 
 }
