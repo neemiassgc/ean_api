@@ -119,4 +119,19 @@ class ProductServiceTest {
         verify(productRepositoryMock, never()).save(any(Product.class));
     }
 
+    @Test
+    public void givenAnExistentEanCodeShouldReturnAProduct_findByEanCode() {
+        //given
+        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
+
+        //when
+        final Product actualProduct = productServiceUnderTest.findByEanCode("1234567890123");
+
+        //then
+        assertThat(actualProduct).isNotNull();
+
+        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
+        verify(productRepositoryMock, only()).findByEanCode(anyString());
+    }
+
 }
