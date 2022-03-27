@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.*;
@@ -170,4 +171,24 @@ class ProductServiceTest {
         verify(productRepositoryMock, never()).findByEanCode(anyString());
     }
 
+    @Test
+    void ifThereAreAnyProductsInTheDBShouldReturnAllProducts_findAll() {
+        //given
+        final List<Product> existentProducts = List.of(
+            getDefaultProduct(), getDefaultProduct(), getDefaultProduct(), getDefaultProduct()
+        );
+
+        given(productRepositoryMock.findAll()).willReturn(existentProducts);
+
+        //when
+        final List<Product> actualProducts = productServiceUnderTest.findAll();
+
+        //then
+        assertThat(actualProducts).isNotNull();
+        assertThat(actualProducts).hasSize(4);
+        assertThat(actualProducts).allSatisfy(product -> assertThat(product).isNotNull());
+
+        verify(productRepositoryMock, times(1)).findAll();
+        verify(productRepositoryMock, only()).findAll();
+    }
 }
