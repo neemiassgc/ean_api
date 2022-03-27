@@ -54,10 +54,11 @@ public class ForeignProductHttpService {
 
         this.restTemplate = restTemplateSupplier.get();
         this.objectMapper = objectMapper;
-        this.createAnInstance();
+
+        this.bind(this.getASessionInstance());
     }
 
-    private void createAnInstance() {
+    public SessionInstance getASessionInstance() {
         final Document loginPageDocument = this.restTemplate.execute("/f?p=171", HttpMethod.GET, null,
             response -> Jsoup.parse(DomainUtils.readFromInputStream(response.getBody())));
 
@@ -87,8 +88,7 @@ public class ForeignProductHttpService {
             }
         );
 
-        this.sessionInstance = new SessionInstance(instanceId, ajaxIdentifier);
-
+        return new SessionInstance(instanceId, ajaxIdentifier);
     }
 
     public Optional<StandardProductDTO> fetchByEanCode(final String eanCode) {
@@ -117,7 +117,7 @@ public class ForeignProductHttpService {
                 final JsonNode jsonNode = objectMapper.readTree(json).get("item");
 
                 if (Objects.isNull(jsonNode)) {
-                    this.createAnInstance();
+                    this.bind(this.getASessionInstance());
                     return fetchByEanCode(eanCode);
                 }
 
@@ -137,5 +137,9 @@ public class ForeignProductHttpService {
                 return Optional.of(standardProductDTO);
             }
         );
+    }
+
+    private void bind(SessionInstance sessionInstance) {
+        this.sessionInstance = sessionInstance;
     }
 }
