@@ -31,6 +31,7 @@ public class Product {
     private String description;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("instant DESC")
     private List<Price> prices = new Vector<>();
 
     @Column(name = "ean_code", nullable = false, length = 13)
