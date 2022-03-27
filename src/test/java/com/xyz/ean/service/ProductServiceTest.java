@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -187,6 +188,22 @@ class ProductServiceTest {
         assertThat(actualProducts).isNotNull();
         assertThat(actualProducts).hasSize(4);
         assertThat(actualProducts).allSatisfy(product -> assertThat(product).isNotNull());
+
+        verify(productRepositoryMock, times(1)).findAll();
+        verify(productRepositoryMock, only()).findAll();
+    }
+
+    @Test
+    void ifThereAreNoProductsInTheDBShouldReturnAnEmptyList_findAll() {
+        //given
+        given(productRepositoryMock.findAll()).willReturn(Collections.emptyList());
+
+        //when
+        final List<Product> actualProducts = productServiceUnderTest.findAll();
+
+        //then
+        assertThat(actualProducts).isNotNull();
+        assertThat(actualProducts).isEmpty();
 
         verify(productRepositoryMock, times(1)).findAll();
         verify(productRepositoryMock, only()).findAll();
