@@ -19,4 +19,11 @@ public final class DomainUtils {
             }
         }
     }
+
+    public static <O> O requireNonNull(final O object, final RuntimeException runtimeException) {
+        if (object == null) {
+            throw runtimeException;
+        }
+        return object;
+    }
 }
