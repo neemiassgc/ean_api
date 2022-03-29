@@ -90,4 +90,23 @@ public class ForeignProductHttpServiceTest {
         verify(this.restTemplateMock, only()).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, never()).postForEntity(anyString(), anyMap(), eq(String.class));
     }
+
+    @Test
+    void whenSomeOfTheRequiredFieldsAreMissingShouldThrowAnException() {
+        // given
+        given(this.restTemplateMock.execute(
+            eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
+        )).willReturn(Jsoup.parse("<input id=\"pInstance\" value=\"54321\"/><input id=\"pPageSubmissionId\" value=\"898900\"/>"));
+
+        // when
+        final Throwable actualThrowable = catchThrowable(() -> this.foreignProductHttpServiceUnderTest.getASessionInstance());
+
+        // then
+        assertThat(actualThrowable).isNotNull();
+        assertThat(actualThrowable).isInstanceOf(IllegalStateException.class);
+
+        verify(this.restTemplateMock, times(1)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, only()).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, never()).postForEntity(anyString(), anyMap(), eq(String.class));
+    }
 }
