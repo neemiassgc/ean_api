@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -69,5 +70,24 @@ public class ForeignProductHttpServiceTest {
 
         verify(this.restTemplateMock, times(2)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(anyString(), anyMap(), eq(String.class));
+    }
+
+    @Test
+    void ifTheLoginPageParsingFailsShouldThrowAnException() {
+        // given
+        given(this.restTemplateMock.execute(
+            eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
+        )).willReturn(null);
+
+        // when
+        final Throwable actualThrowable = catchThrowable(() -> this.foreignProductHttpServiceUnderTest.getASessionInstance());
+
+        // then
+        assertThat(actualThrowable).isInstanceOf(IllegalStateException.class);
+        assertThat(actualThrowable).hasMessage("Login page parsing failed");
+
+        verify(this.restTemplateMock, times(1)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, only()).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, never()).postForEntity(anyString(), anyMap(), eq(String.class));
     }
 }
