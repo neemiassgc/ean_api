@@ -41,24 +41,31 @@ public class ForeignProductHttpServiceTest {
         this.foreignProductHttpServiceUnderTest = new ForeignProductHttpService(restTemplateBuilderMock, this.objectMapperMock);
     }
 
-    @Test
-    void ifTheStructuresOfTheHTMLResponsesAreIntactShouldReturnAValidSessionInstance() throws IOException {
-        // given
+    private String getDefaultHtmlContent() {
         final InputStreamReader isr = new InputStreamReader(
             Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("html_for_test.html"))
         );
 
         try (BufferedReader br = new BufferedReader(isr)) {
-            given(this.restTemplateMock.execute(
-                eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
-            )).willReturn(Jsoup.parse(br.lines().collect(Collectors.joining())));
-
-            given(this.restTemplateMock.postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class))).will(invocation -> null);
-
-            given(this.restTemplateMock.execute(
-                eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
-            )).willReturn("peanut butter");
+            return br.lines().collect(Collectors.joining("\n"));
         }
+        catch (IOException ignored) {
+            return "";
+        }
+    }
+
+    @Test
+    void ifTheStructuresOfTheHTMLResponsesAreIntactShouldReturnAValidSessionInstance() throws IOException {
+        // given
+        given(this.restTemplateMock.execute(
+            eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
+        )).willReturn(Jsoup.parse(this.getDefaultHtmlContent()));
+
+        given(this.restTemplateMock.postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class))).will(invocation -> null);
+
+        given(this.restTemplateMock.execute(
+            eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
+        )).willReturn("peanut butter");
 
         // when
         final SessionInstance actualSessionInstance = this.foreignProductHttpServiceUnderTest.getASessionInstance();
