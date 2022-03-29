@@ -54,15 +54,21 @@ public class ForeignProductHttpService {
 
         this.restTemplate = restTemplateSupplier.get();
         this.objectMapper = objectMapper;
-
-        this.bind(this.getASessionInstance());
     }
 
     public SessionInstance getASessionInstance() {
-        final Document loginPageDocument = this.restTemplate.execute("/f?p=171", HttpMethod.GET, null,
-            response -> Jsoup.parse(DomainUtils.readFromInputStream(response.getBody())));
+        final Document loginPageDocument = DomainUtils.requireNonNull(
+            this.restTemplate.execute(
+                "/f?p=171", HttpMethod.GET, null,
+                response -> Jsoup.parse(DomainUtils.readFromInputStream(response.getBody()))
+            ),
+            new IllegalStateException("Login page parsing failed")
+        );
 
-        final String instanceId = Objects.requireNonNull(Objects.requireNonNull(loginPageDocument).getElementById("pInstance")).attr("value");
+        final String instanceId = DomainUtils.requireNonNull(
+            loginPageDocument.getElementById("pInstance"),
+            new IllegalStateException("Element with id 'pInstance' not found")
+        ).attr("value");
 
         final MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
         requestBody.add("p_flow_id", "171");
@@ -73,9 +79,22 @@ public class ForeignProductHttpService {
         requestBody.add("p_t02", System.getenv("SAVEG_PASSWORD"));
         requestBody.add("p_md5_checksum", "");
         requestBody.add("p_instance", instanceId);
-        requestBody.add("p_page_submission_id", Objects.requireNonNull(loginPageDocument.getElementById("pPageSubmissionId")).attr("value"));
-        requestBody.add("p_page_checksum", Objects.requireNonNull(loginPageDocument.getElementById("pPageChecksum")).attr("value"));
+        requestBody.add(
+            "p_page_submission_id",
+            DomainUtils.requireNonNull(
+                loginPageDocument.getElementById("pPageSubmissionId"),
+                new IllegalStateException("Element with id 'pPageSubmissionId' not found")
+            ).attr("value")
+        );
+        requestBody.add(
+            "p_page_checksum",
+            DomainUtils.requireNonNull(
+                loginPageDocument.getElementById("pPageChecksum"),
+                new IllegalStateException("Element with id 'pPageChecksum' not found")
+            ).attr("value")
+        );
 
+        // It's just to get a cookie for the session
         this.restTemplate.postForEntity("/wwv_flow.accept", requestBody, String.class);
 
         final String ajaxIdentifier = this.restTemplate.execute("/f?p=171:2:"+instanceId+":NEXT:NO:2:P2_CURSOR:B", HttpMethod.GET, null,
