@@ -1,14 +1,20 @@
 package com.xyz.ean.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.xyz.ean.dto.StandardProductDTO;
 import com.xyz.ean.pojo.SessionInstance;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.client.RequestCallback;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,8 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 public class ForeignProductHttpServiceTest {
 
@@ -146,5 +151,55 @@ public class ForeignProductHttpServiceTest {
 
         verify(this.restTemplateMock, times(2)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(anyString(), anyMap(), eq(String.class));
+    }
+
+    @Test
+    void givenAValidEanCodeShouldReturnAStandardProductDTO_fetchByEanCode() throws JsonProcessingException {
+        // given
+        final Supplier<ObjectNode> objectNodeSupplier = () -> {
+            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
+            ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode(5);
+            arrayNode.insertObject(0);
+            arrayNode.insertObject(1).set("value", JsonNodeFactory.instance.textNode("default description"));
+            arrayNode.insertObject(2).set("value", JsonNodeFactory.instance.numberNode(12345));
+            arrayNode.insertObject(3);
+            arrayNode.insertObject(4).set("value", JsonNodeFactory.instance.numberNode(16.4));
+            arrayNode.insertObject(5).set("value", JsonNodeFactory.instance.textNode("134283434809"));
+
+            rootNode.putArray("item").addAll(arrayNode);
+
+            return rootNode;
+        };
+
+        final String existingEanCode = "1234567890123";
+
+        given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
+
+        given(this.objectMapperMock.readTree(anyString())).willReturn(objectNodeSupplier.get());
+
+        given(this.restTemplateMock.execute(
+            eq("/wwv_flow.show"),
+            eq(HttpMethod.POST),
+            isNull(),
+            any(ResponseExtractor.class)
+        )).will(invocation ->
+            invocation.getArgument(3, ResponseExtractor.class)
+                .extractData(new MockClientHttpResponse(new byte[0], HttpStatus.OK))
+        );
+
+        // when
+        final Optional<StandardProductDTO> actualStandardProductDTO =
+            this.foreignProductHttpServiceUnderTest.fetchByEanCode(existingEanCode);
+
+        // then
+        assertThat(actualStandardProductDTO).as("Optional cannot be null").isNotNull();
+        assertThat(actualStandardProductDTO.orElse(null)).as("actualStandardProductDTO cannot be null").isNotNull();
+        assertThat(actualStandardProductDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
+        assertThat(actualStandardProductDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
+        assertThat(actualStandardProductDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("134283434809");
+
+        verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
+        verify(this.objectMapperMock, times(1)).readTree(anyString());
     }
 }
