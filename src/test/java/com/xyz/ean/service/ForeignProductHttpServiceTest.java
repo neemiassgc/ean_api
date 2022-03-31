@@ -75,7 +75,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void ifTheStructuresOfTheHTMLResponsesAreIntactShouldReturnAValidSessionInstance_getASessionInstance() throws IOException {
+    void ifTheStructuresOfTheHTMLResponsesAreIntactThenShouldReturnAValidSessionInstance_getASessionInstance() throws IOException {
         // given
         this.getASessionInstanceGenericStub();
 
@@ -92,7 +92,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void ifTheLoginPageParsingFailsShouldThrowAnException_getASessionInstance() {
+    void ifTheLoginPageParsingFailsThenShouldThrowAnException_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
             eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -111,7 +111,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void whenSomeOfTheRequiredFieldsAreMissingShouldThrowAnException_getASessionInstance() {
+    void whenSomeOfTheRequiredFieldsAreMissingThenShouldThrowAnException_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
             eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -130,7 +130,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void whenAjaxIdentifierIsNotFoundShouldThrowAnException_getASessionInstance() {
+    void whenAjaxIdentifierIsNotFoundThenShouldThrowAnException_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
                 eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -154,7 +154,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void givenAValidEanCodeShouldReturnAStandardProductDTO_fetchByEanCode() throws JsonProcessingException {
+    void givenAValidEanCodeThenShouldReturnAStandardProductDTO_fetchByEanCode() throws JsonProcessingException {
         // given
         final Supplier<ObjectNode> objectNodeSupplier = () -> {
             ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
@@ -204,7 +204,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void givenANonExistentEanCodeShouldReturnEmpty_fetchByEanCode() throws JsonProcessingException {
+    void givenANonExistentEanCodeThenShouldReturnEmpty_fetchByEanCode() throws JsonProcessingException {
         // given
         final String nonExistingEanCode = "";
 
