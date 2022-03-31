@@ -14,6 +14,10 @@ public final class SessionInstance {
     private final String sessionId;
     private final String ajaxIdentifier;
 
+    private SessionInstance() {
+        this("", "");
+    }
+
     public String getAjaxIdentifier() {
         return "PLUGIN="+ ajaxIdentifier;
     }
