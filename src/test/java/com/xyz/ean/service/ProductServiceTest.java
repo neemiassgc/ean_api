@@ -137,7 +137,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenAnNonExistentEanCodeShouldThrowAnException_findByEanCode() {
+    void givenANonExistentEanCodeShouldThrowAnException_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
 
