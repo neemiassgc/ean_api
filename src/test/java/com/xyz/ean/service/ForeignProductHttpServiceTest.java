@@ -1,12 +1,14 @@
 package com.xyz.ean.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xyz.ean.dto.StandardProductDTO;
 import com.xyz.ean.pojo.SessionInstance;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,18 @@ public class ForeignProductHttpServiceTest {
         this.foreignProductHttpServiceUnderTest = new ForeignProductHttpService(restTemplateBuilderMock, this.objectMapperMock);
     }
 
+    private void getASessionInstanceGenericStub() {
+        given(this.restTemplateMock.execute(
+            eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
+        )).willReturn(Jsoup.parse(this.getDefaultHtmlContent()));
+
+        given(this.restTemplateMock.postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class))).will(invocation -> null);
+
+        given(this.restTemplateMock.execute(
+            eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
+        )).willReturn("peanut butter");
+    }
+
     private String getDefaultHtmlContent() {
         final InputStreamReader isr = new InputStreamReader(
             Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("html_for_test.html"))
@@ -57,15 +72,7 @@ public class ForeignProductHttpServiceTest {
     @Test
     void ifTheStructuresOfTheHTMLResponsesAreIntactShouldReturnAValidSessionInstance_getASessionInstance() throws IOException {
         // given
-        given(this.restTemplateMock.execute(
-            eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
-        )).willReturn(Jsoup.parse(this.getDefaultHtmlContent()));
-
-        given(this.restTemplateMock.postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class))).will(invocation -> null);
-
-        given(this.restTemplateMock.execute(
-            eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
-        )).willReturn("peanut butter");
+        this.getASessionInstanceGenericStub();
 
         // when
         final SessionInstance actualSessionInstance = this.foreignProductHttpServiceUnderTest.getASessionInstance();
