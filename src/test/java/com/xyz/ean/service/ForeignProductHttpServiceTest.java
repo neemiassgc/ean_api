@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.*;
 
 public class ForeignProductHttpServiceTest {
@@ -56,7 +55,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void ifTheStructuresOfTheHTMLResponsesAreIntactShouldReturnAValidSessionInstance() throws IOException {
+    void ifTheStructuresOfTheHTMLResponsesAreIntactShouldReturnAValidSessionInstance_getASessionInstance() throws IOException {
         // given
         given(this.restTemplateMock.execute(
             eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -81,7 +80,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void ifTheLoginPageParsingFailsShouldThrowAnException() {
+    void ifTheLoginPageParsingFailsShouldThrowAnException_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
             eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -100,7 +99,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void whenSomeOfTheRequiredFieldsAreMissingShouldThrowAnException() {
+    void whenSomeOfTheRequiredFieldsAreMissingShouldThrowAnException_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
             eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -119,7 +118,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void whenAjaxIdentifierIsNotFoundShouldThrowAnException() {
+    void whenAjaxIdentifierIsNotFoundShouldThrowAnException_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
                 eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
