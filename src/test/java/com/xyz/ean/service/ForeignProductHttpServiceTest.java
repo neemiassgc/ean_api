@@ -202,4 +202,50 @@ public class ForeignProductHttpServiceTest {
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
         verify(this.objectMapperMock, times(1)).readTree(anyString());
     }
+
+    @Test
+    void givenANonExistentEanCodeShouldReturnEmpty_fetchByEanCode() throws JsonProcessingException {
+        // given
+        final String nonExistingEanCode = "";
+
+        final Supplier<ObjectNode> objectNodeSupplier = () -> {
+            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
+            ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode(5);
+            arrayNode.insertObject(0);
+            arrayNode.insertObject(1).set("value", JsonNodeFactory.instance.textNode("default description"));
+            arrayNode.insertObject(2).set("value", JsonNodeFactory.instance.numberNode(12345));
+            arrayNode.insertObject(3);
+            arrayNode.insertObject(4).set("value", JsonNodeFactory.instance.numberNode(16.4));
+            arrayNode.insertObject(5).set("value", JsonNodeFactory.instance.textNode(""));
+
+            rootNode.putArray("item").addAll(arrayNode);
+
+            return rootNode;
+        };
+
+        given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
+
+        given(this.objectMapperMock.readTree(anyString())).willReturn(objectNodeSupplier.get());
+
+        given(this.restTemplateMock.execute(
+            eq("/wwv_flow.show"),
+            eq(HttpMethod.POST),
+            isNull(),
+            any(ResponseExtractor.class)
+        )).will(invocation ->
+            invocation.getArgument(3, ResponseExtractor.class)
+                .extractData(new MockClientHttpResponse(new byte[0], HttpStatus.OK))
+        );
+
+        // when
+        final Optional<StandardProductDTO> actualDTO = this.foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingEanCode);
+
+        // then
+        assertThat(actualDTO).as("Optional cannot be null").isNotNull();
+        assertThat(actualDTO.orElse(null)).as("'actualDTO' must be null").isNull();
+
+        verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
+        verify(this.objectMapperMock, times(1)).readTree(anyString());
+    }
 }
