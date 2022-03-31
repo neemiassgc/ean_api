@@ -6,13 +6,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
-@ToString
 @RequiredArgsConstructor
 public final class SessionInstance {
 
     private final String sessionId;
     private final String ajaxIdentifier;
+
+    public static SessionInstance EMPTY_SESSION = new SessionInstance();
 
     private SessionInstance() {
         this("", "");
@@ -20,5 +20,10 @@ public final class SessionInstance {
 
     public String getAjaxIdentifier() {
         return "PLUGIN="+ ajaxIdentifier;
+    }
+
+    @Override
+    public String toString() {
+        return "SessionInstance [sessionId="+sessionId+", "+this.getAjaxIdentifier()+"]";
     }
 }
