@@ -54,6 +54,7 @@ public class ForeignProductHttpService {
 
         this.restTemplate = restTemplateSupplier.get();
         this.objectMapper = objectMapper;
+        this.sessionInstance = SessionInstance.EMPTY_SESSION;
     }
 
     public SessionInstance getASessionInstance() {
