@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static org.mockito.BDDMockito.*;
 
+@SuppressWarnings("ConstantConditions")
 class ProductServiceTest {
 
     private ProductService productServiceUnderTest;
@@ -97,22 +98,26 @@ class ProductServiceTest {
     @Test
     void givenAValidProductThenShouldSaveTheProduct_save() {
         //given
-        final Product defaultProduct = getDefaultProduct();
+        given(productRepositoryMock.save(any(Product.class))).will(invocation -> invocation.getArgument(0));
 
         //when
-        productServiceUnderTest.save(defaultProduct);
+        final Product actualProduct = productServiceUnderTest.save(getDefaultProduct());
 
         //then
-        verify(productRepositoryMock, times(1)).save(defaultProduct);
+        assertThat(actualProduct).isNotNull();
+        assertThat(actualProduct.getPrices()).isNotNull();
+        assertThat(actualProduct.getPrices()).hasSize(1);
+
+        verify(productRepositoryMock, times(1)).save(any(Product.class));
     }
 
     @Test
     void givenANullProductThenShouldThrowAnException_save() {
         //given
-        final Product defaultProduct = null;
+        given(productRepositoryMock.save(any(Product.class))).will(invocation -> null);
 
         //when
-        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.save(defaultProduct));
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.save(null));
 
         //then
         assertThat(actualException).isNotNull();
