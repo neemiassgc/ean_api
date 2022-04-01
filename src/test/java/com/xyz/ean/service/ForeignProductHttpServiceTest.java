@@ -248,4 +248,59 @@ public class ForeignProductHttpServiceTest {
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
         verify(this.objectMapperMock, times(1)).readTree(anyString());
     }
+
+    @Test
+    void whenASessionInstanceIsNotValidThenShouldRecreateIt() throws JsonProcessingException {
+       //given
+        final Supplier<ObjectNode> objectNodeSupplier = () -> {
+            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
+            ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode(5);
+            arrayNode.insertObject(0);
+            arrayNode.insertObject(1).set("value", JsonNodeFactory.instance.textNode("default description"));
+            arrayNode.insertObject(2).set("value", JsonNodeFactory.instance.numberNode(12345));
+            arrayNode.insertObject(3);
+            arrayNode.insertObject(4).set("value", JsonNodeFactory.instance.numberNode(16.4));
+            arrayNode.insertObject(5).set("value", JsonNodeFactory.instance.textNode("123412341234"));
+
+            rootNode.putArray("item").addAll(arrayNode);
+
+            return rootNode;
+        };
+
+        this.getASessionInstanceGenericStub();
+
+        given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
+
+        given(this.objectMapperMock.readTree(anyString()))
+            .willReturn(JsonNodeFactory.instance.nullNode())
+            .willReturn(objectNodeSupplier.get());
+
+        given(this.restTemplateMock.execute(
+            eq("/wwv_flow.show"),
+            eq(HttpMethod.POST),
+            isNull(),
+            any(ResponseExtractor.class)
+        )).will(invocation ->
+            invocation.getArgument(3, ResponseExtractor.class)
+                .extractData(new MockClientHttpResponse(new byte[0], HttpStatus.OK))
+        );
+
+        //when
+        final Optional<StandardProductDTO> actualStandardProductDTO =
+                this.foreignProductHttpServiceUnderTest.fetchByEanCode("134324134324");
+
+        //then
+
+        assertThat(actualStandardProductDTO).as("Optional cannot be null").isNotNull();
+        assertThat(actualStandardProductDTO.orElse(null)).as("actualStandardProductDTO cannot be null").isNotNull();
+        assertThat(actualStandardProductDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
+        assertThat(actualStandardProductDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
+        assertThat(actualStandardProductDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123412341234");
+
+        verify(this.restTemplateMock, times(2)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, times(2)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
+        verify(this.objectMapperMock, times(2)).readTree(anyString());
+        verify(this.restTemplateMock, times(2)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, times(1)).postForEntity(anyString(), anyMap(), eq(String.class));
+    }
 }
