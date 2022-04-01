@@ -95,7 +95,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenAValidProductShouldSaveTheProduct_save() {
+    void givenAValidProductThenShouldSaveTheProduct_save() {
         //given
         final Product defaultProduct = getDefaultProduct();
 
@@ -107,7 +107,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenANullProductShouldThrowAnException_save() {
+    void givenANullProductThenShouldThrowAnException_save() {
         //given
         final Product defaultProduct = null;
 
@@ -122,7 +122,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenAnExistentEanCodeShouldReturnAProduct_findByEanCode() {
+    void givenAnExistentEanCodeThenShouldReturnAProduct_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
 
@@ -137,7 +137,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenANonExistentEanCodeShouldThrowAnException_findByEanCode() {
+    void givenANonExistentEanCodeThenShouldThrowAnException_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
 
@@ -156,7 +156,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenANullEanCodeShouldThrowAnException_findByEanCode() {
+    void givenANullEanCodeThenShouldThrowAnException_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
 
@@ -173,7 +173,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void ifThereAreAnyProductsInTheDBShouldReturnAllProducts_findAll() {
+    void ifThereAreAnyProductsInTheDBThenShouldReturnAllProducts_findAll() {
         //given
         final List<Product> existentProducts = List.of(
             getDefaultProduct(), getDefaultProduct(), getDefaultProduct(), getDefaultProduct()
@@ -194,7 +194,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void ifThereAreNoProductsInTheDBShouldReturnAnEmptyList_findAll() {
+    void ifThereAreNoProductsInTheDBThenShouldReturnAnEmptyList_findAll() {
         //given
         given(productRepositoryMock.findAll()).willReturn(Collections.emptyList());
 
