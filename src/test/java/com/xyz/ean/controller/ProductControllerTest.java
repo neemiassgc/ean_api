@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,6 +118,21 @@ class ProductControllerTest {
             .andExpect(jsonPath("$[0].prices", hasSize(1)))
             .andExpect(jsonPath("$[0].prices[0].instant").exists())
             .andExpect(jsonPath("$[0].prices[0].price").value(4.55));
+
+        verify(this.productServiceMock, times(1)).findAll();
+        verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
+    }
+
+    @Test
+    void ifThereAreNoProductsAvailableThenResponseAnEmptyListWithOk() throws Exception {
+        given(this.productServiceMock.findAll()).willReturn(null);
+        given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$", hasSize(0)));
 
         verify(this.productServiceMock, times(1)).findAll();
         verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
