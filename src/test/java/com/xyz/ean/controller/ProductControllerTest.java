@@ -24,6 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
@@ -97,8 +98,27 @@ class ProductControllerTest {
         assertThat((ResponseStatusException)mvcResult.getResolvedException()).extracting("reason").isEqualTo("Product not found");
         assertThat((ResponseStatusException)mvcResult.getResolvedException()).extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
 
-
         verify(this.productServiceMock, times(1)).saveByEanCode(anyString());
         verify(this.domainMapperMock, times(1)).mapToDto(isNull());
+    }
+
+    @Test
+    void ifThereAreProductsAvailableThenResponseThemWithOk() throws Exception {
+        final List<ProductResponseDTO> dtoList = List.of(getProductResponseDTO(), getProductResponseDTO(), getProductResponseDTO());
+        given(this.productServiceMock.findAll()).willReturn(null);
+        given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(dtoList);
+
+        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].prices").isArray())
+            .andExpect(jsonPath("$[0].prices", hasSize(1)))
+            .andExpect(jsonPath("$[0].prices[0].instant").exists())
+            .andExpect(jsonPath("$[0].prices[0].price").value(4.55));
+
+        verify(this.productServiceMock, times(1)).findAll();
+        verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
     }
 }
