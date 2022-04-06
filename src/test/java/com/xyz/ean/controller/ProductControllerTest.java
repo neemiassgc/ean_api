@@ -19,8 +19,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -136,5 +135,26 @@ class ProductControllerTest {
 
         verify(this.productServiceMock, times(1)).findAll();
         verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
+    }
+
+    @Test
+    void givenAnExistentEanCodeThenResponseAProductWithOk() throws Exception {
+        final String anExistentEanCode = "1234567890123";
+
+        given(this.productServiceMock.findByEanCode(eq(anExistentEanCode))).willReturn(null);
+        given(this.domainMapperMock.mapToDto(isNull())).willReturn(getProductResponseDTO());
+
+        mockMvc.perform(get("/api/products/"+anExistentEanCode).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.description").value("default description"))
+            .andExpect(jsonPath("$.prices").isArray())
+            .andExpect(jsonPath("$.prices").isNotEmpty())
+            .andExpect(jsonPath("$.prices[0].price").value(4.55))
+            .andExpect(jsonPath("$.eanCode").value("1234567890123"))
+            .andExpect(jsonPath("$.sequenceCode").value(12345));
+
+        verify(this.productServiceMock, times(1)).findByEanCode(eq(anExistentEanCode));
+        verify(this.domainMapperMock, times(1)).mapToDto(isNull());
     }
 }
