@@ -3,6 +3,8 @@ package com.xyz.ean.controller;
 import com.xyz.ean.dto.ProductResponseDTO;
 import com.xyz.ean.service.DomainMapper;
 import com.xyz.ean.service.ProductService;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,8 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -156,5 +157,35 @@ class ProductControllerTest {
 
         verify(this.productServiceMock, times(1)).findByEanCode(eq(anExistentEanCode));
         verify(this.domainMapperMock, times(1)).mapToDto(isNull());
+    }
+
+    @Test
+    void givenANonExistentEanCodeThenResponseBadRequest() throws Exception {
+        final String aNonExistentEanCode = "1234567890123";
+
+        given(this.productServiceMock.findByEanCode(eq(aNonExistentEanCode))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        given(this.domainMapperMock.mapToDto(isNull())).willReturn(getProductResponseDTO());
+
+        final MvcResult mvcResult = mockMvc.perform(get("/api/products/"+aNonExistentEanCode).accept(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.reasons").isArray())
+            .andExpect(jsonPath("$.reasons", hasSize(1)))
+            .andExpect(jsonPath("$.reasons[0]").value("Product not found"))
+            .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+            .andReturn();
+
+        assertThat(mvcResult.getResolvedException())
+            .isNotNull()
+            .isInstanceOf(ResponseStatusException.class);
+
+        assertThat(Objects.castIfBelongsToType(mvcResult.getResolvedException(), ResponseStatusException.class))
+            .satisfies(exception -> {
+                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                assertThat(exception.getReason()).isEqualTo("Product not found");
+            });
+
+        verify(this.productServiceMock, times(1)).findByEanCode(eq(aNonExistentEanCode));
+        verify(this.domainMapperMock, never()).mapToDto(isNull());
+        verify(this.productServiceMock, only()).findByEanCode(eq(aNonExistentEanCode));
+
     }
 }
