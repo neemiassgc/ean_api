@@ -1,13 +1,13 @@
 package com.xyz.ean.dto;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 @ToString
-public class EanCodeRequestDTO {
+public final class EanCodeRequestDTO {
 
-    private String eanCode;
+    private final String eanCode;
 }
