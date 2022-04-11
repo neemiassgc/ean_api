@@ -31,7 +31,7 @@ public class DomainMapper {
             .prices(product
                 .getPrices()
                 .stream()
-                .map(ProductResponseDTO.PriceInstant::new)
+                .map(ProductResponseDTO.PriceInstant::from)
                 .collect(Collectors.toList())
             )
             .build();

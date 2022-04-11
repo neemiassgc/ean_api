@@ -43,20 +43,19 @@ class ProductControllerTest {
     void setUp() {
         this.mockMvc = standaloneSetup(new ProductController(this.productServiceMock, this.domainMapperMock)).build();
     }
-
-    private static ProductResponseDTO getProductResponseDTO() {
-        final ProductResponseDTO productResponseDTO = new ProductResponseDTO();
-        productResponseDTO.setDescription("default description");
-        productResponseDTO.setPrices(List.of(new ProductResponseDTO.PriceInstant(Instant.now(), 4.55)));
-        productResponseDTO.setEanCode("1234567890123");
-        productResponseDTO.setSequenceCode(12345);
-        return productResponseDTO;
+    
+    private ProductResponseDTO getANewInstanceOfResponseDTO() {
+        return ProductResponseDTO.builder()
+            .description("default description")
+            .prices(List.of(new ProductResponseDTO.PriceInstant(Instant.now(), 45.5)))
+            .eanCode("234567890123")
+            .sequenceCode(12345).build();
     }
 
     @Test
     void whenPOSTAnExistentEanCodeThenResponseOK() throws Exception {
         given(this.productServiceMock.saveByEanCode(anyString())).willReturn(null);
-        given(this.domainMapperMock.mapToDto(isNull())).willReturn(getProductResponseDTO());
+        given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
         mockMvc.perform(post("/api/products")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -104,7 +103,7 @@ class ProductControllerTest {
 
     @Test
     void ifThereAreProductsAvailableThenResponseThemWithOk() throws Exception {
-        final List<ProductResponseDTO> dtoList = List.of(getProductResponseDTO(), getProductResponseDTO(), getProductResponseDTO());
+        final List<ProductResponseDTO> dtoList = List.of(this.getANewInstanceOfResponseDTO(), this.getANewInstanceOfResponseDTO(), this.getANewInstanceOfResponseDTO());
         given(this.productServiceMock.findAll()).willReturn(null);
         given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(dtoList);
 
@@ -142,7 +141,7 @@ class ProductControllerTest {
         final String anExistentEanCode = "1234567890123";
 
         given(this.productServiceMock.findByEanCode(eq(anExistentEanCode))).willReturn(null);
-        given(this.domainMapperMock.mapToDto(isNull())).willReturn(getProductResponseDTO());
+        given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
         mockMvc.perform(get("/api/products/"+anExistentEanCode).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -163,7 +162,7 @@ class ProductControllerTest {
         final String aNonExistentEanCode = "1234567890123";
 
         given(this.productServiceMock.findByEanCode(eq(aNonExistentEanCode))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
-        given(this.domainMapperMock.mapToDto(isNull())).willReturn(getProductResponseDTO());
+        given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
         final MvcResult mvcResult = mockMvc.perform(get("/api/products/"+aNonExistentEanCode).accept(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.reasons").isArray())

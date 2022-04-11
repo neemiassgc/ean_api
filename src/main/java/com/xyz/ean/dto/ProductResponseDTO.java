@@ -7,16 +7,13 @@ import java.time.Instant;
 import java.util.List;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public final class ProductResponseDTO {
 
-    private String description;
-    private List<PriceInstant> prices;
-    private String eanCode;
-    private Integer sequenceCode;
+    private final String description;
+    private final List<PriceInstant> prices;
+    private final String eanCode;
+    private final Integer sequenceCode;
 
     @Override
     public String toString() {
@@ -30,23 +27,20 @@ public final class ProductResponseDTO {
         );
     }
 
-    @Setter
     @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @RequiredArgsConstructor
     public static class PriceInstant {
 
-        private Instant instant;
-        private Double price;
+        private final Instant instant;
+        private final Double priceValue;
 
-        public PriceInstant(final Price price) {
-            this.instant = price.getInstant();
-            this.price = price.getPrice();
+        public static PriceInstant from(final Price price) {
+            return new PriceInstant(price.getInstant(), price.getPrice());
         }
 
         @Override
         public String toString() {
-            return String.format("dateTime=%s, price=%s", instant, price);
+            return String.format("dateTime=%s, price=%s", instant, priceValue);
         }
     }
 }
