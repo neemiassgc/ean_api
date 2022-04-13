@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.*;
 
+@SuppressWarnings("unchecked")
 public class ForeignProductHttpServiceTest {
 
     private RestTemplate restTemplateMock;
@@ -75,7 +76,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void ifTheStructuresOfTheHTMLResponsesAreIntactThenShouldReturnAValidSessionInstance_getASessionInstance() throws IOException {
+    void ifTheStructuresOfTheHTMLResponsesAreIntactThenShouldReturnAValidSessionInstance_getASessionInstance() {
         // given
         this.getASessionInstanceGenericStub();
 

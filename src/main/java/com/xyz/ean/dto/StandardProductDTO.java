@@ -2,15 +2,13 @@ package com.xyz.ean.dto;
 
 import lombok.*;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
 @ToString
+@Builder
 public final class StandardProductDTO {
 
-    private double currentPrice;
-    private String description;
-    private int sequence;
-    private String eanCode;
+    private final double currentPrice;
+    private final String description;
+    private final int sequence;
+    private final String eanCode;
 }

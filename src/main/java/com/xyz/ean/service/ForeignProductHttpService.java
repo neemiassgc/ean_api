@@ -133,7 +133,6 @@ public class ForeignProductHttpService {
             restTemplate.httpEntityCallback(httpEntity, String.class),
             (clientHttpResponse) -> {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
-                final StandardProductDTO standardProductDTO = new StandardProductDTO();
                 final JsonNode jsonNode = objectMapper.readTree(json).get("item");
 
                 if (Objects.isNull(jsonNode)) {
@@ -149,10 +148,12 @@ public class ForeignProductHttpService {
                 final double currentPriceValue = DomainUtils.parsePrice(jsonNode.get(4).get("value").asText());
                 final String eanCodeValue = jsonNode.get(5).get("value").asText();
 
-                standardProductDTO.setDescription(description);
-                standardProductDTO.setSequence(sequence);
-                standardProductDTO.setCurrentPrice(currentPriceValue);
-                standardProductDTO.setEanCode(eanCodeValue);
+                final StandardProductDTO standardProductDTO = StandardProductDTO.builder()
+                    .description(description)
+                    .sequence(sequence)
+                    .currentPrice(currentPriceValue)
+                    .eanCode(eanCodeValue)
+                    .build();
 
                 return Optional.of(standardProductDTO);
             }

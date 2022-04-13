@@ -61,8 +61,16 @@ class ProductServiceTest {
     @Test
     void shouldReturnAProductFromExternalApiIfItDoesNotExistInTheDB_saveByEanCode() {
         //given
+        final StandardProductDTO standardProductDTO = StandardProductDTO.builder()
+            .description("Default Product Description")
+            .eanCode("1234567890123")
+            .currentPrice(10.0)
+            .sequence(417304)
+            .build();
+
+
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
-        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(new StandardProductDTO()));
+        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(standardProductDTO));
         given(domainMapperMock.mapToProduct(any(StandardProductDTO.class))).willReturn(new Product());
 
         //when
