@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 public final class DomainUtils {
 
+    private DomainUtils() {}
+
     public static double parsePrice(final String priceInput) {
         return Double.parseDouble(priceInput.replace(",", "."));
     }
