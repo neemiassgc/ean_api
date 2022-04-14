@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -42,11 +43,8 @@ public class ProductController {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorTemplate> handleException(final ResponseStatusException rse) {
-        final ErrorTemplate errorTemplate = new ErrorTemplate(rse.getStatus());
-        errorTemplate.addReasons(rse.getReason());
-
         return ResponseEntity
             .status(rse.getStatus())
-            .body(errorTemplate);
+            .body(new ErrorTemplate(rse.getStatus(), List.of(Objects.requireNonNullElseGet(rse.getReason(), () -> "No reasons"))));
     }
 }

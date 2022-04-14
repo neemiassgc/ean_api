@@ -8,32 +8,23 @@ import java.util.List;
 import java.util.Vector;
 
 @Getter
-@Setter
-public class ErrorTemplate {
+public final class ErrorTemplate {
 
-    private List<String> reasons;
-    private HttpStatus status;
+    private final List<String> reasons;
+    private final HttpStatus status;
 
-    public ErrorTemplate(final HttpStatus status) {
+    public ErrorTemplate(final HttpStatus status, final List<String> reasons) {
         this.status = status;
-        this.reasons = new Vector<>();
-    }
-
-    public ErrorTemplate() {
-        this(null);
-    }
-
-    public void addReasons(final String... reasons) {
-        this.reasons.addAll(List.of(reasons));
+        this.reasons = reasons;
     }
 
     @Override
     public String toString() {
-        final String template = "ErrorTemplate{status=%s, reasons=%s}";
+        final String template = "ErrorTemplate{status=%s, reasons=[%s]}";
         return String.format(
             template,
             status.value()+" "+status.getReasonPhrase(),
-            String.join(";", this.reasons)
+            String.join(", ", this.reasons)
         );
     }
 }
