@@ -32,7 +32,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
 
-    @SuppressWarnings("unused")
     @MockBean
     private ProductService productServiceMock;
 
@@ -51,7 +50,7 @@ class ProductControllerTest {
     private ProductResponseDTO getANewInstanceOfResponseDTO() {
         return ProductResponseDTO.builder()
             .description("default description")
-            .prices(List.of(new ProductResponseDTO.PriceInstant(Instant.now(), 4.55)))
+            .priceInstants(List.of(new ProductResponseDTO.PriceInstant(Instant.now(), 4.55)))
             .eanCode("1234567890123")
             .sequenceCode(12345).build();
     }
@@ -70,9 +69,9 @@ class ProductControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.description").value("default description"))
-        .andExpect(jsonPath("$.prices").isArray())
-        .andExpect(jsonPath("$.prices").isNotEmpty())
-        .andExpect(jsonPath("$.prices[0].priceValue").value(4.55))
+        .andExpect(jsonPath("$.priceInstants").isArray())
+        .andExpect(jsonPath("$.priceInstants").isNotEmpty())
+        .andExpect(jsonPath("$.priceInstants[0].priceValue").value(4.55))
         .andExpect(jsonPath("$.eanCode").value("1234567890123"))
         .andExpect(jsonPath("$.sequenceCode").value(12345));
 
@@ -118,10 +117,10 @@ class ProductControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[0].prices").isArray())
-            .andExpect(jsonPath("$[0].prices", hasSize(1)))
-            .andExpect(jsonPath("$[0].prices[0].instant").exists())
-            .andExpect(jsonPath("$[0].prices[0].priceValue").value(4.55));
+            .andExpect(jsonPath("$[0].priceInstants").isArray())
+            .andExpect(jsonPath("$[0].priceInstants", hasSize(1)))
+            .andExpect(jsonPath("$[0].priceInstants[0].instant").exists())
+            .andExpect(jsonPath("$[0].priceInstants[0].priceValue").value(4.55));
 
         verify(this.productServiceMock, times(1)).findAll();
         verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
@@ -153,9 +152,9 @@ class ProductControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.description").value("default description"))
-            .andExpect(jsonPath("$.prices").isArray())
-            .andExpect(jsonPath("$.prices").isNotEmpty())
-            .andExpect(jsonPath("$.prices[0].priceValue").value(4.55))
+            .andExpect(jsonPath("$.priceInstants").isArray())
+            .andExpect(jsonPath("$.priceInstants").isNotEmpty())
+            .andExpect(jsonPath("$.priceInstants[0].priceValue").value(4.55))
             .andExpect(jsonPath("$.eanCode").value(anExistentEanCode))
             .andExpect(jsonPath("$.sequenceCode").value(12345));
 

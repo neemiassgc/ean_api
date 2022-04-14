@@ -28,7 +28,7 @@ public class DomainMapper {
             .description(product.getDescription())
             .eanCode(product.getEanCode())
             .sequenceCode(product.getSequenceCode())
-            .prices(product
+            .priceInstants(product
                 .getPrices()
                 .stream()
                 .map(ProductResponseDTO.PriceInstant::from)
