@@ -25,15 +25,18 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
 
+    @SuppressWarnings("unused")
     @MockBean
     private ProductService productServiceMock;
 
+    @SuppressWarnings("unused")
     @MockBean
     private DomainMapper domainMapperMock;
 
@@ -41,14 +44,15 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = standaloneSetup(new ProductController(this.productServiceMock, this.domainMapperMock)).build();
+        this.mockMvc = standaloneSetup(new ProductController(this.productServiceMock, this.domainMapperMock))
+                .alwaysDo(print()).build();
     }
     
     private ProductResponseDTO getANewInstanceOfResponseDTO() {
         return ProductResponseDTO.builder()
             .description("default description")
-            .prices(List.of(new ProductResponseDTO.PriceInstant(Instant.now(), 45.5)))
-            .eanCode("234567890123")
+            .prices(List.of(new ProductResponseDTO.PriceInstant(Instant.now(), 4.55)))
+            .eanCode("1234567890123")
             .sequenceCode(12345).build();
     }
 
@@ -61,13 +65,14 @@ class ProductControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .accept(MediaType.APPLICATION_JSON)
             .content("{\"eanCode\":\"1234567890123\"}")
+            .characterEncoding("UTF-8")
         )
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.description").value("default description"))
         .andExpect(jsonPath("$.prices").isArray())
         .andExpect(jsonPath("$.prices").isNotEmpty())
-        .andExpect(jsonPath("$.prices[0].price").value(4.55))
+        .andExpect(jsonPath("$.prices[0].priceValue").value(4.55))
         .andExpect(jsonPath("$.eanCode").value("1234567890123"))
         .andExpect(jsonPath("$.sequenceCode").value(12345));
 
@@ -77,10 +82,11 @@ class ProductControllerTest {
 
     @Test
     void whenPOSTANonExistentEanCodeThenResponseNotFound() throws Exception {
-        given(this.productServiceMock.saveByEanCode(anyString())).willReturn(null);
-        given(this.domainMapperMock.mapToDto(isNull())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        given(this.productServiceMock.saveByEanCode(anyString())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        given(this.domainMapperMock.mapToDto(isNull())).willReturn(null);
 
         final MvcResult mvcResult = mockMvc.perform(post("/api/products")
+            .characterEncoding("UTF-8")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .content("{\"eanCode\":\"1234567890124\"}")
@@ -98,7 +104,7 @@ class ProductControllerTest {
         assertThat((ResponseStatusException)mvcResult.getResolvedException()).extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
 
         verify(this.productServiceMock, times(1)).saveByEanCode(anyString());
-        verify(this.domainMapperMock, times(1)).mapToDto(isNull());
+        verify(this.domainMapperMock, never()).mapToDto(isNull());
     }
 
     @Test
@@ -107,7 +113,7 @@ class ProductControllerTest {
         given(this.productServiceMock.findAll()).willReturn(null);
         given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(dtoList);
 
-        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
@@ -115,7 +121,7 @@ class ProductControllerTest {
             .andExpect(jsonPath("$[0].prices").isArray())
             .andExpect(jsonPath("$[0].prices", hasSize(1)))
             .andExpect(jsonPath("$[0].prices[0].instant").exists())
-            .andExpect(jsonPath("$[0].prices[0].price").value(4.55));
+            .andExpect(jsonPath("$[0].prices[0].priceValue").value(4.55));
 
         verify(this.productServiceMock, times(1)).findAll();
         verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
@@ -126,7 +132,7 @@ class ProductControllerTest {
         given(this.productServiceMock.findAll()).willReturn(null);
         given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
@@ -143,14 +149,14 @@ class ProductControllerTest {
         given(this.productServiceMock.findByEanCode(eq(anExistentEanCode))).willReturn(null);
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
-        mockMvc.perform(get("/api/products/"+anExistentEanCode).accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/products/"+anExistentEanCode).accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.description").value("default description"))
             .andExpect(jsonPath("$.prices").isArray())
             .andExpect(jsonPath("$.prices").isNotEmpty())
-            .andExpect(jsonPath("$.prices[0].price").value(4.55))
-            .andExpect(jsonPath("$.eanCode").value("1234567890123"))
+            .andExpect(jsonPath("$.prices[0].priceValue").value(4.55))
+            .andExpect(jsonPath("$.eanCode").value(anExistentEanCode))
             .andExpect(jsonPath("$.sequenceCode").value(12345));
 
         verify(this.productServiceMock, times(1)).findByEanCode(eq(anExistentEanCode));
@@ -164,12 +170,16 @@ class ProductControllerTest {
         given(this.productServiceMock.findByEanCode(eq(aNonExistentEanCode))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
-        final MvcResult mvcResult = mockMvc.perform(get("/api/products/"+aNonExistentEanCode).accept(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.reasons").isArray())
-            .andExpect(jsonPath("$.reasons", hasSize(1)))
-            .andExpect(jsonPath("$.reasons[0]").value("Product not found"))
-            .andExpect(jsonPath("$.status").value("NOT_FOUND"))
-            .andReturn();
+        final MvcResult mvcResult = mockMvc.perform(
+            get("/api/products/"+aNonExistentEanCode)
+            .accept(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+        )
+        .andExpect(jsonPath("$.reasons").isArray())
+        .andExpect(jsonPath("$.reasons", hasSize(1)))
+        .andExpect(jsonPath("$.reasons[0]").value("Product not found"))
+        .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+        .andReturn();
 
         assertThat(mvcResult.getResolvedException())
             .isNotNull()
