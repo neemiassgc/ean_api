@@ -1,13 +1,17 @@
 package com.xyz.ean.dto;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 @Getter
-@RequiredArgsConstructor
 @ToString
 public final class EanCodeRequestDTO {
 
     private final String eanCode;
+
+    @JsonCreator
+    public EanCodeRequestDTO(@JsonProperty("eanCode") String eanCode) {
+        this.eanCode = eanCode;
+    }
 }
