@@ -1,6 +1,6 @@
 package com.xyz.ean.service;
 
-import com.xyz.ean.dto.StandardProductDTO;
+import com.xyz.ean.dto.InputItemDTO;
 import com.xyz.ean.dto.ProductResponseDTO;
 import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 @Service
 public class DomainMapper {
 
-    public Product mapToProduct(final StandardProductDTO standardProductDTO) {
+    public Product mapToProduct(final InputItemDTO inputItemDTO) {
         final Product product = new Product();
         final Price price = new Price();
-        product.setDescription(standardProductDTO.getDescription());
-        product.setSequenceCode(standardProductDTO.getSequence());
-        product.setEanCode(standardProductDTO.getEanCode());
-        price.setPrice(standardProductDTO.getCurrentPrice());
+        product.setDescription(inputItemDTO.getDescription());
+        product.setSequenceCode(inputItemDTO.getSequence());
+        product.setEanCode(inputItemDTO.getEanCode());
+        price.setPrice(inputItemDTO.getCurrentPrice());
         product.addPrice(price);
         return product;
     }

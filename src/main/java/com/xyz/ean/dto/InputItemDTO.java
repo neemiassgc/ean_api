@@ -5,7 +5,7 @@ import lombok.*;
 
 @Getter
 @ToString
-public final class StandardProductDTO {
+public final class InputItemDTO {
 
     private final double currentPrice;
     private final String description;
@@ -13,7 +13,7 @@ public final class StandardProductDTO {
     private final String eanCode;
 
     @Builder
-    public StandardProductDTO(
+    public InputItemDTO(
         @JsonProperty("currentPrice") final double currentPrice,
         @JsonProperty("description") final String description,
         @JsonProperty("sequence") final int sequence,

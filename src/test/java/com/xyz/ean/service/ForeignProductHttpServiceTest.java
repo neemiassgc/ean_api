@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.xyz.ean.dto.StandardProductDTO;
+import com.xyz.ean.dto.InputItemDTO;
 import com.xyz.ean.pojo.SessionInstance;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.BeforeEach;
@@ -189,15 +189,15 @@ public class ForeignProductHttpServiceTest {
         );
 
         // when
-        final Optional<StandardProductDTO> actualStandardProductDTO =
+        final Optional<InputItemDTO> actualDTO =
             this.foreignProductHttpServiceUnderTest.fetchByEanCode(existingEanCode);
 
         // then
-        assertThat(actualStandardProductDTO).as("Optional cannot be null").isNotNull();
-        assertThat(actualStandardProductDTO.orElse(null)).as("actualStandardProductDTO cannot be null").isNotNull();
-        assertThat(actualStandardProductDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
-        assertThat(actualStandardProductDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
-        assertThat(actualStandardProductDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("134283434809");
+        assertThat(actualDTO).as("Optional cannot be null").isNotNull();
+        assertThat(actualDTO.orElse(null)).as("actualDTO cannot be null").isNotNull();
+        assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
+        assertThat(actualDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
+        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("134283434809");
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
@@ -239,7 +239,7 @@ public class ForeignProductHttpServiceTest {
         );
 
         // when
-        final Optional<StandardProductDTO> actualDTO = this.foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingEanCode);
+        final Optional<InputItemDTO> actualDTO = this.foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingEanCode);
 
         // then
         assertThat(actualDTO).as("Optional cannot be null").isNotNull();
@@ -287,16 +287,16 @@ public class ForeignProductHttpServiceTest {
         );
 
         //when
-        final Optional<StandardProductDTO> actualStandardProductDTO =
+        final Optional<InputItemDTO> actualDTO =
                 this.foreignProductHttpServiceUnderTest.fetchByEanCode("134324134324");
 
         //then
 
-        assertThat(actualStandardProductDTO).as("Optional cannot be null").isNotNull();
-        assertThat(actualStandardProductDTO.orElse(null)).as("actualStandardProductDTO cannot be null").isNotNull();
-        assertThat(actualStandardProductDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
-        assertThat(actualStandardProductDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
-        assertThat(actualStandardProductDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123412341234");
+        assertThat(actualDTO).as("Optional cannot be null").isNotNull();
+        assertThat(actualDTO.orElse(null)).as("actualDTO cannot be null").isNotNull();
+        assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
+        assertThat(actualDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
+        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123412341234");
 
         verify(this.restTemplateMock, times(2)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(2)).httpEntityCallback(any(HttpEntity.class), eq(String.class));

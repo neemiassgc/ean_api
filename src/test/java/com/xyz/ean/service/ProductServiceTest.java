@@ -1,6 +1,6 @@
 package com.xyz.ean.service;
 
-import com.xyz.ean.dto.StandardProductDTO;
+import com.xyz.ean.dto.InputItemDTO;
 import com.xyz.ean.entity.Price;
 import com.xyz.ean.entity.Product;
 import com.xyz.ean.repository.ProductRepository;
@@ -55,13 +55,13 @@ class ProductServiceTest {
         verify(productRepositoryMock, times(1)).findByEanCode(anyString());
         verify(productRepositoryMock, only()).findByEanCode(anyString());
         verify(foreignProductHttpServiceMock, never()).fetchByEanCode(anyString());
-        verify(domainMapperMock, never()).mapToProduct(any(StandardProductDTO.class));
+        verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
     }
 
     @Test
     void shouldReturnAProductFromExternalApiIfItDoesNotExistInTheDB_saveByEanCode() {
         //given
-        final StandardProductDTO standardProductDTO = StandardProductDTO.builder()
+        final InputItemDTO inputItemDTO = InputItemDTO.builder()
             .description("Default Product Description")
             .eanCode("1234567890123")
             .currentPrice(10.0)
@@ -70,8 +70,8 @@ class ProductServiceTest {
 
 
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
-        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(standardProductDTO));
-        given(domainMapperMock.mapToProduct(any(StandardProductDTO.class))).willReturn(new Product());
+        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(inputItemDTO));
+        given(domainMapperMock.mapToProduct(any(InputItemDTO.class))).willReturn(new Product());
 
         //when
         final Product actualProduct = productServiceUnderTest.saveByEanCode("1234567890123");
@@ -81,7 +81,7 @@ class ProductServiceTest {
 
         verify(productRepositoryMock, times(1)).findByEanCode(anyString());
         verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
-        verify(domainMapperMock, times(1)).mapToProduct(any(StandardProductDTO.class));
+        verify(domainMapperMock, times(1)).mapToProduct(any(InputItemDTO.class));
     }
 
     @Test
@@ -100,7 +100,7 @@ class ProductServiceTest {
 
         verify(productRepositoryMock, times(1)).findByEanCode(anyString());
         verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
-        verify(domainMapperMock, never()).mapToProduct(any(StandardProductDTO.class));
+        verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
     }
 
     @Test

@@ -2,7 +2,7 @@ package com.xyz.ean.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.xyz.ean.dto.StandardProductDTO;
+import com.xyz.ean.dto.InputItemDTO;
 import com.xyz.ean.pojo.DomainUtils;
 import com.xyz.ean.pojo.SessionInstance;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -111,7 +111,7 @@ public class ForeignProductHttpService {
         return new SessionInstance(instanceId, ajaxIdentifier);
     }
 
-    public Optional<StandardProductDTO> fetchByEanCode(final String eanCode) {
+    public Optional<InputItemDTO> fetchByEanCode(final String eanCode) {
         final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
         headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -148,14 +148,14 @@ public class ForeignProductHttpService {
                 final double currentPriceValue = DomainUtils.parsePrice(jsonNode.get(4).get("value").asText());
                 final String eanCodeValue = jsonNode.get(5).get("value").asText();
 
-                final StandardProductDTO standardProductDTO = StandardProductDTO.builder()
+                final InputItemDTO inputItemDTO = InputItemDTO.builder()
                     .description(description)
                     .sequence(sequence)
                     .currentPrice(currentPriceValue)
                     .eanCode(eanCodeValue)
                     .build();
 
-                return Optional.of(standardProductDTO);
+                return Optional.of(inputItemDTO);
             }
         );
     }
