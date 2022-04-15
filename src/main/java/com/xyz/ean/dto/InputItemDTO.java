@@ -1,27 +1,19 @@
 package com.xyz.ean.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.xyz.ean.pojo.InputItemDTODeserializer;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @ToString
+@Builder
+@JsonDeserialize(using = InputItemDTODeserializer.class)
 public final class InputItemDTO {
 
     private final double currentPrice;
     private final String description;
     private final int sequence;
     private final String eanCode;
-
-    @Builder
-    public InputItemDTO(
-        @JsonProperty("currentPrice") final double currentPrice,
-        @JsonProperty("description") final String description,
-        @JsonProperty("sequence") final int sequence,
-        @JsonProperty("eanCode") final String eanCode
-    ) {
-        this.currentPrice = currentPrice;
-        this.description = description;
-        this.sequence = sequence;
-        this.eanCode = eanCode;
-    }
 }

@@ -1,6 +1,5 @@
 package com.xyz.ean.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xyz.ean.dto.InputItemDTO;
 import com.xyz.ean.pojo.DomainUtils;
@@ -23,7 +22,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -133,29 +131,18 @@ public class ForeignProductHttpService {
             restTemplate.httpEntityCallback(httpEntity, String.class),
             (clientHttpResponse) -> {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
-                final JsonNode jsonNode = objectMapper.readTree(json).get("item");
 
-                if (Objects.isNull(jsonNode)) {
-                    this.bind(this.getASessionInstance());
-                    return fetchByEanCode(eanCode);
+                try {
+                    return Optional.of(objectMapper.readValue(json, InputItemDTO.class));
                 }
+                catch (Exception e) {
+                    if (e instanceof NullPointerException) {
+                        this.bind(this.getASessionInstance());
+                        return fetchByEanCode(eanCode);
+                    }
 
-                if (jsonNode.get(5).get("value").asText().length() == 0)
                     return Optional.empty();
-
-                final String description = jsonNode.get(1).get("value").asText();
-                final int sequence = jsonNode.get(2).get("value").asInt();
-                final double currentPriceValue = DomainUtils.parsePrice(jsonNode.get(4).get("value").asText());
-                final String eanCodeValue = jsonNode.get(5).get("value").asText();
-
-                final InputItemDTO inputItemDTO = InputItemDTO.builder()
-                    .description(description)
-                    .sequence(sequence)
-                    .currentPrice(currentPriceValue)
-                    .eanCode(eanCodeValue)
-                    .build();
-
-                return Optional.of(inputItemDTO);
+                }
             }
         );
     }
