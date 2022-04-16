@@ -25,18 +25,18 @@ public class ProductController {
     private final DomainMapper domainMapper;
 
     @PostMapping(path = "/products", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO createProduct(@RequestBody EanCodeRequestDTO eanCodeRequestDTO) {
+    public ProductResponseDTO create(@RequestBody EanCodeRequestDTO eanCodeRequestDTO) {
         final Product fetchedProduct = productService.saveByEanCode(eanCodeRequestDTO.getEanCode());
         return domainMapper.mapToDto(fetchedProduct);
     }
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ProductResponseDTO> getAllProducts() {
+    public List<ProductResponseDTO> getAll() {
         return domainMapper.mapToDtoList(productService.findAll());
     }
 
     @GetMapping(path = "/products/{eanCode}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO getProductByEanCode(@PathVariable("eanCode") String eanCode) {
+    public ProductResponseDTO getByEanCode(@PathVariable("eanCode") String eanCode) {
         final Product fetchedProduct = productService.findByEanCode(eanCode);
         return domainMapper.mapToDto(fetchedProduct);
     }
