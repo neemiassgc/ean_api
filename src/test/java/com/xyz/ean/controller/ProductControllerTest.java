@@ -56,7 +56,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void whenPOSTAnExistentEanCodeThenResponseOK() throws Exception {
+    void when_POST_an_existent_ean_code_then_response_200_create() throws Exception {
         given(this.productServiceMock.saveByEanCode(anyString())).willReturn(null);
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
@@ -80,7 +80,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void whenPOSTANonExistentEanCodeThenResponseNotFound() throws Exception {
+    void when_POST_a_non_existent_ean_code_then_response_404_create() throws Exception {
         given(this.productServiceMock.saveByEanCode(anyString())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(null);
 
@@ -107,7 +107,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void ifThereAreProductsAvailableThenResponseThemWithOk() throws Exception {
+    void if_there_are_products_available_then_response_them_with_200_getAll() throws Exception {
         final List<ProductResponseDTO> dtoList = List.of(this.getANewInstanceOfResponseDTO(), this.getANewInstanceOfResponseDTO(), this.getANewInstanceOfResponseDTO());
         given(this.productServiceMock.findAll()).willReturn(null);
         given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(dtoList);
@@ -127,7 +127,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void ifThereAreNoProductsAvailableThenResponseAnEmptyListWithOk() throws Exception {
+    void if_there_are_no_products_available_then_response_an_empty_list_with_200_getAll() throws Exception {
         given(this.productServiceMock.findAll()).willReturn(null);
         given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(Collections.emptyList());
 
@@ -142,7 +142,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void givenAnExistentEanCodeThenResponseAProductWithOk() throws Exception {
+    void given_an_existent_ean_code_then_response_a_product_with_200_getByEanCode() throws Exception {
         final String anExistentEanCode = "1234567890123";
 
         given(this.productServiceMock.findByEanCode(eq(anExistentEanCode))).willReturn(null);
@@ -163,7 +163,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void givenANonExistentEanCodeThenResponseBadRequest() throws Exception {
+    void given_a_non_existent_ean_code_then_response_400_getByEanCode() throws Exception {
         final String aNonExistentEanCode = "1234567890123";
 
         given(this.productServiceMock.findByEanCode(eq(aNonExistentEanCode))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
