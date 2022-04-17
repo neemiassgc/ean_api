@@ -44,7 +44,7 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         this.mockMvc = standaloneSetup(new ProductController(this.productServiceMock, this.domainMapperMock))
-                .alwaysDo(print()).build();
+            .alwaysDo(print()).build();
     }
     
     private ProductResponseDTO getANewInstanceOfResponseDTO() {
@@ -59,11 +59,12 @@ class ProductControllerTest {
     void when_POST_an_existent_ean_code_then_response_200_create() throws Exception {
         given(this.productServiceMock.saveByEanCode(anyString())).willReturn(null);
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
+        final String requestJsonBody = "{\"eanCode\":\"1234567890123\"}";
 
         mockMvc.perform(post("/api/products")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .accept(MediaType.APPLICATION_JSON)
-            .content("{\"eanCode\":\"1234567890123\"}")
+            .content(requestJsonBody)
             .characterEncoding("UTF-8")
         )
         .andExpect(status().isOk())
@@ -83,12 +84,13 @@ class ProductControllerTest {
     void when_POST_a_non_existent_ean_code_then_response_404_create() throws Exception {
         given(this.productServiceMock.saveByEanCode(anyString())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(null);
+        final String requestJsonBody = "{\"eanCode\":\"1234567890123\"}";
 
         final MvcResult mvcResult = mockMvc.perform(post("/api/products")
             .characterEncoding("UTF-8")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
-            .content("{\"eanCode\":\"1234567890124\"}")
+            .content(requestJsonBody)
         )
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -108,9 +110,13 @@ class ProductControllerTest {
 
     @Test
     void if_there_are_products_available_then_response_them_with_200_getAll() throws Exception {
-        final List<ProductResponseDTO> dtoList = List.of(this.getANewInstanceOfResponseDTO(), this.getANewInstanceOfResponseDTO(), this.getANewInstanceOfResponseDTO());
+        final List<ProductResponseDTO> productResponseDTOList = List.of(
+            this.getANewInstanceOfResponseDTO(),
+            this.getANewInstanceOfResponseDTO(),
+            this.getANewInstanceOfResponseDTO()
+        );
         given(this.productServiceMock.findAll()).willReturn(null);
-        given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(dtoList);
+        given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(productResponseDTOList);
 
         mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
             .andExpect(status().isOk())
