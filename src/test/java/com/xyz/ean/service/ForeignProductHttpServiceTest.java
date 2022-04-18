@@ -198,28 +198,13 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void given_a_non_existent_ean_code_then_should_return_empty_fetchByEanCode() throws JsonProcessingException {
+    void given_a_non_existent_ean_code_then_should_return_optional_empty_fetchByEanCode() throws JsonProcessingException {
         // given
         final String nonExistingEanCode = "";
 
-        final Supplier<ObjectNode> objectNodeSupplier = () -> {
-            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
-            ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode(5);
-            arrayNode.insertObject(0);
-            arrayNode.insertObject(1).set("value", JsonNodeFactory.instance.textNode("default description"));
-            arrayNode.insertObject(2).set("value", JsonNodeFactory.instance.numberNode(12345));
-            arrayNode.insertObject(3);
-            arrayNode.insertObject(4).set("value", JsonNodeFactory.instance.numberNode(16.4));
-            arrayNode.insertObject(5).set("value", JsonNodeFactory.instance.textNode(""));
-
-            rootNode.putArray("item").addAll(arrayNode);
-
-            return rootNode;
-        };
-
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
-        given(this.objectMapperMock.readTree(anyString())).willReturn(objectNodeSupplier.get());
+        given(this.objectMapperMock.readValue(anyString(), eq(InputItemDTO.class))).willThrow(new IllegalStateException("Item name is empty"));
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -240,7 +225,7 @@ public class ForeignProductHttpServiceTest {
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(1)).readTree(anyString());
+        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(InputItemDTO.class));
     }
 
     @Test
