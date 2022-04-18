@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.xyz.ean.dto.InputItemDTO;
+import org.springframework.lang.Nullable;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public final class InputItemDTODeserializer extends StdDeserializer<InputItemDTO> {
 
@@ -20,9 +22,13 @@ public final class InputItemDTODeserializer extends StdDeserializer<InputItemDTO
     }
 
     @Override
+    @Nullable
     public InputItemDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
         final JsonNode jsonNode = p.getCodec().readTree(p);
-        final JsonNode item = DomainUtils.requireNonNull(jsonNode.get("item"), new NullPointerException());
+
+        final JsonNode item = jsonNode.get("item");
+
+        if (Objects.isNull(item)) return null;
 
         if (item.get(5).get("value").asText().isEmpty()) throw new IllegalStateException("Item name is empty");
 
