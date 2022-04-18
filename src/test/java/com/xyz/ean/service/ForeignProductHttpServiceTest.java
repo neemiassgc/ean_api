@@ -253,28 +253,21 @@ public class ForeignProductHttpServiceTest {
     @Test
     void when_a_session_instance_is_not_valid_then_should_recreate_it() throws JsonProcessingException {
        //given
-        final Supplier<ObjectNode> objectNodeSupplier = () -> {
-            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
-            ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode(5);
-            arrayNode.insertObject(0);
-            arrayNode.insertObject(1).set("value", JsonNodeFactory.instance.textNode("default description"));
-            arrayNode.insertObject(2).set("value", JsonNodeFactory.instance.numberNode(12345));
-            arrayNode.insertObject(3);
-            arrayNode.insertObject(4).set("value", JsonNodeFactory.instance.numberNode(16.4));
-            arrayNode.insertObject(5).set("value", JsonNodeFactory.instance.textNode("123412341234"));
-
-            rootNode.putArray("item").addAll(arrayNode);
-
-            return rootNode;
-        };
+        final Supplier<InputItemDTO> inputItemDTOSupplier = () ->
+            InputItemDTO.builder()
+                .description("description")
+                .eanCode("123456789101")
+                .currentPrice(16.4)
+                .sequence(123456)
+                .build();
 
         this.getASessionInstanceGenericStub();
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
-        given(this.objectMapperMock.readTree(anyString()))
-            .willReturn(JsonNodeFactory.instance.nullNode())
-            .willReturn(objectNodeSupplier.get());
+        given(this.objectMapperMock.readValue(anyString(), eq(InputItemDTO.class)))
+            .willReturn(null)
+            .willReturn(inputItemDTOSupplier.get());
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -288,20 +281,24 @@ public class ForeignProductHttpServiceTest {
 
         //when
         final Optional<InputItemDTO> actualDTO =
-                this.foreignProductHttpServiceUnderTest.fetchByEanCode("134324134324");
+            this.foreignProductHttpServiceUnderTest.fetchByEanCode("134324134324");
 
         //then
 
         assertThat(actualDTO).as("Optional cannot be null").isNotNull();
         assertThat(actualDTO.orElse(null)).as("actualDTO cannot be null").isNotNull();
-        assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
+        assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("description");
         assertThat(actualDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
-        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123412341234");
+        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123456789101");
 
         verify(this.restTemplateMock, times(2)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(2)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(2)).readTree(anyString());
-        verify(this.restTemplateMock, times(2)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
-        verify(this.restTemplateMock, times(1)).postForEntity(anyString(), anyMap(), eq(String.class));
+        verify(this.objectMapperMock, times(2)).readValue(anyString(), eq(InputItemDTO.class));
+
+        // getASessionInstanceGenericStub();
+        verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
+        verify(this.restTemplateMock, times(1)).postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class));
+
     }
 }
