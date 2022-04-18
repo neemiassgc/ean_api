@@ -157,26 +157,19 @@ public class ForeignProductHttpServiceTest {
     @Test
     void given_a_valid_ean_code_then_should_return_an_input_dto_fetchByEanCode() throws JsonProcessingException {
         // given
-        final Supplier<ObjectNode> objectNodeSupplier = () -> {
-            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
-            ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode(5);
-            arrayNode.insertObject(0);
-            arrayNode.insertObject(1).set("value", JsonNodeFactory.instance.textNode("default description"));
-            arrayNode.insertObject(2).set("value", JsonNodeFactory.instance.numberNode(12345));
-            arrayNode.insertObject(3);
-            arrayNode.insertObject(4).set("value", JsonNodeFactory.instance.numberNode(16.4));
-            arrayNode.insertObject(5).set("value", JsonNodeFactory.instance.textNode("134283434809"));
+        final String existingEanCode = "123456789101";
 
-            rootNode.putArray("item").addAll(arrayNode);
-
-            return rootNode;
-        };
-
-        final String existingEanCode = "1234567890123";
+        final Supplier<InputItemDTO> inputItemDTOSupplier = () -> InputItemDTO.builder()
+            .description("description")
+            .eanCode(existingEanCode)
+            .currentPrice(16.4)
+            .sequence(123456)
+            .build();
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
-        given(this.objectMapperMock.readTree(anyString())).willReturn(objectNodeSupplier.get());
+        given(this.objectMapperMock.readValue(anyString(), eq(InputItemDTO.class)))
+            .willReturn(inputItemDTOSupplier.get());
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -195,13 +188,13 @@ public class ForeignProductHttpServiceTest {
         // then
         assertThat(actualDTO).as("Optional cannot be null").isNotNull();
         assertThat(actualDTO.orElse(null)).as("actualDTO cannot be null").isNotNull();
-        assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("default description");
+        assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("description");
         assertThat(actualDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
-        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("134283434809");
+        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123456789101");
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(1)).readTree(anyString());
+        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(InputItemDTO.class));
     }
 
     @Test
