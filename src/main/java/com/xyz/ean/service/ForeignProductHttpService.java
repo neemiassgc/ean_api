@@ -1,5 +1,6 @@
 package com.xyz.ean.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xyz.ean.dto.InputItemDTO;
 import com.xyz.ean.pojo.DomainUtils;
@@ -21,7 +22,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import javax.validation.constraints.Null;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -133,14 +136,15 @@ public class ForeignProductHttpService {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
 
                 try {
-                    return Optional.of(objectMapper.readValue(json, InputItemDTO.class));
-                }
-                catch (Exception e) {
-                    if (e instanceof NullPointerException) {
+                    final InputItemDTO inputItemDTO = objectMapper.readValue(json, InputItemDTO.class);
+
+                    if (Objects.isNull(inputItemDTO)) {
                         this.bind(this.getASessionInstance());
                         return fetchByEanCode(eanCode);
                     }
 
+                    return Optional.of(inputItemDTO);
+                } catch (Exception e)  {
                     return Optional.empty();
                 }
             }
