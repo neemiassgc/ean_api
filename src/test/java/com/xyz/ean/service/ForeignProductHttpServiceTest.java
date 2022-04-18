@@ -76,7 +76,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void ifTheStructuresOfTheHTMLResponsesAreIntactThenShouldReturnAValidSessionInstance_getASessionInstance() {
+    void if_the_structures_of_the_html_responses_are_intact_then_should_return_a_valid_session_instance__getASessionInstance() {
         // given
         this.getASessionInstanceGenericStub();
 
@@ -93,7 +93,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void ifTheLoginPageParsingFailsThenShouldThrowAnException_getASessionInstance() {
+    void if_the_login_page_parsing_fails_then_should_throw_an_exception_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
             eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -112,7 +112,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void whenSomeOfTheRequiredFieldsAreMissingThenShouldThrowAnException_getASessionInstance() {
+    void when_some_of_the_required_fields_are_missing_then_should_throw_an_exception_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
             eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -131,7 +131,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void whenAjaxIdentifierIsNotFoundThenShouldThrowAnException_getASessionInstance() {
+    void when_ajaxIdentifier_is_not_found_then_should_throw_an_exception_getASessionInstance() {
         // given
         given(this.restTemplateMock.execute(
                 eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class)
@@ -155,7 +155,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void givenAValidEanCodeThenShouldReturnAStandardProductDTO_fetchByEanCode() throws JsonProcessingException {
+    void given_a_valid_ean_code_then_should_return_an_input_dto_fetchByEanCode() throws JsonProcessingException {
         // given
         final Supplier<ObjectNode> objectNodeSupplier = () -> {
             ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
@@ -205,7 +205,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void givenANonExistentEanCodeThenShouldReturnEmpty_fetchByEanCode() throws JsonProcessingException {
+    void given_a_non_existent_ean_code_then_should_return_empty_fetchByEanCode() throws JsonProcessingException {
         // given
         final String nonExistingEanCode = "";
 
@@ -251,7 +251,7 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void whenASessionInstanceIsNotValidThenShouldRecreateIt() throws JsonProcessingException {
+    void when_a_session_instance_is_not_valid_then_should_recreate_it() throws JsonProcessingException {
        //given
         final Supplier<ObjectNode> objectNodeSupplier = () -> {
             ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
