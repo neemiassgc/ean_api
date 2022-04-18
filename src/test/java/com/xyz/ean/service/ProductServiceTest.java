@@ -42,7 +42,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void shouldReturnAProductFromDBIfItExistsInTheDatabase_saveByEanCode() {
+    void should_return_a_product_from_db_if_it_exists_in_the_database_saveByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
 
@@ -59,7 +59,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void shouldReturnAProductFromExternalApiIfItDoesNotExistInTheDB_saveByEanCode() {
+    void should_return_a_product_from_external_api_if_it_does_not_exist_in_the_db_saveByEanCode() {
         //given
         final InputItemDTO inputItemDTO = InputItemDTO.builder()
             .description("Default Product Description")
@@ -85,7 +85,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void shouldThrowAnExceptionIfProductDoesNotExistInTheDBOrExternalApi_saveByEanCode() {
+    void should_throw_an_exception_if_product_does_not_exist_in_the_db_or_external_api_saveByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
         given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.empty());
@@ -104,7 +104,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenAValidProductThenShouldSaveTheProduct_save() {
+    void given_a_valid_product_then_should_save_the_product_save() {
         //given
         given(productRepositoryMock.save(any(Product.class))).will(invocation -> invocation.getArgument(0));
 
@@ -120,7 +120,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenANullProductThenShouldThrowAnException_save() {
+    void given_a_null_product_then_should_throw_an_exception_save() {
         //given
         given(productRepositoryMock.save(any(Product.class))).will(invocation -> null);
 
@@ -135,7 +135,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenAnExistentEanCodeThenShouldReturnAProduct_findByEanCode() {
+    void given_an_existent_ean_code_then_should_return_a_product_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
 
@@ -150,7 +150,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenANonExistentEanCodeThenShouldThrowAnException_findByEanCode() {
+    void given_a_non_existent_ean_code_then_should_throw_an_exception_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
 
@@ -169,7 +169,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void givenANullEanCodeThenShouldThrowAnException_findByEanCode() {
+    void given_a_null_ean_code_then_should_throw_an_exception_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
 
@@ -186,7 +186,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void ifThereAreAnyProductsInTheDBThenShouldReturnAllProducts_findAll() {
+    void if_there_are_any_products_in_the_db_then_should_return_all_products_findAll() {
         //given
         final List<Product> existentProducts = List.of(
             getDefaultProduct(), getDefaultProduct(), getDefaultProduct(), getDefaultProduct()
@@ -207,7 +207,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void ifThereAreNoProductsInTheDBThenShouldReturnAnEmptyList_findAll() {
+    void if_there_are_no_products_in_the_db_then_should_return_an_empty_list_findAll() {
         //given
         given(productRepositoryMock.findAll()).willReturn(Collections.emptyList());
 
