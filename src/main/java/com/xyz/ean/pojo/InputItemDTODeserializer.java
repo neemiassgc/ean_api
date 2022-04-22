@@ -32,10 +32,10 @@ public final class InputItemDTODeserializer extends StdDeserializer<InputItemDTO
 
         if (item.get(5).get("value").asText().isEmpty()) throw new IllegalStateException("Item name is empty");
 
-        final String description = jsonNode.get(1).get("value").asText();
-        final int sequence = jsonNode.get(2).get("value").asInt();
-        final double currentPriceValue = DomainUtils.parsePrice(jsonNode.get(4).get("value").asText());
-        final String eanCodeValue = jsonNode.get(5).get("value").asText();
+        final String description = item.get(1).get("value").asText();
+        final int sequence = item.get(2).get("value").asInt();
+        final double currentPriceValue = DomainUtils.parsePrice(item.get(4).get("value").asText());
+        final String eanCodeValue = item.get(5).get("value").asText();
 
         return InputItemDTO.builder()
             .description(description)
