@@ -1,0 +1,21 @@
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+
+    # For loading data from data-dev.sql file along with Hibernate schema creation
+    defer-datasource-initialization: true
+
+    quartz:
+      job-store-type: memory
+      thead-pool-size: 1
+
+  # Disable loading init data only for embedded database
+  sql:
+    init:
+      mode: always
+
+      # Load data only for development environment
+      platform: dev
