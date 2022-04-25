@@ -26,7 +26,7 @@ public class DomainMapper {
     public ProductResponseDTO mapToDto(final Product product) {
         return ProductResponseDTO.builder()
             .description(product.getDescription())
-            .eanCode(product.getBarCode())
+            .barCode(product.getBarCode())
             .sequenceCode(product.getSequenceCode())
             .priceInstants(product
                 .getPrices()

@@ -14,7 +14,7 @@ public final class ProductResponseDTO {
 
     private final String description;
     private final List<PriceInstant> priceInstants;
-    private final String eanCode;
+    private final String barCode;
     private final Integer sequenceCode;
 
     @JsonCreator
@@ -22,12 +22,12 @@ public final class ProductResponseDTO {
     public ProductResponseDTO(
         @JsonProperty("description") final String description,
         @JsonProperty("priceInstants") final List<PriceInstant> priceInstants,
-        @JsonProperty("eanCode") final String eanCode,
+        @JsonProperty("barCode") final String barCode,
         @JsonProperty("sequenceCode") final Integer sequenceCode
     ) {
         this.description = description;
         this.priceInstants = priceInstants;
-        this.eanCode = eanCode;
+        this.barCode = barCode;
         this.sequenceCode = sequenceCode;
     }
 
@@ -38,7 +38,7 @@ public final class ProductResponseDTO {
             template,
             description,
             priceInstants.stream().map(PriceInstant::toString).collect(Collectors.joining(", ")),
-            eanCode,
+                barCode,
             sequenceCode
         );
     }

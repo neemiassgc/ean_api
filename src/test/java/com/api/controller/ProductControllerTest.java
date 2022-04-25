@@ -51,7 +51,7 @@ class ProductControllerTest {
         return ProductResponseDTO.builder()
             .description("default description")
             .priceInstants(List.of(new ProductResponseDTO.PriceInstant(Instant.now(), 4.55)))
-            .eanCode("1234567890123")
+            .barCode("1234567890123")
             .sequenceCode(12345).build();
     }
 
