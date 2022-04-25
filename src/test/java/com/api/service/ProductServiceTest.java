@@ -137,12 +137,14 @@ class ProductServiceTest {
     }
 
     @Test
-    void given_an_existent_ean_code_then_should_return_a_product_findByEanCode() {
+    void given_an_existent_bar_code_then_should_return_a_product_findByEanCode() {
+        final String barCode = "1234567890123";
+
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
 
         //when
-        final Product actualProduct = productServiceUnderTest.findByEanCode("1234567890123");
+        final Product actualProduct = productServiceUnderTest.findByEanCode(barCode);
 
         //then
         assertThat(actualProduct).isNotNull();
@@ -152,12 +154,14 @@ class ProductServiceTest {
     }
 
     @Test
-    void given_a_non_existent_ean_code_then_should_throw_an_exception_findByEanCode() {
+    void given_a_non_existent_bar_code_then_should_throw_an_exception_findByEanCode() {
+        final String barCode = "1234567890123";
+
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
 
         //when
-        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByEanCode("1234567890123"));
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByEanCode(barCode));
 
         //then
         assertThat(actualException).satisfies(throwable -> {
@@ -171,7 +175,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void given_a_null_ean_code_then_should_throw_an_exception_findByEanCode() {
+    void given_a_null_bar_code_then_should_throw_an_exception_findByEanCode() {
         //given
         given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
 
