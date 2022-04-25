@@ -38,4 +38,21 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.eanCode").value("7897534852624"))
         .andExpect(jsonPath("$.sequenceCode").value(137513));
     }
+
+    @Test
+    void given_a_non_existing_bar_code_should_response_404_create() throws Exception {
+        final String nonExistentBarCodeJson = "{\"eanCode\":\"5897534852624\"}";
+
+        mockMvc.perform(post("/api/products")
+            .contentType(MediaType.APPLICATION_JSON)
+            .characterEncoding("UTF-8")
+            .content(nonExistentBarCodeJson)
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.reasons").isArray())
+        .andExpect(jsonPath("$.reasons", hasSize(1)))
+        .andExpect(jsonPath("$.reasons[0]").value("Product not found"))
+        .andExpect(jsonPath("$.status").value("NOT_FOUND"));
+    }
 }
