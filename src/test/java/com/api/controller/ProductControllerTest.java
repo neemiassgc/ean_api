@@ -56,7 +56,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void when_POST_an_existent_ean_code_then_response_200_create() throws Exception {
+    void when_POST_an_existent_bar_code_then_response_200_create() throws Exception {
         given(this.productServiceMock.saveByEanCode(anyString())).willReturn(null);
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
         final String requestJsonBody = "{\"eanCode\":\"1234567890123\"}";
@@ -81,7 +81,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void when_POST_a_non_existent_ean_code_then_response_404_create() throws Exception {
+    void when_POST_a_non_existent_bar_code_then_response_404_create() throws Exception {
         given(this.productServiceMock.saveByEanCode(anyString())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(null);
         final String requestJsonBody = "{\"eanCode\":\"1234567890123\"}";
@@ -148,7 +148,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void given_an_existent_ean_code_then_response_a_product_with_200_getByEanCode() throws Exception {
+    void given_an_existent_bar_code_then_response_a_product_with_200_getByEanCode() throws Exception {
         final String anExistentEanCode = "1234567890123";
 
         given(this.productServiceMock.findByEanCode(eq(anExistentEanCode))).willReturn(null);
@@ -169,7 +169,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void given_a_non_existent_ean_code_then_response_400_getByEanCode() throws Exception {
+    void given_a_non_existent_bar_code_then_response_400_getByEanCode() throws Exception {
         final String aNonExistentEanCode = "1234567890123";
 
         given(this.productServiceMock.findByEanCode(eq(aNonExistentEanCode))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
