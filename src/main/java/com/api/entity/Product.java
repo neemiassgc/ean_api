@@ -34,8 +34,8 @@ public class Product {
     @OrderBy("instant DESC")
     private List<Price> prices = new Vector<>();
 
-    @Column(name = "ean_code", nullable = false, length = 13)
-    private String eanCode;
+    @Column(name = "bar_code", nullable = false, length = 13)
+    private String barCode;
 
     @Column(name = "sequence_code", nullable = false)
     private Integer sequenceCode;
@@ -60,7 +60,7 @@ public class Product {
             "Product{id=%s, description=%s, eanCode=%s, sequenceCode=%s, prices=%s}",
             id,
             description,
-            eanCode,
+                barCode,
             sequenceCode,
             this.prices.stream().map(price -> price.getPrice().toString()).collect(Collectors.joining(","))
         );

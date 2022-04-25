@@ -28,7 +28,7 @@ class ProductServiceTest {
 
     private static Product getDefaultProduct() {
         final Product product = new Product();
-        product.setEanCode("1234567890123");
+        product.setBarCode("1234567890123");
         product.setDescription("Default Product Description");
         product.addPrice(new Price(10.0));
         product.setSequenceCode(417304);
