@@ -6,12 +6,12 @@ import lombok.*;
 
 @Getter
 @ToString
-public final class EanCodeRequestDTO {
+public final class BarCodeRequestDTO {
 
-    private final String eanCode;
+    private final String barCode;
 
     @JsonCreator
-    public EanCodeRequestDTO(@JsonProperty("eanCode") String eanCode) {
-        this.eanCode = eanCode;
+    public BarCodeRequestDTO(@JsonProperty("eanCode") String barCode) {
+        this.barCode = barCode;
     }
 }

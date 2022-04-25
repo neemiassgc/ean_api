@@ -1,7 +1,7 @@
 package com.api.controller;
 
 import com.api.service.DomainMapper;
-import com.api.dto.EanCodeRequestDTO;
+import com.api.dto.BarCodeRequestDTO;
 import com.api.dto.ProductResponseDTO;
 import com.api.entity.Product;
 import com.api.error.ErrorTemplate;
@@ -25,8 +25,8 @@ public class ProductController {
     private final DomainMapper domainMapper;
 
     @PostMapping(path = "/products", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO create(@RequestBody EanCodeRequestDTO eanCodeRequestDTO) {
-        final Product fetchedProduct = productService.saveByEanCode(eanCodeRequestDTO.getEanCode());
+    public ProductResponseDTO create(@RequestBody BarCodeRequestDTO barCodeRequestDTO) {
+        final Product fetchedProduct = productService.saveByEanCode(barCodeRequestDTO.getBarCode());
         return domainMapper.mapToDto(fetchedProduct);
     }
 
