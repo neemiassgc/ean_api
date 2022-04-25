@@ -152,13 +152,13 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void given_a_valid_ean_code_then_should_return_an_input_dto_fetchByEanCode() throws JsonProcessingException {
+    void given_a_valid_bar_code_then_should_return_an_input_dto_fetchByEanCode() throws JsonProcessingException {
         // given
-        final String existingEanCode = "123456789101";
+        final String existingBarCode = "123456789101";
 
         final Supplier<InputItemDTO> inputItemDTOSupplier = () -> InputItemDTO.builder()
             .description("description")
-            .eanCode(existingEanCode)
+            .eanCode(existingBarCode)
             .currentPrice(16.4)
             .sequence(123456)
             .build();
@@ -180,7 +180,7 @@ public class ForeignProductHttpServiceTest {
 
         // when
         final Optional<InputItemDTO> actualDTO =
-            this.foreignProductHttpServiceUnderTest.fetchByEanCode(existingEanCode);
+            this.foreignProductHttpServiceUnderTest.fetchByEanCode(existingBarCode);
 
         // then
         assertThat(actualDTO).as("Optional cannot be null").isNotNull();
@@ -195,9 +195,9 @@ public class ForeignProductHttpServiceTest {
     }
 
     @Test
-    void given_a_non_existent_ean_code_then_should_return_optional_empty_fetchByEanCode() throws JsonProcessingException {
+    void given_a_non_existent_bar_code_then_should_return_optional_empty_fetchByEanCode() throws JsonProcessingException {
         // given
-        final String nonExistingEanCode = "";
+        final String nonExistingBarCode = "1983471983474";
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
@@ -214,7 +214,7 @@ public class ForeignProductHttpServiceTest {
         );
 
         // when
-        final Optional<InputItemDTO> actualDTO = this.foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingEanCode);
+        final Optional<InputItemDTO> actualDTO = this.foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingBarCode);
 
         // then
         assertThat(actualDTO).as("Optional cannot be null").isNotNull();
