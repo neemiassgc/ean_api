@@ -23,7 +23,7 @@ public class ScanJob extends QuartzJobBean {
     protected void executeInternal(@NonNull JobExecutionContext context) {
 
         productService.findAll().forEach(dbProduct -> {
-            final String dbProductEanCode = dbProduct.getBarCode();
+            final String dbProductEanCode = dbProduct.getBarcode();
             foreignProductHttpService.fetchByEanCode(dbProductEanCode).ifPresent(externalProduct -> {
                 final double externalProductPrice = externalProduct.getCurrentPrice();
                 if (!Objects.equals(dbProduct.getPrices().get(0).getPrice(), externalProductPrice)) {

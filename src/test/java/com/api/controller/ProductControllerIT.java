@@ -37,7 +37,7 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.priceInstants").isArray())
         .andExpect(jsonPath("$.priceInstants", hasSize(4)))
         .andExpect(jsonPath("$.priceInstants[*].price", contains(5.65, 9.9, 10.75, 7.5)))
-        .andExpect(jsonPath("$.eanCode").value("7897534852624"))
+        .andExpect(jsonPath("$.barcode").value("7897534852624"))
         .andExpect(jsonPath("$.sequenceCode").value(137513));
     }
 

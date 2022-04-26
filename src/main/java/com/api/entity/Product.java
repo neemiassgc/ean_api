@@ -35,7 +35,7 @@ public class Product {
     private List<Price> prices = new Vector<>();
 
     @Column(name = "barcode", nullable = false, length = 13)
-    private String barCode;
+    private String barcode;
 
     @Column(name = "sequence_code", nullable = false)
     private Integer sequenceCode;
@@ -60,7 +60,7 @@ public class Product {
             "Product{id=%s, description=%s, eanCode=%s, sequenceCode=%s, prices=%s}",
             id,
             description,
-                barCode,
+                barcode,
             sequenceCode,
             this.prices.stream().map(price -> price.getPrice().toString()).collect(Collectors.joining(","))
         );

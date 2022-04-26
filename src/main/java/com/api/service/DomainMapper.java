@@ -17,7 +17,7 @@ public class DomainMapper {
         final Price price = new Price();
         product.setDescription(inputItemDTO.getDescription());
         product.setSequenceCode(inputItemDTO.getSequence());
-        product.setBarCode(inputItemDTO.getEanCode());
+        product.setBarcode(inputItemDTO.getEanCode());
         price.setPrice(inputItemDTO.getCurrentPrice());
         product.addPrice(price);
         return product;
@@ -26,7 +26,7 @@ public class DomainMapper {
     public ProductResponseDTO mapToDto(final Product product) {
         return ProductResponseDTO.builder()
             .description(product.getDescription())
-            .barCode(product.getBarCode())
+            .barcode(product.getBarcode())
             .sequenceCode(product.getSequenceCode())
             .priceInstants(product
                 .getPrices()
