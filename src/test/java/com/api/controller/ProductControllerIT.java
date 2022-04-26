@@ -71,4 +71,19 @@ public class ProductControllerIT {
             .andExpect(jsonPath("$[*].priceInstants[3]", hasSize(1)))
             .andExpect(jsonPath("$[*].description", contains("ALCOOL HIG AZULIM 50", "OLEO MARIA", "CHA CAMOMILA", "PAO BAUDUC 400G INTE")));
     }
+
+    @Test
+    void when_GET_an_existent_barcode_should_response_a_product_with_200_getByBarcode() throws Exception {
+        final String existentBarcode = "7891098010575";
+
+        mockMvc.perform(get(DEFAULT_URL+"/"+existentBarcode).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.description").value("CHA CAMOMILA"))
+            .andExpect(jsonPath("$.priceInstants").isArray())
+            .andExpect(jsonPath("$.priceInstants", hasSize(2)))
+            .andExpect(jsonPath("$.priceInstants[*].price", contains(6.49, 1.49)))
+            .andExpect(jsonPath("$.barcode").value(existentBarcode))
+            .andExpect(jsonPath("$.sequenceCode").value(9785));
+    }
 }
