@@ -21,7 +21,7 @@ public class ProductControllerIT {
     @Autowired private ObjectMapper objectMapper;
 
     @Test
-    void given_an_existing_bar_code_should_create_a_product_with_200_create() throws Exception {
+    void when_POST_existing_bar_code_should_create_a_product_with_200_create() throws Exception {
         final String existentBarCodeJson = "{\"eanCode\":\"7897534852624\"}";
 
         mockMvc.perform(post("/api/products")
@@ -40,7 +40,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    void given_a_non_existing_bar_code_should_response_404_create() throws Exception {
+    void when_POST_a_non_existing_bar_code_should_response_404_create() throws Exception {
         final String nonExistentBarCodeJson = "{\"eanCode\":\"5897534852624\"}";
 
         mockMvc.perform(post("/api/products")
@@ -57,7 +57,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    void if_there_are_products_should_return_them_with_200_getAll() throws Exception {
+    void when_GET_should_response_all_products_with_200_getAll() throws Exception {
         mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
