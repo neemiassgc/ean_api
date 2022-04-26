@@ -55,4 +55,18 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.reasons[0]").value("Product not found"))
         .andExpect(jsonPath("$.status").value("NOT_FOUND"));
     }
+
+    @Test
+    void if_there_are_products_should_return_them_with_200_getAll() throws Exception {
+        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$", hasSize(4)))
+            .andExpect(jsonPath("$[*].priceInstants[0]", hasSize(4)))
+            .andExpect(jsonPath("$[*].priceInstants[1]", hasSize(3)))
+            .andExpect(jsonPath("$[*].priceInstants[2]", hasSize(2)))
+            .andExpect(jsonPath("$[*].priceInstants[3]", hasSize(1)))
+            .andExpect(jsonPath("$[*].description", contains("ALCOOL HIG AZULIM 50", "OLEO MARIA", "CHA CAMOMILA", "PAO BAUDUC 400G INTE")));
+    }
 }
