@@ -35,9 +35,9 @@ public class ProductController {
         return domainMapper.mapToDtoList(productService.findAll());
     }
 
-    @GetMapping(path = "/products/{eanCode}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO getByEanCode(@PathVariable("eanCode") String eanCode) {
-        final Product fetchedProduct = productService.findByEanCode(eanCode);
+    @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ProductResponseDTO getByBarcode(@PathVariable("barcode") String barcode) {
+        final Product fetchedProduct = productService.findByEanCode(barcode);
         return domainMapper.mapToDto(fetchedProduct);
     }
 
