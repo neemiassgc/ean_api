@@ -19,12 +19,14 @@ public class ProductControllerIT {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    
+    private static final String DEFAULT_URL = "/api/products";
 
     @Test
     void when_POST_existing_bar_code_should_create_a_product_with_200_create() throws Exception {
         final String existentBarCodeJson = "{\"eanCode\":\"7897534852624\"}";
 
-        mockMvc.perform(post("/api/products")
+        mockMvc.perform(post(DEFAULT_URL)
             .contentType(MediaType.APPLICATION_JSON)
             .characterEncoding("UTF-8")
             .content(existentBarCodeJson)
@@ -43,7 +45,7 @@ public class ProductControllerIT {
     void when_POST_a_non_existing_bar_code_should_response_404_create() throws Exception {
         final String nonExistentBarCodeJson = "{\"eanCode\":\"5897534852624\"}";
 
-        mockMvc.perform(post("/api/products")
+        mockMvc.perform(post(DEFAULT_URL)
             .contentType(MediaType.APPLICATION_JSON)
             .characterEncoding("UTF-8")
             .content(nonExistentBarCodeJson)
@@ -58,7 +60,7 @@ public class ProductControllerIT {
 
     @Test
     void when_GET_should_response_all_products_with_200_getAll() throws Exception {
-        mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(DEFAULT_URL).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
