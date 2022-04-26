@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Table(
     name = "products",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_ean", columnNames = "ean_code"),
+        @UniqueConstraint(name = "uk_barcode", columnNames = "barcode"),
         @UniqueConstraint(name = "uk_sequence_code", columnNames = "sequence_code")
     }
 )
@@ -34,7 +34,7 @@ public class Product {
     @OrderBy("instant DESC")
     private List<Price> prices = new Vector<>();
 
-    @Column(name = "bar_code", nullable = false, length = 13)
+    @Column(name = "barcode", nullable = false, length = 13)
     private String barCode;
 
     @Column(name = "sequence_code", nullable = false)

@@ -1,4 +1,4 @@
-INSERT INTO products (id, description, ean_code, sequence_code) VALUES
+INSERT INTO products (id, description, barcode, sequence_code) VALUES
 ('7e49cbbf-0d4b-4a67-b108-346bef1c961f', 'ALCOOL HIG AZULIM 50', '7897534852624', 137513),
 ('3f30dc5c-5ce1-4556-a648-de8e55b0f6be', 'OLEO MARIA', '7896036093085', 1184),
 ('f5a3feed-b3f0-4253-99f9-129049856c4f', 'CHA CAMOMILA', '7891098010575', 9785),
