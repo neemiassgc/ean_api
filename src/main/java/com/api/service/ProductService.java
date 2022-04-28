@@ -46,4 +46,8 @@ public class ProductService {
     public List<Product> findAll() {
         return productRepository.findAll();
     }
+
+    public List<Product> saveAll(@NonNull final List<Product> products) {
+        return productRepository.saveAllAndFlush(products);
+    }
 }
