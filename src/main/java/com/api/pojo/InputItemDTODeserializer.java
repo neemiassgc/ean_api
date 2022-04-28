@@ -41,7 +41,7 @@ public final class InputItemDTODeserializer extends StdDeserializer<InputItemDTO
             .description(description)
             .sequence(sequence)
             .currentPrice(currentPriceValue)
-            .eanCode(eanCodeValue)
+            .barcode(eanCodeValue)
             .build();
     }
 }

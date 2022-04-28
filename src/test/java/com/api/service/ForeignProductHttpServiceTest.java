@@ -158,7 +158,7 @@ public class ForeignProductHttpServiceTest {
 
         final Supplier<InputItemDTO> inputItemDTOSupplier = () -> InputItemDTO.builder()
             .description("description")
-            .eanCode(existingBarCode)
+            .barcode(existingBarCode)
             .currentPrice(16.4)
             .sequence(123456)
             .build();
@@ -231,7 +231,7 @@ public class ForeignProductHttpServiceTest {
         final Supplier<InputItemDTO> inputItemDTOSupplier = () ->
             InputItemDTO.builder()
                 .description("description")
-                .eanCode("123456789101")
+                .barcode("123456789101")
                 .currentPrice(16.4)
                 .sequence(123456)
                 .build();

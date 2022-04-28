@@ -17,7 +17,7 @@ public class DomainMapper {
         final Price price = new Price();
         product.setDescription(inputItemDTO.getDescription());
         product.setSequenceCode(inputItemDTO.getSequence());
-        product.setBarcode(inputItemDTO.getEanCode());
+        product.setBarcode(inputItemDTO.getBarcode());
         price.setPrice(inputItemDTO.getCurrentPrice());
         product.addPrice(price);
         return product;

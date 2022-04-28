@@ -15,5 +15,5 @@ public final class InputItemDTO {
     private final double currentPrice;
     private final String description;
     private final int sequence;
-    private final String eanCode;
+    private final String barcode;
 }

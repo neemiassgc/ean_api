@@ -44,63 +44,63 @@ class ProductServiceTest {
     }
 
     @Test
-    void should_return_a_product_from_db_if_it_exists_in_the_database_saveByEanCode() {
+    void should_return_a_product_from_db_if_it_exists_in_the_database_saveByBarcode() {
         //given
-        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
+        given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.of(getDefaultProduct()));
 
         //when
-        final Product actualProduct = productServiceUnderTest.saveByEanCode("1234567890123");
+        final Product actualProduct = productServiceUnderTest.saveByBarcode("1234567890123");
 
         //then
         assertThat(actualProduct).isNotNull();
 
-        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
-        verify(productRepositoryMock, only()).findByEanCode(anyString());
+        verify(productRepositoryMock, times(1)).findByBarcode(anyString());
+        verify(productRepositoryMock, only()).findByBarcode(anyString());
         verify(foreignProductHttpServiceMock, never()).fetchByEanCode(anyString());
         verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
     }
 
     @Test
-    void should_return_a_product_from_external_api_if_it_does_not_exist_in_the_db_saveByEanCode() {
+    void should_return_a_product_from_external_api_if_it_does_not_exist_in_the_db_saveByBarcode() {
         //given
         final InputItemDTO inputItemDTO = InputItemDTO.builder()
             .description("Default Product Description")
-            .eanCode("1234567890123")
+            .barcode("1234567890123")
             .currentPrice(10.0)
             .sequence(417304)
             .build();
 
 
-        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+        given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
         given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(inputItemDTO));
         given(domainMapperMock.mapToProduct(any(InputItemDTO.class))).willReturn(new Product());
 
         //when
-        final Product actualProduct = productServiceUnderTest.saveByEanCode("1234567890123");
+        final Product actualProduct = productServiceUnderTest.saveByBarcode("1234567890123");
 
         //then
         assertThat(actualProduct).isNotNull();
 
-        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
+        verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
         verify(domainMapperMock, times(1)).mapToProduct(any(InputItemDTO.class));
     }
 
     @Test
-    void should_throw_an_exception_if_product_does_not_exist_in_the_db_or_external_api_saveByEanCode() {
+    void should_throw_an_exception_if_product_does_not_exist_in_the_db_or_external_api_saveByBarcode() {
         //given
-        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+        given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
         given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.empty());
 
         //when
-        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.saveByEanCode("1234567890123"));
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.saveByBarcode("1234567890123"));
 
         //then
         assertThat(actualException).isNotNull();
         assertThat(actualException).isInstanceOf(ResponseStatusException.class);
         assertThat(((ResponseStatusException) actualException).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
 
-        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
+        verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
         verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
     }
@@ -137,31 +137,31 @@ class ProductServiceTest {
     }
 
     @Test
-    void given_an_existent_bar_code_then_should_return_a_product_findByEanCode() {
+    void given_an_existent_bar_code_then_should_return_a_product_findByBarcode() {
         final String barCode = "1234567890123";
 
         //given
-        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.of(getDefaultProduct()));
+        given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.of(getDefaultProduct()));
 
         //when
-        final Product actualProduct = productServiceUnderTest.findByEanCode(barCode);
+        final Product actualProduct = productServiceUnderTest.findByBarcode(barCode);
 
         //then
         assertThat(actualProduct).isNotNull();
 
-        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
-        verify(productRepositoryMock, only()).findByEanCode(anyString());
+        verify(productRepositoryMock, times(1)).findByBarcode(anyString());
+        verify(productRepositoryMock, only()).findByBarcode(anyString());
     }
 
     @Test
-    void given_a_non_existent_bar_code_then_should_throw_an_exception_findByEanCode() {
+    void given_a_non_existent_bar_code_then_should_throw_an_exception_findByBarcode() {
         final String barCode = "1234567890123";
 
         //given
-        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+        given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
 
         //when
-        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByEanCode(barCode));
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByBarcode(barCode));
 
         //then
         assertThat(actualException).satisfies(throwable -> {
@@ -170,17 +170,17 @@ class ProductServiceTest {
             assertThat(((ResponseStatusException) throwable).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
         });
 
-        verify(productRepositoryMock, times(1)).findByEanCode(anyString());
-        verify(productRepositoryMock, only()).findByEanCode(anyString());
+        verify(productRepositoryMock, times(1)).findByBarcode(anyString());
+        verify(productRepositoryMock, only()).findByBarcode(anyString());
     }
 
     @Test
-    void given_a_null_bar_code_then_should_throw_an_exception_findByEanCode() {
+    void given_a_null_bar_code_then_should_throw_an_exception_findByBarcode() {
         //given
-        given(productRepositoryMock.findByEanCode(anyString())).willReturn(Optional.empty());
+        given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
 
         //when
-        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByEanCode(null));
+        final Throwable actualException = catchThrowable(() -> productServiceUnderTest.findByBarcode(null));
 
         //then
         assertThat(actualException).satisfies(throwable -> {
@@ -188,7 +188,7 @@ class ProductServiceTest {
             assertThat(throwable).isInstanceOf(NullPointerException.class);
         });
 
-        verify(productRepositoryMock, never()).findByEanCode(anyString());
+        verify(productRepositoryMock, never()).findByBarcode(anyString());
     }
 
     @Test

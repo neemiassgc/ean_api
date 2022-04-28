@@ -57,7 +57,7 @@ class ProductControllerTest {
 
     @Test
     void when_POST_an_existent_bar_code_then_response_200_create() throws Exception {
-        given(this.productServiceMock.saveByEanCode(anyString())).willReturn(null);
+        given(this.productServiceMock.saveByBarcode(anyString())).willReturn(null);
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
         final String existentBarCodeJson = "{\"eanCode\":\"1234567890123\"}";
 
@@ -76,13 +76,13 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.eanCode").value("1234567890123"))
         .andExpect(jsonPath("$.sequenceCode").value(12345));
 
-        verify(this.productServiceMock, times(1)).saveByEanCode(anyString());
+        verify(this.productServiceMock, times(1)).saveByBarcode(anyString());
         verify(this.domainMapperMock, times(1)).mapToDto(isNull());
     }
 
     @Test
     void when_POST_a_non_existent_bar_code_then_response_404_create() throws Exception {
-        given(this.productServiceMock.saveByEanCode(anyString())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        given(this.productServiceMock.saveByBarcode(anyString())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(null);
         final String nonExistentBarCodeJson = "{\"eanCode\":\"1234567890123\"}";
 
@@ -104,7 +104,7 @@ class ProductControllerTest {
         assertThat((ResponseStatusException)mvcResult.getResolvedException()).extracting("reason").isEqualTo("Product not found");
         assertThat((ResponseStatusException)mvcResult.getResolvedException()).extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
 
-        verify(this.productServiceMock, times(1)).saveByEanCode(anyString());
+        verify(this.productServiceMock, times(1)).saveByBarcode(anyString());
         verify(this.domainMapperMock, never()).mapToDto(isNull());
     }
 
@@ -151,7 +151,7 @@ class ProductControllerTest {
     void given_an_existent_bar_code_then_response_a_product_with_200_getByEanCode() throws Exception {
         final String existentBarCode = "1234567890123";
 
-        given(this.productServiceMock.findByEanCode(eq(existentBarCode))).willReturn(null);
+        given(this.productServiceMock.findByBarcode(eq(existentBarCode))).willReturn(null);
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
         mockMvc.perform(get("/api/products/"+existentBarCode).accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
@@ -164,7 +164,7 @@ class ProductControllerTest {
             .andExpect(jsonPath("$.eanCode").value(existentBarCode))
             .andExpect(jsonPath("$.sequenceCode").value(12345));
 
-        verify(this.productServiceMock, times(1)).findByEanCode(eq(existentBarCode));
+        verify(this.productServiceMock, times(1)).findByBarcode(eq(existentBarCode));
         verify(this.domainMapperMock, times(1)).mapToDto(isNull());
     }
 
@@ -172,7 +172,7 @@ class ProductControllerTest {
     void given_a_non_existent_bar_code_then_response_400_getByEanCode() throws Exception {
         final String nonExistentBarCode = "1234567890123";
 
-        given(this.productServiceMock.findByEanCode(eq(nonExistentBarCode))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        given(this.productServiceMock.findByBarcode(eq(nonExistentBarCode))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
         given(this.domainMapperMock.mapToDto(isNull())).willReturn(this.getANewInstanceOfResponseDTO());
 
         final MvcResult mvcResult = mockMvc.perform(
@@ -196,9 +196,9 @@ class ProductControllerTest {
                 assertThat(exception.getReason()).isEqualTo("Product not found");
             });
 
-        verify(this.productServiceMock, times(1)).findByEanCode(eq(nonExistentBarCode));
+        verify(this.productServiceMock, times(1)).findByBarcode(eq(nonExistentBarCode));
         verify(this.domainMapperMock, never()).mapToDto(isNull());
-        verify(this.productServiceMock, only()).findByEanCode(eq(nonExistentBarCode));
+        verify(this.productServiceMock, only()).findByBarcode(eq(nonExistentBarCode));
 
     }
 }
