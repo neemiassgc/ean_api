@@ -31,4 +31,17 @@ class ForeignProductHttpServiceIT {
         assertThat(actualResult).get().extracting("eanCode").isEqualTo(existingBarcode);
         assertThat(actualResult).get().extracting("sequence").isEqualTo(134262);
     }
+
+    @Test
+    void given_an_non_existing_barcode_then_return_an_empty_optional() {
+        // Give
+        String nonExistingBarcode = "7891962057621";
+
+        // When
+        final Optional<InputItemDTO> actualResult = foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingBarcode);
+
+        // Then
+        assertThat(actualResult).isNotNull();
+        assertThat(actualResult).isEmpty();
+    }
 }
