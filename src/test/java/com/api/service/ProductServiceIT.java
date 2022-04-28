@@ -21,7 +21,7 @@ public class ProductServiceIT {
     private static final String BARCODE_FOR_DB = "7896036093085";
     private static final String BARCODE_FOR_INTEGRATION_API = "7898215151784";
     private static final String NON_EXISTING_BARCODE = "7898215151785";
-
+    
     @Test
     void should_return_a_product_from_the_database_saveByBarcode() {
         final Product actualProduct = productService.saveByBarcode(BARCODE_FOR_DB);
