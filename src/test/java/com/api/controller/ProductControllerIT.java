@@ -86,4 +86,17 @@ public class ProductControllerIT {
             .andExpect(jsonPath("$.barcode").value(existentBarcode))
             .andExpect(jsonPath("$.sequenceCode").value(9785));
     }
+
+    @Test
+    void when_GET_a_non_existent_barcode_should_response_404_getByBarcode() throws Exception {
+        final String nonExistentBarcode = "7891098010576";
+
+        mockMvc.perform(get(DEFAULT_URL+"/"+nonExistentBarcode).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.reasons").isArray())
+            .andExpect(jsonPath("$.reasons", hasSize(1)))
+            .andExpect(jsonPath("$.reasons[0]").value("Product not found"))
+            .andExpect(jsonPath("$.status").value("NOT_FOUND"));
+    }
 }
