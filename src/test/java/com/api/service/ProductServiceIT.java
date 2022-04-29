@@ -98,4 +98,17 @@ public class ProductServiceIT {
         assertThat(actualProduct.getPrices()).extracting("price").containsExactly(10.9, 8.75);
         assertThat(actualCount).isEqualTo(PRODUCT_ACTUAL_COUNT + 1); // 5 expected products
     }
+
+    @Test
+    void should_return_a_product_from_db_findByBarcode() {
+        final Product fetchedActualProduct = productService.findByBarcode(BARCODE_FOR_DB);
+
+        assertThat(fetchedActualProduct).isNotNull();
+        assertThat(fetchedActualProduct).extracting("barcode").isEqualTo(BARCODE_FOR_DB);
+        assertThat(fetchedActualProduct).extracting("description").isEqualTo("OLEO MARIA");
+        assertThat(fetchedActualProduct).extracting("sequenceCode").isEqualTo(1184);
+        assertThat(fetchedActualProduct).extracting("id").isEqualTo(UUID.fromString("3f30dc5c-5ce1-4556-a648-de8e55b0f6be"));
+        assertThat(fetchedActualProduct.getPrices()).hasSize(3);
+        assertThat(fetchedActualProduct.getPrices()).extracting("price").containsExactly(3.5, 2.5, 5.49);
+    }
 }
