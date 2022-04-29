@@ -111,4 +111,16 @@ public class ProductServiceIT {
         assertThat(fetchedActualProduct.getPrices()).hasSize(3);
         assertThat(fetchedActualProduct.getPrices()).extracting("price").containsExactly(3.5, 2.5, 5.49);
     }
+
+    @Test
+    void should_throw_an_exception_when_barcode_is_not_found_findByBarcode() {
+        final Throwable actualThrowable = catchThrowable(() -> productService.findByBarcode(NON_EXISTING_BARCODE));
+
+        assertThat(actualThrowable).isNotNull();
+        assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+        assertThat(Objects.castIfBelongsToType(actualThrowable, ResponseStatusException.class)).satisfies(throwable -> {
+           assertThat(throwable.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+           assertThat(throwable.getReason()).isEqualTo("Product not found");
+        });
+    }
 }
