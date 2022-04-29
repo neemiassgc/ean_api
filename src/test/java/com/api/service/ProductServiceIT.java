@@ -132,4 +132,27 @@ public class ProductServiceIT {
         assertThat(fetchedActualProducts).hasSize((int) PRODUCT_ACTUAL_COUNT);
         assertThat(fetchedActualProducts).allSatisfy(product -> assertThat(product).isNotNull());
     }
+
+    @Test
+    void should_save_all_the_products_saveAll() {
+        // given
+        final List<Product> productsToSave = List.of(
+            Product.builder()
+                .description("Testing product").barcode("1234567890123")
+                .sequenceCode(12345).prices(new Price[] {new Price(8.34)}).build(),
+            Product.builder().description("Testing product").barcode("1234567890124")
+                .sequenceCode(12346).prices(new Price[] {new Price(7.12)}).build(),
+            Product.builder().description("Testing product").barcode("1234567890125")
+                .sequenceCode(12347).prices(new Price[] {new Price(5.6)}).build()
+        );
+
+        // when
+        final List<Product> actualProducts = productService.saveAll(productsToSave);
+        final long actualCount = productRepository.count();
+
+        // then
+        assertThat(actualProducts).isNotNull();
+        assertThat(actualProducts).hasSize(3);
+        assertThat(actualCount).isEqualTo(PRODUCT_ACTUAL_COUNT + 3); // 7 expected products
+    }
 }
