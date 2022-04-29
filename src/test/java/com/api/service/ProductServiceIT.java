@@ -34,4 +34,17 @@ public class ProductServiceIT {
         assertThat(actualProduct.getPrices()).hasSize(3);
         assertThat(actualProduct.getPrices()).extracting("price").containsExactly(3.5, 2.5, 5.49);
     }
+
+    @Test
+    void should_fetch_a_product_from_the_external_api_save_it_in_the_db_and_return_it_saveByBarcode() {
+        final Product actualProduct = productService.saveByBarcode(BARCODE_FOR_INTEGRATION_API);
+        final long actualCount = productRepository.count();
+
+        assertThat(actualProduct).isNotNull();
+        assertThat(actualProduct).extracting("barcode").isEqualTo(BARCODE_FOR_INTEGRATION_API);
+        assertThat(actualProduct).extracting("description").isEqualTo("CR LEITE PIRACANJUBA");
+        assertThat(actualProduct).extracting("sequenceCode").isEqualTo(109727);
+        assertThat(actualProduct.getPrices()).hasSize(1);
+        assertThat(actualCount).isEqualTo(PRODUCT_ACTUAL_COUNT + 1); // 5 expected products
+    }
 }
