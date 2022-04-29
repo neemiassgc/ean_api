@@ -1,6 +1,7 @@
 package com.api.job;
 
 import com.api.entity.Price;
+import com.api.entity.Product;
 import com.api.service.ProductExternalService;
 import com.api.service.ProductService;
 import lombok.NonNull;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -22,15 +24,20 @@ public class ScanJob extends QuartzJobBean {
     @Override
     protected void executeInternal(@NonNull JobExecutionContext context) {
 
-        productService.findAll().forEach(dbProduct -> {
-            final String dbProductEanCode = dbProduct.getBarcode();
-            productExternalService.fetchByEanCode(dbProductEanCode).ifPresent(externalProduct -> {
-                final double externalProductPrice = externalProduct.getCurrentPrice();
-                if (!Objects.equals(dbProduct.getPrices().get(0).getPrice(), externalProductPrice)) {
-                    dbProduct.addPrice(new Price(externalProductPrice));
-                    this.productService.save(dbProduct);
-                }
+        final List<Product> productsToScan = productService.findAll();
+
+        productsToScan.forEach(product -> {
+            final String productBarcode = product.getBarcode();
+
+            productExternalService.fetchByEanCode(productBarcode).ifPresent(inputItem -> {
+
+                final Double currentPrice = inputItem.getCurrentPrice();
+                final Double lastPrice = product.getPrices().get(0).getPrice();
+
+                if (!Objects.equals(currentPrice, lastPrice)) product.addPrice(new Price(currentPrice));
             });
         });
+
+        productService.saveAll(productsToScan);
     }
 }
