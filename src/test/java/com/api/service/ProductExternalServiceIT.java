@@ -12,9 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ForeignProductHttpServiceIT {
+class ProductExternalServiceIT {
 
-    @Autowired private ForeignProductHttpService foreignProductHttpServiceUnderTest;
+    @Autowired private ProductExternalService productExternalServiceUnderTest;
 
     @Test
     void given_an_existing_barcode_then_return_a_dto() {
@@ -22,7 +22,7 @@ class ForeignProductHttpServiceIT {
         String existingBarcode = "7891962057620";
 
         // When
-        final Optional<InputItemDTO> actualResult = foreignProductHttpServiceUnderTest.fetchByEanCode(existingBarcode);
+        final Optional<InputItemDTO> actualResult = productExternalServiceUnderTest.fetchByEanCode(existingBarcode);
 
         // Then
         assertThat(actualResult).isNotNull();
@@ -38,7 +38,7 @@ class ForeignProductHttpServiceIT {
         String nonExistingBarcode = "7891962057621";
 
         // When
-        final Optional<InputItemDTO> actualResult = foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingBarcode);
+        final Optional<InputItemDTO> actualResult = productExternalServiceUnderTest.fetchByEanCode(nonExistingBarcode);
 
         // Then
         assertThat(actualResult).isNotNull();

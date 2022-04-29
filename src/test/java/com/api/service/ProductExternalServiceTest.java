@@ -28,11 +28,11 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.*;
 
 @SuppressWarnings("unchecked")
-public class ForeignProductHttpServiceTest {
+public class ProductExternalServiceTest {
 
     private RestTemplate restTemplateMock;
     private ObjectMapper objectMapperMock;
-    private ForeignProductHttpService foreignProductHttpServiceUnderTest;
+    private ProductExternalService productExternalServiceUnderTest;
 
     @BeforeEach
     void setUp() {
@@ -44,7 +44,7 @@ public class ForeignProductHttpServiceTest {
         given(restTemplateBuilderMock.build()).willReturn(this.restTemplateMock);
 
         this.objectMapperMock = mock(ObjectMapper.class);
-        this.foreignProductHttpServiceUnderTest = new ForeignProductHttpService(restTemplateBuilderMock, this.objectMapperMock);
+        this.productExternalServiceUnderTest = new ProductExternalService(restTemplateBuilderMock, this.objectMapperMock);
     }
 
     private void getASessionInstanceGenericStub() {
@@ -78,7 +78,7 @@ public class ForeignProductHttpServiceTest {
         this.getASessionInstanceGenericStub();
 
         // when
-        final SessionInstance actualSessionInstance = this.foreignProductHttpServiceUnderTest.getASessionInstance();
+        final SessionInstance actualSessionInstance = this.productExternalServiceUnderTest.getASessionInstance();
 
         // then
         assertThat(actualSessionInstance).isNotNull();
@@ -97,7 +97,7 @@ public class ForeignProductHttpServiceTest {
         )).willReturn(null);
 
         // when
-        final Throwable actualThrowable = catchThrowable(() -> this.foreignProductHttpServiceUnderTest.getASessionInstance());
+        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceUnderTest.getASessionInstance());
 
         // then
         assertThat(actualThrowable).isInstanceOf(IllegalStateException.class);
@@ -116,7 +116,7 @@ public class ForeignProductHttpServiceTest {
         )).willReturn(Jsoup.parse("<input id=\"pInstance\" value=\"54321\"/><input id=\"pPageSubmissionId\" value=\"898900\"/>"));
 
         // when
-        final Throwable actualThrowable = catchThrowable(() -> this.foreignProductHttpServiceUnderTest.getASessionInstance());
+        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceUnderTest.getASessionInstance());
 
         // then
         assertThat(actualThrowable).isNotNull();
@@ -140,7 +140,7 @@ public class ForeignProductHttpServiceTest {
         )).willThrow(new IllegalStateException("Ajax identifier not found"));
 
         // when
-        final Throwable actualThrowable = catchThrowable(() -> this.foreignProductHttpServiceUnderTest.getASessionInstance());
+        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceUnderTest.getASessionInstance());
 
         // then
         assertThat(actualThrowable).isNotNull();
@@ -180,7 +180,7 @@ public class ForeignProductHttpServiceTest {
 
         // when
         final Optional<InputItemDTO> actualDTO =
-            this.foreignProductHttpServiceUnderTest.fetchByEanCode(existingBarCode);
+            this.productExternalServiceUnderTest.fetchByEanCode(existingBarCode);
 
         // then
         assertThat(actualDTO).as("Optional cannot be null").isNotNull();
@@ -214,7 +214,7 @@ public class ForeignProductHttpServiceTest {
         );
 
         // when
-        final Optional<InputItemDTO> actualDTO = this.foreignProductHttpServiceUnderTest.fetchByEanCode(nonExistingBarCode);
+        final Optional<InputItemDTO> actualDTO = this.productExternalServiceUnderTest.fetchByEanCode(nonExistingBarCode);
 
         // then
         assertThat(actualDTO).as("Optional cannot be null").isNotNull();
@@ -256,7 +256,7 @@ public class ForeignProductHttpServiceTest {
 
         //when
         final Optional<InputItemDTO> actualDTO =
-            this.foreignProductHttpServiceUnderTest.fetchByEanCode("134324134324");
+            this.productExternalServiceUnderTest.fetchByEanCode("134324134324");
 
         //then
 

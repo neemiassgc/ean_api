@@ -1,7 +1,7 @@
 package com.api.job;
 
 import com.api.entity.Price;
-import com.api.service.ForeignProductHttpService;
+import com.api.service.ProductExternalService;
 import com.api.service.ProductService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.Objects;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ScanJob extends QuartzJobBean {
 
-    private final ForeignProductHttpService foreignProductHttpService;
+    private final ProductExternalService productExternalService;
     private final ProductService productService;
 
     @Override
@@ -24,7 +24,7 @@ public class ScanJob extends QuartzJobBean {
 
         productService.findAll().forEach(dbProduct -> {
             final String dbProductEanCode = dbProduct.getBarcode();
-            foreignProductHttpService.fetchByEanCode(dbProductEanCode).ifPresent(externalProduct -> {
+            productExternalService.fetchByEanCode(dbProductEanCode).ifPresent(externalProduct -> {
                 final double externalProductPrice = externalProduct.getCurrentPrice();
                 if (!Objects.equals(dbProduct.getPrices().get(0).getPrice(), externalProductPrice)) {
                     dbProduct.addPrice(new Price(externalProductPrice));

@@ -17,13 +17,13 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository  productRepository;
-    private final ForeignProductHttpService foreignProductHttpService;
+    private final ProductExternalService productExternalService;
     private final DomainMapper domainMapper;
 
     public Product saveByBarcode(@NonNull final String barcode) {
         return productRepository.findByBarcode(barcode)
             .or(() -> {
-                final Optional<Product> fetchedProduct = this.foreignProductHttpService
+                final Optional<Product> fetchedProduct = this.productExternalService
                     .fetchByEanCode(barcode)
                     .map(this.domainMapper::mapToProduct);
 

@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class ForeignProductHttpService {
+public class ProductExternalService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -37,7 +37,7 @@ public class ForeignProductHttpService {
     private SessionInstance sessionInstance;
 
     @Autowired
-    public ForeignProductHttpService(final RestTemplateBuilder restTemplateBuilder, final ObjectMapper objectMapper) {
+    public ProductExternalService(final RestTemplateBuilder restTemplateBuilder, final ObjectMapper objectMapper) {
         final Supplier<RestTemplate> restTemplateSupplier = () -> {
             final CloseableHttpClient httpClient =
                 HttpClientBuilder.create()

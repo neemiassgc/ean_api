@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.*;
 class ProductServiceTest {
 
     private ProductService productServiceUnderTest;
-    private ForeignProductHttpService foreignProductHttpServiceMock;
+    private ProductExternalService productExternalServiceMock;
     private DomainMapper domainMapperMock;
     private ProductRepository productRepositoryMock;
 
@@ -37,10 +37,10 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.foreignProductHttpServiceMock = mock(ForeignProductHttpService.class);
+        this.productExternalServiceMock = mock(ProductExternalService.class);
         this.domainMapperMock = mock(DomainMapper.class);
         this.productRepositoryMock = mock(ProductRepository.class);
-        this.productServiceUnderTest = new ProductService(this.productRepositoryMock, this.foreignProductHttpServiceMock, this.domainMapperMock);
+        this.productServiceUnderTest = new ProductService(this.productRepositoryMock, this.productExternalServiceMock, this.domainMapperMock);
     }
 
     @Test
@@ -56,7 +56,7 @@ class ProductServiceTest {
 
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(productRepositoryMock, only()).findByBarcode(anyString());
-        verify(foreignProductHttpServiceMock, never()).fetchByEanCode(anyString());
+        verify(productExternalServiceMock, never()).fetchByEanCode(anyString());
         verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
     }
 
@@ -72,7 +72,7 @@ class ProductServiceTest {
 
 
         given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
-        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(inputItemDTO));
+        given(productExternalServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(inputItemDTO));
         given(domainMapperMock.mapToProduct(any(InputItemDTO.class))).willReturn(new Product());
 
         //when
@@ -82,7 +82,7 @@ class ProductServiceTest {
         assertThat(actualProduct).isNotNull();
 
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
-        verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
+        verify(productExternalServiceMock, times(1)).fetchByEanCode(anyString());
         verify(domainMapperMock, times(1)).mapToProduct(any(InputItemDTO.class));
     }
 
@@ -90,7 +90,7 @@ class ProductServiceTest {
     void should_throw_an_exception_if_product_does_not_exist_in_the_db_or_external_api_saveByBarcode() {
         //given
         given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
-        given(foreignProductHttpServiceMock.fetchByEanCode(anyString())).willReturn(Optional.empty());
+        given(productExternalServiceMock.fetchByEanCode(anyString())).willReturn(Optional.empty());
 
         //when
         final Throwable actualException = catchThrowable(() -> productServiceUnderTest.saveByBarcode("1234567890123"));
@@ -101,7 +101,7 @@ class ProductServiceTest {
         assertThat(((ResponseStatusException) actualException).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
 
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
-        verify(foreignProductHttpServiceMock, times(1)).fetchByEanCode(anyString());
+        verify(productExternalServiceMock, times(1)).fetchByEanCode(anyString());
         verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
     }
 
