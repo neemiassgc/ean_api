@@ -30,8 +30,12 @@ public class Price {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices_product"))
     private Product product;
 
-    public Price(final double price) {
-        this(null, price, Instant.now(), null);
+    public Price(final Double price) {
+        this(price, Instant.now());
+    }
+
+    public Price(final Double price, final Instant instant) {
+        this(null, price, instant, null);
     }
 
     @Override
