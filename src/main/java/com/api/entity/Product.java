@@ -1,5 +1,6 @@
 package com.api.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,6 +40,14 @@ public class Product {
 
     @Column(name = "sequence_code", nullable = false)
     private Integer sequenceCode;
+
+    @Builder
+    public Product(final String description, final String barcode, final Integer sequenceCode, final Price... prices) {
+        this.description = description;
+        this.barcode = barcode;
+        this.sequenceCode = sequenceCode;
+        this.addPrice(prices);
+    }
 
     public void addPrice(final Price... prices) {
         for (Price price : prices) {
