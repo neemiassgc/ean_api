@@ -123,4 +123,13 @@ public class ProductServiceIT {
            assertThat(throwable.getReason()).isEqualTo("Product not found");
         });
     }
+
+    @Test
+    void should_return_all_products_from_db_findAll() {
+        final List<Product> fetchedActualProducts = productService.findAll();
+
+        assertThat(fetchedActualProducts).isNotNull();
+        assertThat(fetchedActualProducts).hasSize((int) PRODUCT_ACTUAL_COUNT);
+        assertThat(fetchedActualProducts).allSatisfy(product -> assertThat(product).isNotNull());
+    }
 }
