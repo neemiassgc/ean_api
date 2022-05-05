@@ -3,9 +3,8 @@ package com.api.job;
 import com.api.entity.Product;
 import com.api.service.ProductService;
 import org.junit.jupiter.api.Test;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
+import org.mockito.Mockito;
+import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -14,14 +13,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ScanJobIT {
+public class ScanJobIT {
 
-    @Autowired private Scheduler scheduler;
     @Autowired private ProductService productService;
+    @Autowired private ScanJob scanJob;
 
     @Test
-    void should_add_prices() throws SchedulerException {
-        scheduler.triggerJob(new JobKey("scanJob"));
+    void should_add_prices() {
+        scanJob.execute(Mockito.mock(JobExecutionContext.class));
 
         final List<Product> actualProductList = productService.findAll();
 
