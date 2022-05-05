@@ -73,7 +73,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.priceInstants").isArray())
         .andExpect(jsonPath("$.priceInstants").isNotEmpty())
         .andExpect(jsonPath("$.priceInstants[0].priceValue").value(4.55))
-        .andExpect(jsonPath("$.eanCode").value("1234567890123"))
+        .andExpect(jsonPath("$.barcode").value("1234567890123"))
         .andExpect(jsonPath("$.sequenceCode").value(12345));
 
         verify(this.productServiceMock, times(1)).saveByBarcode(anyString());
@@ -161,7 +161,7 @@ class ProductControllerTest {
             .andExpect(jsonPath("$.priceInstants").isArray())
             .andExpect(jsonPath("$.priceInstants").isNotEmpty())
             .andExpect(jsonPath("$.priceInstants[0].priceValue").value(4.55))
-            .andExpect(jsonPath("$.eanCode").value(existentBarCode))
+            .andExpect(jsonPath("$.barcode").value(existentBarCode))
             .andExpect(jsonPath("$.sequenceCode").value(12345));
 
         verify(this.productServiceMock, times(1)).findByBarcode(eq(existentBarCode));
