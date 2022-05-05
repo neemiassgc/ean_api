@@ -8,10 +8,6 @@ spring:
     # For loading data from data-dev.sql file along with Hibernate schema creation
     defer-datasource-initialization: true
 
-    quartz:
-      job-store-type: memory
-      thead-pool-size: 1
-
   # Disable loading init data only for embedded database
   sql:
     init:

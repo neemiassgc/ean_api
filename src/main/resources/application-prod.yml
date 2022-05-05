@@ -4,7 +4,3 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
-
-    quartz:
-      job-store-type: memory
-      thead-pool-size: 1

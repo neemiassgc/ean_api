@@ -5,7 +5,14 @@ spring:
     password: pass
     driver-class-name: org.postgresql.Driver
 
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    ddl-auto: create-drop
-    show-sql: true
+  quartz:
+    properties:
+      org:
+        quartz:
+          threadPool:
+            threadCount: 1
+
+    job-store-type: memory
+
+  profiles:
+    active: dev
