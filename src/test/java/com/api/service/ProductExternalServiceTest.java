@@ -187,7 +187,7 @@ public class ProductExternalServiceTest {
         assertThat(actualDTO.orElse(null)).as("actualDTO cannot be null").isNotNull();
         assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("description");
         assertThat(actualDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
-        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123456789101");
+        assertThat(actualDTO.get()).extracting("barcode").as("EanCode is not correct").isEqualTo("123456789101");
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
@@ -264,7 +264,7 @@ public class ProductExternalServiceTest {
         assertThat(actualDTO.orElse(null)).as("actualDTO cannot be null").isNotNull();
         assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("description");
         assertThat(actualDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
-        assertThat(actualDTO.get()).extracting("eanCode").as("EanCode is not correct").isEqualTo("123456789101");
+        assertThat(actualDTO.get()).extracting("barcode").as("barcode is not correct").isEqualTo("123456789101");
 
         verify(this.restTemplateMock, times(2)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(2)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
