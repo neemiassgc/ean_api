@@ -28,7 +28,7 @@ class ProductExternalServiceIT {
         assertThat(actualResult).isNotNull();
         assertThat(actualResult).isPresent();
         assertThat(actualResult).get().extracting("description").isEqualTo("PAO BAUDUC 400G INTE");
-        assertThat(actualResult).get().extracting("eanCode").isEqualTo(existingBarcode);
+        assertThat(actualResult).get().extracting("barcode").isEqualTo(existingBarcode);
         assertThat(actualResult).get().extracting("sequence").isEqualTo(134262);
     }
 
