@@ -1,20 +1,24 @@
 package com.api.controller;
 
-import com.api.service.DomainMapper;
 import com.api.dto.BarcodeRequestDTO;
 import com.api.dto.ProductResponseDTO;
 import com.api.entity.Product;
 import com.api.error.ErrorTemplate;
+import com.api.service.DomainMapper;
 import com.api.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -25,7 +29,7 @@ public class ProductController {
     private final DomainMapper domainMapper;
 
     @PostMapping(path = "/products", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO create(@RequestBody BarcodeRequestDTO barcodeRequestDTO) {
+    public ProductResponseDTO create(@RequestBody @Valid BarcodeRequestDTO barcodeRequestDTO) {
         final Product fetchedProduct = productService.saveByBarcode(barcodeRequestDTO.getBarcode());
         return domainMapper.mapToDto(fetchedProduct);
     }
@@ -41,8 +45,20 @@ public class ProductController {
         return domainMapper.mapToDto(fetchedProduct);
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ErrorTemplate handleMethodArgumentNotValid(final MethodArgumentNotValidException mnv) {
+        final List<String> reasons = mnv.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(fe -> "'"+fe.getField()+"' "+fe.getDefaultMessage())
+            .collect(Collectors.toList());
+
+        return new ErrorTemplate(HttpStatus.BAD_REQUEST, reasons);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorTemplate> handleException(final ResponseStatusException rse) {
+    public ResponseEntity<ErrorTemplate> handleResponseStatusException(final ResponseStatusException rse) {
         return ResponseEntity
             .status(rse.getStatus())
             .body(new ErrorTemplate(rse.getStatus(), List.of(Objects.requireNonNullElseGet(rse.getReason(), () -> "No reasons"))));
