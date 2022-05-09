@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
         @UniqueConstraint(name = "uk_sequence_code", columnNames = "sequence_code")
     }
 )
+@NamedEntityGraph(name = "prices_entity_graph", attributeNodes = @NamedAttributeNode("prices")) // It defines which entities need to be fetched in join query
 @Getter
 @Setter
 @NoArgsConstructor
