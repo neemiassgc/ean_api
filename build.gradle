@@ -4,8 +4,8 @@ plugins {
 	id 'java'
 }
 
-group = 'com.xyz.ean'
-version = '0.0.1-SNAPSHOT'
+group = 'com.api'
+version = '1.0.0-saveg-barcode-querier'
 sourceCompatibility = '11'
 
 configurations {
