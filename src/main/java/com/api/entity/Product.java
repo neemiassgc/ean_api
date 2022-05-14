@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
@@ -50,6 +51,10 @@ public class Product {
         this.addPrice(prices);
     }
 
+    public List<Price> getPrices() {
+        return Collections.unmodifiableList(prices);
+    }
+
     public void addPrice(final Price... prices) {
         for (Price price : prices) {
             if (price == null) throw new NullPointerException("Price cannot be null");
@@ -73,7 +78,7 @@ public class Product {
             "Product{id=%s, description=%s, eanCode=%s, sequenceCode=%s, prices=%s}",
             id,
             description,
-                barcode,
+            barcode,
             sequenceCode,
             this.prices.stream().map(price -> price.getPrice().toString()).collect(Collectors.joining(","))
         );
