@@ -1,9 +1,6 @@
 package com.api.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -28,6 +25,7 @@ public class Price {
 
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices_product"))
+    @Setter(AccessLevel.PACKAGE)
     private Product product;
 
     public Price(final Double price) {
