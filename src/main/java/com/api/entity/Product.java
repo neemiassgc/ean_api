@@ -52,6 +52,9 @@ public class Product {
 
     public void addPrice(final Price... prices) {
         for (Price price : prices) {
+            if (price == null) throw new NullPointerException("Price cannot be null");
+            if (price.getProduct() != null) throw new IllegalArgumentException("Price already has a product");
+
             this.prices.add(price);
             price.setProduct(this);
         }
