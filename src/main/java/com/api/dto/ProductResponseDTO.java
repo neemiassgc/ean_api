@@ -33,12 +33,12 @@ public final class ProductResponseDTO {
 
     @Override
     public String toString() {
-        final String template = "ProductResponseDTO{description='%s', prices={%s}, eanCode='%s', sequenceCode='%s'}";
+        final String template = "ProductResponseDTO{description='%s', prices={%s}, barcode='%s', sequenceCode='%s'}";
         return String.format(
             template,
             description,
             priceInstants.stream().map(PriceInstant::toString).collect(Collectors.joining(", ")),
-                barcode,
+            barcode,
             sequenceCode
         );
     }
