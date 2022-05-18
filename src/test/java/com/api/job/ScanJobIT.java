@@ -22,7 +22,7 @@ public class ScanJobIT {
     @Autowired private ScanJob scanJob;
 
     @Test
-    void should_add_prices() {
+    void should_update_the_prices() {
         scanJob.execute(Mockito.mock(JobExecutionContext.class));
 
         final Map<UUID, Product> actualProductMap = productService
