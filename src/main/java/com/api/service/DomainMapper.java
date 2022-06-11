@@ -44,6 +44,8 @@ public class DomainMapper {
     }
 
     public List<ProductResponseDTO> mapToDtoList(final List<Product> products) {
+        Objects.requireNonNull(products, "Products cannot be null");
+
         return products.stream()
             .map(this::mapToDto)
             .collect(Collectors.toList());
