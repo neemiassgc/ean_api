@@ -67,11 +67,11 @@ public class ProductControllerIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$", hasSize(4)))
-            .andExpect(jsonPath("$[*].priceInstants[0]", hasSize(0)))
+            .andExpect(jsonPath("$[*].priceInstants[0]", hasSize(4)))
             .andExpect(jsonPath("$[*].priceInstants[1]", hasSize(3)))
             .andExpect(jsonPath("$[*].priceInstants[2]", hasSize(2)))
             .andExpect(jsonPath("$[*].priceInstants[3]", hasSize(1)))
-            .andExpect(jsonPath("$[*].description", contains("ALCOOL HIG AZULIM 50", "OLEO MARIA", "CHA CAMOMILA", "PAO BAUDUC 400G INTE")));
+            .andExpect(jsonPath("$[*].description", contains("ALCOOL HIG AZULIM 50", "CHA CAMOMILA", "OLEO MARIA", "PAO BAUDUC 400G INTE")));
     }
 
     @Test
