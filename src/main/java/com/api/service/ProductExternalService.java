@@ -90,6 +90,11 @@ public class ProductExternalService {
     }
 
     private String loginRequest(final Map<String, String> resourcesMap) {
+        assert resourcesMap != null;
+        assert resourcesMap.containsKey("instance_id");
+        assert resourcesMap.containsKey("submission_id");
+        assert resourcesMap.containsKey("checksum");
+
         final MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
         requestBody.add("p_flow_id", "171");
         requestBody.add("p_flow_step_id", "101");
@@ -124,6 +129,8 @@ public class ProductExternalService {
     }
 
     public Optional<InputItemDTO> fetchByEanCode(final String barcode) {
+        Objects.requireNonNull(barcode);
+
         final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
         headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
