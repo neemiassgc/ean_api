@@ -28,6 +28,8 @@ public class DomainMapper {
     }
 
     public ProductResponseDTO mapToDto(final Product product) {
+        Objects.requireNonNull(product, "Product cannot be null");
+
         return ProductResponseDTO.builder()
             .description(product.getDescription())
             .barcode(product.getBarcode())
