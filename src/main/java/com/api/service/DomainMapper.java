@@ -4,15 +4,19 @@ import com.api.dto.InputItemDTO;
 import com.api.dto.ProductResponseDTO;
 import com.api.entity.Price;
 import com.api.entity.Product;
+import com.api.pojo.DomainUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class DomainMapper {
 
     public Product mapToProduct(final InputItemDTO inputItemDTO) {
+        Objects.requireNonNull(inputItemDTO, "InputItemDTO cannot be null");
+
         final Product product = new Product();
         final Price price = new Price();
         product.setDescription(inputItemDTO.getDescription());
