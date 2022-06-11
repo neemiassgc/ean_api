@@ -115,7 +115,7 @@ class ProductControllerTest {
             this.getANewInstanceOfResponseDTO(),
             this.getANewInstanceOfResponseDTO()
         );
-        given(this.productServiceMock.findAll()).willReturn(null);
+        given(this.productServiceMock.findAllByOrderByDescriptionAsc()).willReturn(null);
         given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(productResponseDTOList);
 
         mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
@@ -128,13 +128,13 @@ class ProductControllerTest {
             .andExpect(jsonPath("$[0].priceInstants[0].instant").exists())
             .andExpect(jsonPath("$[0].priceInstants[0].priceValue").value(4.55));
 
-        verify(this.productServiceMock, times(1)).findAll();
+        verify(this.productServiceMock, times(1)).findAllByOrderByDescriptionAsc();
         verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
     }
 
     @Test
     void if_there_are_no_products_available_then_response_an_empty_list_with_200_getAll() throws Exception {
-        given(this.productServiceMock.findAll()).willReturn(null);
+        given(this.productServiceMock.findAllByOrderByDescriptionAsc()).willReturn(null);
         given(this.domainMapperMock.mapToDtoList(isNull())).willReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/products").accept(MediaType.APPLICATION_JSON).characterEncoding("UTF-8"))
@@ -143,7 +143,7 @@ class ProductControllerTest {
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(this.productServiceMock, times(1)).findAll();
+        verify(this.productServiceMock, times(1)).findAllByOrderByDescriptionAsc();
         verify(this.domainMapperMock, times(1)).mapToDtoList(isNull());
     }
 

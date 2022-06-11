@@ -24,7 +24,7 @@ public class ScanJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) {
-        final List<Product> productsToScan = productService.findAll();
+        final List<Product> productsToScan = productService.findAllByOrderByDescriptionAsc();
         log.info("ProductService.findAll() invoked; fetched {} products", productsToScan.size());
 
         productsToScan.forEach(product -> {

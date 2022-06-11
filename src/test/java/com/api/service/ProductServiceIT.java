@@ -126,7 +126,7 @@ public class ProductServiceIT {
 
     @Test
     void should_return_all_products_from_db_findAll() {
-        final List<Product> fetchedActualProducts = productService.findAll();
+        final List<Product> fetchedActualProducts = productService.findAllByOrderByDescriptionAsc();
 
         assertThat(fetchedActualProducts).isNotNull();
         assertThat(fetchedActualProducts).hasSize((int) PRODUCT_ACTUAL_COUNT);

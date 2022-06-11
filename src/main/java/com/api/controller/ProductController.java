@@ -36,7 +36,7 @@ public class ProductController {
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ProductResponseDTO> getAll() {
-        return domainMapper.mapToDtoList(productService.findAll());
+        return domainMapper.mapToDtoList(productService.findAllByOrderByDescriptionAsc());
     }
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)

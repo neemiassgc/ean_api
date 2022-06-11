@@ -198,33 +198,33 @@ class ProductServiceTest {
             getDefaultProduct(), getDefaultProduct(), getDefaultProduct(), getDefaultProduct()
         );
 
-        given(productRepositoryMock.findAll()).willReturn(existentProducts);
+        given(productRepositoryMock.findAllByOrderByDescriptionAsc()).willReturn(existentProducts);
 
         //when
-        final List<Product> actualProducts = productServiceUnderTest.findAll();
+        final List<Product> actualProducts = productServiceUnderTest.findAllByOrderByDescriptionAsc();
 
         //then
         assertThat(actualProducts).isNotNull();
         assertThat(actualProducts).hasSize(4);
         assertThat(actualProducts).allSatisfy(product -> assertThat(product).isNotNull());
 
-        verify(productRepositoryMock, times(1)).findAll();
-        verify(productRepositoryMock, only()).findAll();
+        verify(productRepositoryMock, times(1)).findAllByOrderByDescriptionAsc();
+        verify(productRepositoryMock, only()).findAllByOrderByDescriptionAsc();
     }
 
     @Test
     void if_there_are_no_products_in_the_db_then_should_return_an_empty_list_findAll() {
         //given
-        given(productRepositoryMock.findAll()).willReturn(Collections.emptyList());
+        given(productRepositoryMock.findAllByOrderByDescriptionAsc()).willReturn(Collections.emptyList());
 
         //when
-        final List<Product> actualProducts = productServiceUnderTest.findAll();
+        final List<Product> actualProducts = productServiceUnderTest.findAllByOrderByDescriptionAsc();
 
         //then
         assertThat(actualProducts).isNotNull();
         assertThat(actualProducts).isEmpty();
 
-        verify(productRepositoryMock, times(1)).findAll();
-        verify(productRepositoryMock, only()).findAll();
+        verify(productRepositoryMock, times(1)).findAllByOrderByDescriptionAsc();
+        verify(productRepositoryMock, only()).findAllByOrderByDescriptionAsc();
     }
 }

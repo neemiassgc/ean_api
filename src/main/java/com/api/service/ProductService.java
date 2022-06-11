@@ -43,8 +43,8 @@ public class ProductService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public List<Product> findAllByOrderByDescriptionAsc() {
+        return productRepository.findAllByOrderByDescriptionAsc();
     }
 
     public List<Product> saveAll(@NonNull final List<Product> products) {

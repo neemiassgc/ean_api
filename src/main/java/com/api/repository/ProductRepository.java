@@ -15,8 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("SELECT pro, pri FROM #{#entityName} pro JOIN FETCH pro.prices pri WHERE pro.barcode = ?1 ORDER BY pri.instant DESC")
     Optional<Product> findByBarcode(final String barcode);
 
-    @Override
     @NonNull
     @EntityGraph(value = "prices_entity_graph")
-    List<Product> findAll();
+    List<Product> findAllByOrderByDescriptionAsc();
 }

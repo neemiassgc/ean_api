@@ -26,7 +26,7 @@ public class ScanJobIT {
         scanJob.execute(Mockito.mock(JobExecutionContext.class));
 
         final Map<UUID, Product> actualProductMap = productService
-            .findAll()
+            .findAllByOrderByDescriptionAsc()
             .stream()
             .collect(Collectors.toMap(Product::getId, Function.identity()));
 
