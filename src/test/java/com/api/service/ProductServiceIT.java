@@ -52,7 +52,6 @@ public class ProductServiceIT {
         assertThat(actualProduct).extracting("barcode").isEqualTo(BARCODE_FOR_INTEGRATION_API);
         assertThat(actualProduct).extracting("description").isEqualTo("CR LEITE PIRACANJUBA");
         assertThat(actualProduct).extracting("sequenceCode").isEqualTo(109727);
-        assertThat(actualProduct.getPrices()).hasSize(1);
         assertThat(actualCount).isEqualTo(PRODUCT_ACTUAL_COUNT + 1); // 5 expected products
     }
 
