@@ -72,15 +72,10 @@ public class ProductServiceIT {
     @Test
     void should_save_a_new_product_save() {
         // given
-        final Price[] pricesToBind = new Price[] {
-            new Price(10.9, Instant.now()),
-            new Price(8.75, Instant.now().minus(2, ChronoUnit.DAYS)) // 2 days ago
-        };
         final Product productToSave = new Product();
         productToSave.setBarcode("1234567890123");
         productToSave.setDescription("Testing product");
         productToSave.setSequenceCode(12345);
-        productToSave.addPrice(pricesToBind);
 
         // when
         final Product actualProduct = productService.save(productToSave);
@@ -91,8 +86,6 @@ public class ProductServiceIT {
         assertThat(actualProduct).extracting("barcode").isEqualTo("1234567890123");
         assertThat(actualProduct).extracting("description").isEqualTo("Testing product");
         assertThat(actualProduct).extracting("sequenceCode").isEqualTo(12345);
-        assertThat(actualProduct.getPrices()).hasSize(2);
-        assertThat(actualProduct.getPrices()).extracting("price").containsExactly(10.9, 8.75);
         assertThat(actualCount).isEqualTo(PRODUCT_ACTUAL_COUNT + 1); // 5 expected products
     }
 
