@@ -127,11 +127,11 @@ public class ProductServiceIT {
         final List<Product> productsToSave = List.of(
             Product.builder()
                 .description("Testing product").barcode("1234567890123")
-                .sequenceCode(12345).prices(new Price[] {new Price(8.34)}).build(),
+                .sequenceCode(12345).build(),
             Product.builder().description("Testing product").barcode("1234567890124")
-                .sequenceCode(12346).prices(new Price[] {new Price(7.12)}).build(),
+                .sequenceCode(12346).build(),
             Product.builder().description("Testing product").barcode("1234567890125")
-                .sequenceCode(12347).prices(new Price[] {new Price(5.6)}).build()
+                .sequenceCode(12347).build()
         );
 
         // when
