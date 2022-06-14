@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "products_prices")
+@Table(name = "prices")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,8 +24,7 @@ public class Price {
     private Instant instant = Instant.now();
 
     @ManyToOne
-    @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices_product"))
-    @Setter(AccessLevel.PACKAGE)
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices"))
     private Product product;
 
     public Price(final Double price) {
