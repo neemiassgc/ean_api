@@ -1,10 +1,9 @@
 package com.api.service;
 
-import com.api.dto.InputItemDTO;
-import com.api.dto.ProductResponseDTO;
+import com.api.projection.InputItemDTO;
+import com.api.projection.ProductResponseDTO;
 import com.api.entity.Price;
 import com.api.entity.Product;
-import com.api.pojo.DomainUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

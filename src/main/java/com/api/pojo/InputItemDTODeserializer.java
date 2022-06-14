@@ -1,6 +1,6 @@
 package com.api.pojo;
 
-import com.api.dto.InputItemDTO;
+import com.api.projection.InputItemDTO;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

@@ -1,6 +1,6 @@
 package com.api.service;
 
-import com.api.dto.InputItemDTO;
+import com.api.projection.InputItemDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.api.pojo.SessionInstance;

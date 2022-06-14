@@ -1,4 +1,4 @@
-package com.api.dto;
+package com.api.projection;
 
 import com.api.entity.Price;
 import com.fasterxml.jackson.annotation.JsonCreator;

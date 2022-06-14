@@ -1,7 +1,7 @@
 package com.api.controller;
 
-import com.api.dto.BarcodeRequestDTO;
-import com.api.dto.ProductResponseDTO;
+import com.api.projection.BarcodeRequestDTO;
+import com.api.projection.ProductResponseDTO;
 import com.api.entity.Product;
 import com.api.error.ErrorTemplate;
 import com.api.service.DomainMapper;

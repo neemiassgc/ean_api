@@ -1,4 +1,4 @@
-package com.api.dto;
+package com.api.projection;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.api.pojo.InputItemDTODeserializer;

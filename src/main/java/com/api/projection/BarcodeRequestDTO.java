@@ -1,4 +1,4 @@
-package com.api.dto;
+package com.api.projection;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

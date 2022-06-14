@@ -1,7 +1,7 @@
 package com.api.controller;
 
 import com.api.service.DomainMapper;
-import com.api.dto.ProductResponseDTO;
+import com.api.projection.ProductResponseDTO;
 import com.api.service.ProductService;
 import org.assertj.core.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
