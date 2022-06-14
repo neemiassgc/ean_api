@@ -98,8 +98,6 @@ public class ProductServiceIT {
         assertThat(fetchedActualProduct).extracting("description").isEqualTo("OLEO MARIA");
         assertThat(fetchedActualProduct).extracting("sequenceCode").isEqualTo(1184);
         assertThat(fetchedActualProduct).extracting("id").isEqualTo(UUID.fromString("3f30dc5c-5ce1-4556-a648-de8e55b0f6be"));
-        assertThat(fetchedActualProduct.getPrices()).hasSize(3);
-        assertThat(fetchedActualProduct.getPrices()).extracting("price").containsExactly(3.5, 2.5, 5.49);
     }
 
     @Test
