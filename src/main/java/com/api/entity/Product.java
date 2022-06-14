@@ -48,12 +48,11 @@ public class Product {
     @Override
     public String toString() {
         return String.format(
-            "Product{id=%s, description=%s, eanCode=%s, sequenceCode=%s, prices=%s}",
+            "Product{id=%s, description=%s, barcode=%s, sequenceCode=%s}",
             id,
             description,
             barcode,
-            sequenceCode,
-            this.prices.stream().map(price -> price.getPrice().toString()).collect(Collectors.joining(","))
+            sequenceCode
         );
     }
 }
