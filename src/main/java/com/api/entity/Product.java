@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
         @UniqueConstraint(name = "uk_sequence_code", columnNames = "sequence_code")
     }
 )
-@NamedEntityGraph(name = "prices_entity_graph", attributeNodes = @NamedAttributeNode("prices")) // It defines which entities need to be fetched in join query
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,10 +32,6 @@ public class Product {
     @Column(nullable = false)
     private String description;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("instant DESC")
-    private List<Price> prices = new Vector<>();
-
     @Column(name = "barcode", nullable = false, length = 13)
     private String barcode;
 
@@ -44,32 +39,10 @@ public class Product {
     private Integer sequenceCode;
 
     @Builder
-    public Product(final String description, final String barcode, final Integer sequenceCode, final Price... prices) {
+    public Product(final String description, final String barcode, final Integer sequenceCode) {
         this.description = description;
         this.barcode = barcode;
         this.sequenceCode = sequenceCode;
-        this.addPrice(prices);
-    }
-
-    public List<Price> getPrices() {
-        return Collections.unmodifiableList(prices);
-    }
-
-    public void addPrice(final Price... prices) {
-        for (Price price : prices) {
-            if (price == null) throw new NullPointerException("Price cannot be null");
-            if (price.getProduct() != null) throw new IllegalArgumentException("Price already has a product");
-
-            this.prices.add(price);
-            price.setProduct(this);
-        }
-    }
-
-    public void remove(final Price... prices) {
-        for (Price price : prices) {
-            this.prices.remove(price);
-            price.setProduct(null);
-        }
     }
 
     @Override
