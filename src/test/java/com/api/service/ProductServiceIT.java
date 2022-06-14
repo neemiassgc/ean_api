@@ -113,12 +113,14 @@ public class ProductServiceIT {
     }
 
     @Test
-    void should_return_all_products_from_db_findAll() {
+    void should_return_all_products_from_db_ordered_by_description_desc_findAllByOrderByDescriptionAsc() {
         final List<Product> fetchedActualProducts = productService.findAllByOrderByDescriptionAsc();
 
         assertThat(fetchedActualProducts).isNotNull();
         assertThat(fetchedActualProducts).hasSize((int) PRODUCT_ACTUAL_COUNT);
         assertThat(fetchedActualProducts).allSatisfy(product -> assertThat(product).isNotNull());
+        assertThat(fetchedActualProducts).extracting("Description", String.class)
+            .containsExactly("ALCOOL HIG AZULIM 50", "CHA CAMOMILA", "OLEO MARIA", "PAO BAUDUC 400G INTE");
     }
 
     @Test
