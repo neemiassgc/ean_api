@@ -30,7 +30,6 @@ class ProductServiceTest {
         final Product product = new Product();
         product.setBarcode("1234567890123");
         product.setDescription("Default Product Description");
-        product.addPrice(new Price(10.0));
         product.setSequenceCode(417304);
         return product;
     }
@@ -115,8 +114,6 @@ class ProductServiceTest {
 
         //then
         assertThat(actualProduct).isNotNull();
-        assertThat(actualProduct.getPrices()).isNotNull();
-        assertThat(actualProduct.getPrices()).hasSize(1);
 
         verify(productRepositoryMock, times(1)).save(any(Product.class));
     }
