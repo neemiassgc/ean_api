@@ -1,6 +1,5 @@
 package com.api.service;
 
-import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.repository.ProductRepository;
 import org.assertj.core.util.Objects;
@@ -12,10 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
