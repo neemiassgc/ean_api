@@ -1,7 +1,9 @@
 package com.api.service;
 
+import com.api.entity.Price;
 import com.api.projection.InputItemDTO;
 import com.api.entity.Product;
+import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 
 import static org.assertj.core.api.Assertions.*;
@@ -21,6 +23,7 @@ import static org.mockito.BDDMockito.*;
 class ProductServiceTest {
 
     private ProductService productServiceUnderTest;
+    private PriceRepository priceRepositoryMock;
     private ProductExternalService productExternalServiceMock;
     private DomainMapper domainMapperMock;
     private ProductRepository productRepositoryMock;
@@ -38,7 +41,14 @@ class ProductServiceTest {
         this.productExternalServiceMock = mock(ProductExternalService.class);
         this.domainMapperMock = mock(DomainMapper.class);
         this.productRepositoryMock = mock(ProductRepository.class);
-        this.productServiceUnderTest = new ProductService(this.productRepositoryMock, this.productExternalServiceMock, this.domainMapperMock);
+        this.priceRepositoryMock = mock(PriceRepository.class);
+
+        this.productServiceUnderTest = new ProductService(
+            this.productRepositoryMock,
+            this.priceRepositoryMock,
+            this.productExternalServiceMock,
+            this.domainMapperMock
+        );
     }
 
     @Test
@@ -55,7 +65,8 @@ class ProductServiceTest {
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(productRepositoryMock, only()).findByBarcode(anyString());
         verify(productExternalServiceMock, never()).fetchByEanCode(anyString());
-        verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
+        verify(domainMapperMock, never()).mapToPrice(any(InputItemDTO.class));
+        verify(priceRepositoryMock, never()).save(any(Price.class));
     }
 
     @Test
@@ -71,7 +82,8 @@ class ProductServiceTest {
 
         given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
         given(productExternalServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(inputItemDTO));
-        given(domainMapperMock.mapToProduct(any(InputItemDTO.class))).willReturn(new Product());
+        given(domainMapperMock.mapToPrice(any(InputItemDTO.class))).willReturn(new Price(10.0, getDefaultProduct()));
+        given(priceRepositoryMock.save(any(Price.class))).willAnswer(invocation -> invocation.getArgument(0, Price.class));
 
         //when
         final Product actualProduct = productServiceUnderTest.saveByBarcode("1234567890123");
@@ -81,7 +93,8 @@ class ProductServiceTest {
 
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(productExternalServiceMock, times(1)).fetchByEanCode(anyString());
-        verify(domainMapperMock, times(1)).mapToProduct(any(InputItemDTO.class));
+        verify(domainMapperMock, times(1)).mapToPrice(any(InputItemDTO.class));
+        verify(priceRepositoryMock, times(1)).save(any(Price.class));
     }
 
     @Test
@@ -100,7 +113,8 @@ class ProductServiceTest {
 
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(productExternalServiceMock, times(1)).fetchByEanCode(anyString());
-        verify(domainMapperMock, never()).mapToProduct(any(InputItemDTO.class));
+        verify(domainMapperMock, never()).mapToPrice(any(InputItemDTO.class));
+        verify(priceRepositoryMock, never()).save(any(Price.class));
     }
 
     @Test

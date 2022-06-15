@@ -1,6 +1,8 @@
 package com.api.service;
 
+import com.api.entity.Price;
 import com.api.entity.Product;
+import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -17,19 +19,21 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository  productRepository;
+    private final PriceRepository priceRepository;
     private final ProductExternalService productExternalService;
     private final DomainMapper domainMapper;
 
     public Product saveByBarcode(@NonNull final String barcode) {
         return productRepository.findByBarcode(barcode)
             .or(() -> {
-                final Optional<Product> fetchedProduct = this.productExternalService
+                final Optional<Price> priceOptional = this.productExternalService
                     .fetchByEanCode(barcode)
-                    .map(this.domainMapper::mapToProduct);
+                    .map(this.domainMapper::mapToPrice);
 
-                fetchedProduct.ifPresent(productRepository::save);
+                if (priceOptional.isEmpty()) return Optional.empty();
 
-                return fetchedProduct;
+                priceRepository.save(priceOptional.get());
+                return Optional.of(priceOptional.get().getProduct());
             })
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     }
