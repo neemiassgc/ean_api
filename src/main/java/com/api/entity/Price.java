@@ -23,7 +23,7 @@ public class Price {
     @Column(name = "instant", columnDefinition = "TIMESTAMPTZ")
     private Instant instant = Instant.now();
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices"))
     private Product product;
 
