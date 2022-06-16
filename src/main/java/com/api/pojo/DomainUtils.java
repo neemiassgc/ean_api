@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class DomainUtils {
@@ -16,6 +17,36 @@ public final class DomainUtils {
 
     public static BigDecimal parsePrice(final String priceInput) {
         return new BigDecimal((priceInput.replace(",", ".")));
+    }
+
+    @Builder(builderMethodName = "productWithAllPricesBuilder")
+    public static Projection.ProductWithAllPrices productWithAllPrices(
+        final String description,
+        final String barcode,
+        final Integer sequenceCode,
+        final List<BigDecimal> prices
+    ) {
+        return new Projection.ProductWithAllPrices() {
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public String getBarcode() {
+                return barcode;
+            }
+
+            @Override
+            public Integer getSequenceCode() {
+                return sequenceCode;
+            }
+
+            @Override
+            public List<BigDecimal> getPrices() {
+                return prices;
+            }
+        };
     }
 
     @Builder(builderMethodName = "productWithLatestPriceBuilder")
