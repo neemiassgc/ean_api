@@ -1,9 +1,9 @@
 package com.api.service;
 
-import com.api.projection.InputItemDTO;
 import com.api.projection.ProductResponseDTO;
 import com.api.entity.Price;
 import com.api.entity.Product;
+import com.api.projection.Projection;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,17 +13,16 @@ import java.util.stream.Collectors;
 @Service
 public class DomainMapper {
 
-    public Product mapToProduct(final InputItemDTO inputItemDTO) {
-        Objects.requireNonNull(inputItemDTO, "InputItemDTO cannot be null");
+    public Price mapToPrice(final Projection.ProductWithLatestPrice productWithLatestPrice) {
+        Objects.requireNonNull(productWithLatestPrice, "InputItemDTO cannot be null");
 
         final Product product = new Product();
-        final Price price = new Price();
-        product.setDescription(inputItemDTO.getDescription());
-        product.setSequenceCode(inputItemDTO.getSequence());
-        product.setBarcode(inputItemDTO.getBarcode());
-        price.setPrice(inputItemDTO.getCurrentPrice());
-        product.addPrice(price);
-        return product;
+
+        product.setDescription(productWithLatestPrice.getDescription());
+        product.setSequenceCode(productWithLatestPrice.getSequenceCode());
+        product.setBarcode(productWithLatestPrice.getBarcode());
+
+        return new Price(productWithLatestPrice.getLatestPrice().doubleValue(), product);
     }
 
     public ProductResponseDTO mapToDto(final Product product) {
@@ -40,6 +39,8 @@ public class DomainMapper {
                 .collect(Collectors.toList())
             )
             .build();
+
+        return null;
     }
 
     public List<ProductResponseDTO> mapToDtoList(final List<Product> products) {
