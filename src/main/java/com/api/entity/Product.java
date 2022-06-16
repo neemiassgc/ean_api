@@ -6,10 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.Vector;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity(name = "Product")
@@ -54,5 +51,21 @@ public class Product {
             barcode,
             sequenceCode
         );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, description, barcode, sequenceCode);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (!(obj instanceof Product)) return false;
+
+        final Product that = (Product) obj;
+        return Objects.equals(this.description, that.description)
+            && Objects.equals(this.barcode, that.barcode)
+            && Objects.equals(this.sequenceCode, that.sequenceCode);
     }
 }
