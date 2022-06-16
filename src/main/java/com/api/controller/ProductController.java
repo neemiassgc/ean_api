@@ -1,9 +1,9 @@
 package com.api.controller;
 
-import com.api.projection.BarcodeRequestDTO;
-import com.api.projection.ProductResponseDTO;
 import com.api.entity.Product;
 import com.api.error.ErrorTemplate;
+import com.api.projection.BarcodeInput;
+import com.api.projection.ProductResponseDTO;
 import com.api.service.DomainMapper;
 import com.api.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +29,8 @@ public class ProductController {
     private final DomainMapper domainMapper;
 
     @PostMapping(path = "/products", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO create(@RequestBody @Valid BarcodeRequestDTO barcodeRequestDTO) {
-        final Product fetchedProduct = productService.saveByBarcode(barcodeRequestDTO.getBarcode());
+    public ProductResponseDTO create(@RequestBody @Valid BarcodeInput barcodeInput) {
+        final Product fetchedProduct = productService.saveByBarcode(barcodeInput.getBarcode());
         return domainMapper.mapToDto(fetchedProduct);
     }
 
