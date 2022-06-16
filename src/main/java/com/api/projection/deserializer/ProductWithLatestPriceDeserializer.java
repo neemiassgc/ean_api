@@ -34,27 +34,11 @@ public final class ProductWithLatestPriceDeserializer extends StdDeserializer<Pr
 
         if (item.get(5).get("value").asText().isEmpty()) throw new IllegalStateException("Item name is empty");
 
-        return new Projection.ProductWithLatestPrice() {
-
-            @Override
-            public String getDescription() {
-                return  item.get(1).get("value").asText();
-            }
-
-            @Override
-            public String getBarcode() {
-                return item.get(5).get("value").asText();
-            }
-
-            @Override
-            public Integer getSequenceCode() {
-                return item.get(2).get("value").asInt();
-            }
-
-            @Override
-            public BigDecimal getLatestPrice() {
-                return DomainUtils.parsePrice(item.get(4).get("value").asText());
-            }
-        };
+        return DomainUtils.productWithLatestPriceBuilder()
+            .description(item.get(1).get("value").asText())
+            .barcode(item.get(5).get("value").asText())
+            .sequenceCode(item.get(2).get("value").asInt())
+            .latestPrice(DomainUtils.parsePrice(item.get(4).get("value").asText()))
+            .build();
     }
 }

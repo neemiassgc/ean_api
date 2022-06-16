@@ -1,6 +1,6 @@
 package com.api.service;
 
-import com.api.projection.InputItemDTO;
+import com.api.projection.Projection;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -17,12 +17,12 @@ class ProductExternalServiceIT {
     @Autowired private ProductExternalService productExternalServiceUnderTest;
 
     @Test
-    void given_an_existing_barcode_then_return_a_dto() {
+    void given_an_existing_barcode_then_return_a_projection() {
         // Give
         String existingBarcode = "7891962057620";
 
         // When
-        final Optional<InputItemDTO> actualResult = productExternalServiceUnderTest.fetchByEanCode(existingBarcode);
+        final Optional<Projection.ProductWithLatestPrice> actualResult = productExternalServiceUnderTest.fetchByEanCode(existingBarcode);
 
         // Then
         assertThat(actualResult).isNotNull();
@@ -38,7 +38,7 @@ class ProductExternalServiceIT {
         String nonExistingBarcode = "7891962057621";
 
         // When
-        final Optional<InputItemDTO> actualResult = productExternalServiceUnderTest.fetchByEanCode(nonExistingBarcode);
+        final Optional<Projection.ProductWithLatestPrice> actualResult = productExternalServiceUnderTest.fetchByEanCode(nonExistingBarcode);
 
         // Then
         assertThat(actualResult).isNotNull();

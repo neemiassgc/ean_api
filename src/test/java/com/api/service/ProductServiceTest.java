@@ -1,8 +1,9 @@
 package com.api.service;
 
 import com.api.entity.Price;
-import com.api.projection.InputItemDTO;
 import com.api.entity.Product;
+import com.api.pojo.DomainUtils;
+import com.api.projection.Projection;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -65,24 +67,24 @@ class ProductServiceTest {
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(productRepositoryMock, only()).findByBarcode(anyString());
         verify(productExternalServiceMock, never()).fetchByEanCode(anyString());
-        verify(domainMapperMock, never()).mapToPrice(any(InputItemDTO.class));
+        verify(domainMapperMock, never()).mapToPrice(any(Projection.ProductWithLatestPrice.class));
         verify(priceRepositoryMock, never()).save(any(Price.class));
     }
 
     @Test
     void should_return_a_product_from_external_api_if_it_does_not_exist_in_the_db_saveByBarcode() {
         //given
-        final InputItemDTO inputItemDTO = InputItemDTO.builder()
+        final Projection.ProductWithLatestPrice givenProjection = DomainUtils.productWithLatestPriceBuilder()
             .description("Default Product Description")
             .barcode("1234567890123")
-            .currentPrice(10.0)
-            .sequence(417304)
+            .latestPrice(new BigDecimal(10))
+            .sequenceCode(417304)
             .build();
 
 
         given(productRepositoryMock.findByBarcode(anyString())).willReturn(Optional.empty());
-        given(productExternalServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(inputItemDTO));
-        given(domainMapperMock.mapToPrice(any(InputItemDTO.class))).willReturn(new Price(10.0, getDefaultProduct()));
+        given(productExternalServiceMock.fetchByEanCode(anyString())).willReturn(Optional.of(givenProjection));
+        given(domainMapperMock.mapToPrice(any(Projection.ProductWithLatestPrice.class))).willReturn(new Price(10.0, getDefaultProduct()));
         given(priceRepositoryMock.save(any(Price.class))).willAnswer(invocation -> invocation.getArgument(0, Price.class));
 
         //when
@@ -93,7 +95,7 @@ class ProductServiceTest {
 
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(productExternalServiceMock, times(1)).fetchByEanCode(anyString());
-        verify(domainMapperMock, times(1)).mapToPrice(any(InputItemDTO.class));
+        verify(domainMapperMock, times(1)).mapToPrice(any(Projection.ProductWithLatestPrice.class));
         verify(priceRepositoryMock, times(1)).save(any(Price.class));
     }
 
@@ -113,7 +115,7 @@ class ProductServiceTest {
 
         verify(productRepositoryMock, times(1)).findByBarcode(anyString());
         verify(productExternalServiceMock, times(1)).fetchByEanCode(anyString());
-        verify(domainMapperMock, never()).mapToPrice(any(InputItemDTO.class));
+        verify(domainMapperMock, never()).mapToPrice(any(Projection.ProductWithLatestPrice.class));
         verify(priceRepositoryMock, never()).save(any(Price.class));
     }
 

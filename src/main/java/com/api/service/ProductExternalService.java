@@ -1,9 +1,9 @@
 package com.api.service;
 
-import com.api.projection.InputItemDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.api.pojo.DomainUtils;
 import com.api.pojo.SessionInstance;
+import com.api.projection.Projection;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -128,7 +128,7 @@ public class ProductExternalService {
         return new SessionInstance(resourcesMap.get("instance_id"), ajaxIdentifier);
     }
 
-    public Optional<InputItemDTO> fetchByEanCode(final String barcode) {
+    public Optional<Projection.ProductWithLatestPrice> fetchByEanCode(final String barcode) {
         Objects.requireNonNull(barcode);
 
         final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -154,14 +154,15 @@ public class ProductExternalService {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
 
                 try {
-                    final InputItemDTO inputItemDTO = objectMapper.readValue(json, InputItemDTO.class);
+                    final Projection.ProductWithLatestPrice productWithLatestPrice =
+                        objectMapper.readValue(json, Projection.ProductWithLatestPrice.class);
 
-                    if (Objects.isNull(inputItemDTO)) {
+                    if (Objects.isNull(productWithLatestPrice)) {
                         this.setSessionInstance(this.getASessionInstance());
                         return fetchByEanCode(barcode);
                     }
 
-                    return Optional.of(inputItemDTO);
+                    return Optional.of(productWithLatestPrice);
                 } catch (Exception e)  {
                     return Optional.empty();
                 }

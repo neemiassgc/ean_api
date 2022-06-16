@@ -1,6 +1,8 @@
 package com.api.service;
 
-import com.api.projection.InputItemDTO;
+import com.api.pojo.DomainUtils;
+import com.api.projection.Projection.ProductWithLatestPrice;
+import com.api.projection.Projection;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.api.pojo.SessionInstance;
@@ -18,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -152,21 +155,21 @@ public class ProductExternalServiceTest {
     }
 
     @Test
-    void given_a_valid_bar_code_then_should_return_an_input_dto_fetchByEanCode() throws JsonProcessingException {
+    void given_a_valid_bar_code_then_should_return_a_projection_fetchByEanCode() throws JsonProcessingException {
         // given
         final String existingBarCode = "123456789101";
 
-        final Supplier<InputItemDTO> inputItemDTOSupplier = () -> InputItemDTO.builder()
+        final Projection.ProductWithLatestPrice expectedProjection = DomainUtils.productWithLatestPriceBuilder()
             .description("description")
             .barcode(existingBarCode)
-            .currentPrice(16.4)
-            .sequence(123456)
+            .latestPrice(new BigDecimal("16.4"))
+            .sequenceCode(123456)
             .build();
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
-        given(this.objectMapperMock.readValue(anyString(), eq(InputItemDTO.class)))
-            .willReturn(inputItemDTOSupplier.get());
+        given(this.objectMapperMock.readValue(anyString(), eq(Projection.ProductWithLatestPrice.class)))
+            .willReturn(expectedProjection);
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -179,19 +182,19 @@ public class ProductExternalServiceTest {
         );
 
         // when
-        final Optional<InputItemDTO> actualDTO =
+        final Optional<Projection.ProductWithLatestPrice> actualProjection =
             this.productExternalServiceUnderTest.fetchByEanCode(existingBarCode);
 
         // then
-        assertThat(actualDTO).as("Optional cannot be null").isNotNull();
-        assertThat(actualDTO.orElse(null)).as("actualDTO cannot be null").isNotNull();
-        assertThat(actualDTO.get()).extracting("description").as("Description is not correct").isEqualTo("description");
-        assertThat(actualDTO.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
-        assertThat(actualDTO.get()).extracting("barcode").as("EanCode is not correct").isEqualTo("123456789101");
+        assertThat(actualProjection).as("Optional cannot be null").isNotNull();
+        assertThat(actualProjection.orElse(null)).as("actualDTO cannot be null").isNotNull();
+        assertThat(actualProjection.get()).extracting("description").as("Description is not correct").isEqualTo("description");
+        assertThat(actualProjection.get()).extracting("currentPrice").as("Price is not correct").isEqualTo(16.4);
+        assertThat(actualProjection.get()).extracting("barcode").as("EanCode is not correct").isEqualTo("123456789101");
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(InputItemDTO.class));
+        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Projection.ProductWithLatestPrice.class));
     }
 
     @Test
@@ -201,7 +204,7 @@ public class ProductExternalServiceTest {
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
-        given(this.objectMapperMock.readValue(anyString(), eq(InputItemDTO.class))).willThrow(new IllegalStateException("Item name is empty"));
+        given(this.objectMapperMock.readValue(anyString(), eq(Projection.ProductWithLatestPrice.class))).willThrow(new IllegalStateException("Item name is empty"));
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -214,35 +217,34 @@ public class ProductExternalServiceTest {
         );
 
         // when
-        final Optional<InputItemDTO> actualDTO = this.productExternalServiceUnderTest.fetchByEanCode(nonExistingBarCode);
+        final Optional<Projection.ProductWithLatestPrice> actualProjection = this.productExternalServiceUnderTest.fetchByEanCode(nonExistingBarCode);
 
         // then
-        assertThat(actualDTO).as("Optional cannot be null").isNotNull();
-        assertThat(actualDTO.orElse(null)).as("'actualDTO' must be null").isNull();
+        assertThat(actualProjection).as("Optional cannot be null").isNotNull();
+        assertThat(actualProjection.orElse(null)).as("'actualProjection' must be null").isNull();
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(InputItemDTO.class));
+        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Projection.ProductWithLatestPrice.class));
     }
 
     @Test
     void when_a_session_instance_is_not_valid_then_should_recreate_it() throws JsonProcessingException {
        //given
-        final Supplier<InputItemDTO> inputItemDTOSupplier = () ->
-            InputItemDTO.builder()
-                .description("description")
-                .barcode("123456789101")
-                .currentPrice(16.4)
-                .sequence(123456)
-                .build();
+        final Projection.ProductWithLatestPrice expectedProjection = DomainUtils.productWithLatestPriceBuilder()
+            .description("description")
+            .barcode("123456789101")
+            .latestPrice(new BigDecimal("16.4"))
+            .sequenceCode(123456)
+            .build();
 
         this.getASessionInstanceGenericStub();
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
-        given(this.objectMapperMock.readValue(anyString(), eq(InputItemDTO.class)))
+        given(this.objectMapperMock.readValue(anyString(), eq(Projection.ProductWithLatestPrice.class)))
             .willReturn(null)
-            .willReturn(inputItemDTOSupplier.get());
+            .willReturn(expectedProjection);
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -255,7 +257,7 @@ public class ProductExternalServiceTest {
         );
 
         //when
-        final Optional<InputItemDTO> actualDTO =
+        final Optional<Projection.ProductWithLatestPrice> actualDTO =
             this.productExternalServiceUnderTest.fetchByEanCode("134324134324");
 
         //then
@@ -268,7 +270,7 @@ public class ProductExternalServiceTest {
 
         verify(this.restTemplateMock, times(2)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(2)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(2)).readValue(anyString(), eq(InputItemDTO.class));
+        verify(this.objectMapperMock, times(2)).readValue(anyString(), eq(Projection.ProductWithLatestPrice.class));
 
         // getASessionInstanceGenericStub();
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
