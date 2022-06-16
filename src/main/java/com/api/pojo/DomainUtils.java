@@ -4,14 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 public final class DomainUtils {
 
     private DomainUtils() {}
 
-    public static double parsePrice(final String priceInput) {
-        return Double.parseDouble(priceInput.replace(",", "."));
+    public static BigDecimal parsePrice(final String priceInput) {
+        return new BigDecimal((priceInput.replace(",", ".")));
     }
 
     public static String readFromInputStream(final InputStream inputStream) throws IOException {
