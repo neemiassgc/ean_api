@@ -1,8 +1,8 @@
 package com.api.service;
 
-import com.api.projection.ProductResponseDTO;
 import com.api.entity.Price;
 import com.api.entity.Product;
+import com.api.pojo.DomainUtils;
 import com.api.projection.Projection;
 import org.springframework.stereotype.Service;
 
@@ -36,27 +36,13 @@ public class DomainMapper {
 
         return mapOfProducts.entrySet().stream().map(entry -> {
             final Product product = entry.getKey();
-            return new Projection.ProductWithAllPrices() {
-                @Override
-                public String getDescription() {
-                    return product.getDescription();
-                }
 
-                @Override
-                public String getBarcode() {
-                    return product.getBarcode();
-                }
-
-                @Override
-                public Integer getSequenceCode() {
-                    return product.getSequenceCode();
-                }
-
-                @Override
-                public List<BigDecimal> getPrices() {
-                    return entry.getValue().stream().map(price -> new BigDecimal(price.getPrice()+"")).collect(Collectors.toList());
-                }
-            };
+            return DomainUtils.productWithAllPricesBuilder()
+                .description(product.getDescription())
+                .barcode(product.getBarcode())
+                .sequenceCode(product.getSequenceCode())
+                .prices(entry.getValue().stream().map(price -> new BigDecimal(price.getPrice() + "")).collect(Collectors.toList()))
+                .build();
         }).collect(Collectors.toList());
     }
 }
