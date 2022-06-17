@@ -10,18 +10,18 @@ public final class Projection {
 
     private Projection() {}
 
-    @JsonDeserialize(using = ProductWithLatestPriceDeserializer.class)
-    public interface ProductWithLatestPrice {
+    private interface ProductBase {
         String getDescription();
         String getBarcode();
         Integer getSequenceCode();
+    }
+
+    @JsonDeserialize(using = ProductWithLatestPriceDeserializer.class)
+    public interface ProductWithLatestPrice extends ProductBase {
         BigDecimal getLatestPrice();
     }
 
-    public interface ProductWithAllPrices {
-        String getDescription();
-        String getBarcode();
-        Integer getSequenceCode();
+    public interface ProductWithAllPrices extends ProductBase {
         List<BigDecimal> getPrices();
     }
 }
