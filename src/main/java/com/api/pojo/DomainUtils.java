@@ -1,6 +1,8 @@
 package com.api.pojo;
 
-import com.api.projection.Projection;
+import static com.api.projection.Projection.*;
+
+import com.api.entity.Price;
 import lombok.Builder;
 
 import java.io.BufferedReader;
@@ -20,13 +22,13 @@ public final class DomainUtils {
     }
 
     @Builder(builderMethodName = "productWithAllPricesBuilder")
-    public static Projection.ProductWithAllPrices productWithAllPrices(
+    public static ProductWithAllPrices productWithAllPrices(
         final String description,
         final String barcode,
         final Integer sequenceCode,
-        final List<BigDecimal> prices
+        final List<PriceWithInstant> prices
     ) {
-        return new Projection.ProductWithAllPrices() {
+        return new ProductWithAllPrices() {
             @Override
             public String getDescription() {
                 return description;
@@ -43,20 +45,20 @@ public final class DomainUtils {
             }
 
             @Override
-            public List<BigDecimal> getPrices() {
+            public List<PriceWithInstant> getPrices() {
                 return prices;
             }
         };
     }
 
     @Builder(builderMethodName = "productWithLatestPriceBuilder")
-    public static Projection.ProductWithLatestPrice productWithLatestPrice(
+    public static ProductWithLatestPrice productWithLatestPrice(
         final String description,
         final String barcode,
         final Integer sequenceCode,
-        final BigDecimal latestPrice
+        final PriceWithInstant latestPrice
     ) {
-        return new Projection.ProductWithLatestPrice() {
+        return new ProductWithLatestPrice() {
             @Override
             public String getDescription() {
                 return description;
@@ -73,7 +75,7 @@ public final class DomainUtils {
             }
 
             @Override
-            public BigDecimal getLatestPrice() {
+            public PriceWithInstant getLatestPrice() {
                 return latestPrice;
             }
         };

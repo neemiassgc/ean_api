@@ -2,8 +2,12 @@ package com.api.projection;
 
 import com.api.projection.deserializer.ProductWithLatestPriceDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 public final class Projection {
@@ -18,10 +22,18 @@ public final class Projection {
 
     @JsonDeserialize(using = ProductWithLatestPriceDeserializer.class)
     public interface ProductWithLatestPrice extends ProductBase {
-        BigDecimal getLatestPrice();
+        PriceWithInstant getLatestPrice();
     }
 
     public interface ProductWithAllPrices extends ProductBase {
-        List<BigDecimal> getPrices();
+        List<PriceWithInstant> getPrices();
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    @ToString
+    public static class PriceWithInstant {
+        final BigDecimal price;
+        final Instant instant;
     }
 }

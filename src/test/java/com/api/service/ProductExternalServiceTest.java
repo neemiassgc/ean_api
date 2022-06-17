@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -162,7 +163,7 @@ public class ProductExternalServiceTest {
         final Projection.ProductWithLatestPrice expectedProjection = DomainUtils.productWithLatestPriceBuilder()
             .description("description")
             .barcode(existingBarCode)
-            .latestPrice(new BigDecimal("16.4"))
+            .latestPrice(new Projection.PriceWithInstant(new BigDecimal("16.4"), Instant.now()))
             .sequenceCode(123456)
             .build();
 
@@ -234,7 +235,7 @@ public class ProductExternalServiceTest {
         final Projection.ProductWithLatestPrice expectedProjection = DomainUtils.productWithLatestPriceBuilder()
             .description("description")
             .barcode("123456789101")
-            .latestPrice(new BigDecimal("16.4"))
+            .latestPrice(new Projection.PriceWithInstant(new BigDecimal("16.4"), Instant.now()))
             .sequenceCode(123456)
             .build();
 

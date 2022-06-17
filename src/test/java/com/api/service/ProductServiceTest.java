@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -77,7 +78,7 @@ class ProductServiceTest {
         final Projection.ProductWithLatestPrice givenProjection = DomainUtils.productWithLatestPriceBuilder()
             .description("Default Product Description")
             .barcode("1234567890123")
-            .latestPrice(new BigDecimal(10))
+            .latestPrice(new Projection.PriceWithInstant(new BigDecimal(10), Instant.now()))
             .sequenceCode(417304)
             .build();
 
