@@ -1,9 +1,8 @@
 package com.api.controller;
 
-import com.api.entity.Product;
 import com.api.error.ErrorTemplate;
 import com.api.projection.BarcodeInput;
-import com.api.projection.ProductResponseDTO;
+import com.api.repository.PriceRepository;
 import com.api.service.DomainMapper;
 import com.api.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +19,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.api.projection.Projection.*;
+
 @RestController
 @RequestMapping(path = "/api")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -27,22 +28,21 @@ public class ProductController {
 
     private final ProductService productService;
     private final DomainMapper domainMapper;
+    private final PriceRepository priceRepository;
 
     @PostMapping(path = "/products", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO create(@RequestBody @Valid BarcodeInput barcodeInput) {
-        final Product fetchedProduct = productService.saveByBarcode(barcodeInput.getBarcode());
-        return domainMapper.mapToDto(fetchedProduct);
+    public ProductWithLatestPrice create(@RequestBody @Valid BarcodeInput barcodeInput) {
+        return domainMapper.mapToProductWithLatestPrice(priceRepository.findLatestPriceByProductBarcode(barcodeInput.getBarcode()).get());
     }
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ProductResponseDTO> getAll() {
-        return domainMapper.mapToDtoList(productService.findAllByOrderByDescriptionAsc());
+    public List<ProductWithAllPrices> getAll() {
+        return domainMapper.toProductListWithAllPrices(priceRepository.findAll());
     }
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductResponseDTO getByBarcode(@PathVariable("barcode") String barcode) {
-        final Product fetchedProduct = productService.findByBarcode(barcode);
-        return domainMapper.mapToDto(fetchedProduct);
+    public ProductWithAllPrices getByBarcode(@PathVariable("barcode") String barcode) {
+        return domainMapper.toProductWithAllPrices(priceRepository.findAllByProductBarcode(barcode));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
