@@ -40,7 +40,7 @@ public class DomainMapper {
             .build();
     }
 
-    public List<Projection.ProductWithAllPrices> toProductWithAllPrices(final List<Price> prices) {
+    public List<Projection.ProductWithAllPrices> toProductListWithAllPrices(final List<Price> prices) {
         Objects.requireNonNull(prices, "Prices cannot be null");
 
         final Map<Product, List<Price>> mapOfProducts = prices.stream()
