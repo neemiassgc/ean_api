@@ -3,7 +3,6 @@ package com.api.service;
 import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.pojo.DomainUtils;
-import com.api.projection.Projection;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,10 +12,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.api.projection.Projection.*;
+
 @Service
 public class DomainMapper {
 
-    public Price mapToPrice(final Projection.ProductWithLatestPrice productWithLatestPrice) {
+    public Price mapToPrice(final ProductWithLatestPrice productWithLatestPrice) {
         Objects.requireNonNull(productWithLatestPrice, "InputItemDTO cannot be null");
 
         final Product product = new Product();
@@ -28,7 +29,7 @@ public class DomainMapper {
         return new Price(productWithLatestPrice.getLatestPrice().doubleValue(), product);
     }
 
-    public Projection.ProductWithLatestPrice mapToProductWithLatestPrice(final Price price) {
+    public ProductWithLatestPrice mapToProductWithLatestPrice(final Price price) {
         Objects.requireNonNull(price, "Price cannot be null");
 
         return DomainUtils
@@ -40,21 +41,24 @@ public class DomainMapper {
             .build();
     }
 
-    public List<Projection.ProductWithAllPrices> toProductListWithAllPrices(final List<Price> prices) {
+    public List<ProductWithAllPrices> toProductListWithAllPrices(final List<Price> prices) {
         Objects.requireNonNull(prices, "Prices cannot be null");
 
         final Map<Product, List<Price>> mapOfProducts = prices.stream()
             .collect(Collectors.groupingBy(Price::getProduct, HashMap::new, Collectors.toList()));
 
-        return mapOfProducts.entrySet().stream().map(entry -> {
-            final Product product = entry.getKey();
+        return mapOfProducts.values().stream().map(this::toProductWithAllPrices).collect(Collectors.toList());
+    }
 
-            return DomainUtils.productWithAllPricesBuilder()
-                .description(product.getDescription())
-                .barcode(product.getBarcode())
-                .sequenceCode(product.getSequenceCode())
-                .prices(entry.getValue().stream().map(price -> new BigDecimal(price.getPrice() + "")).collect(Collectors.toList()))
-                .build();
-        }).collect(Collectors.toList());
+    public ProductWithAllPrices toProductWithAllPrices(final List<Price> priceList) {
+        Objects.requireNonNull(priceList, "Price cannot be null");
+        final Product product = priceList.get(0).getProduct();
+
+        return DomainUtils.productWithAllPricesBuilder()
+            .description(product.getDescription())
+            .barcode(product.getBarcode())
+            .sequenceCode(product.getSequenceCode())
+            .prices(priceList.stream().map(price -> new BigDecimal(price.getPrice() + "")).collect(Collectors.toList()))
+            .build();
     }
 }
