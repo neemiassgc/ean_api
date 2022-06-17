@@ -28,6 +28,18 @@ public class DomainMapper {
         return new Price(productWithLatestPrice.getLatestPrice().doubleValue(), product);
     }
 
+    public Projection.ProductWithLatestPrice mapToProductWithLatestPrice(final Price price) {
+        Objects.requireNonNull(price, "Price cannot be null");
+
+        return DomainUtils
+            .productWithLatestPriceBuilder()
+            .description(price.getProduct().getDescription())
+            .barcode(price.getProduct().getBarcode())
+            .sequenceCode(price.getProduct().getSequenceCode())
+            .latestPrice(BigDecimal.valueOf(price.getPrice()))
+            .build();
+    }
+
     public List<Projection.ProductWithAllPrices> toProductWithAllPrices(final List<Price> prices) {
         Objects.requireNonNull(prices, "Prices cannot be null");
 
