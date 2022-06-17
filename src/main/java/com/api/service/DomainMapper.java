@@ -29,7 +29,7 @@ public class DomainMapper {
         return new Price(productWithLatestPrice.getLatestPrice().getPrice().doubleValue(), product);
     }
 
-    public ProductWithLatestPrice mapToProductWithLatestPrice(final Price price) {
+    public ProductWithLatestPrice toProductWithLatestPrice(final Price price) {
         Objects.requireNonNull(price, "Price cannot be null");
 
         return DomainUtils

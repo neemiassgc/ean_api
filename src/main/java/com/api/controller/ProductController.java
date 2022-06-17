@@ -32,7 +32,7 @@ public class ProductController {
 
     @PostMapping(path = "/products", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ProductWithLatestPrice create(@RequestBody @Valid BarcodeInput barcodeInput) {
-        return domainMapper.mapToProductWithLatestPrice(priceRepository.findLatestPriceByProductBarcode(barcodeInput.getBarcode()).get());
+        return domainMapper.toProductWithLatestPrice(priceRepository.findLatestPriceByProductBarcode(barcodeInput.getBarcode()).get());
     }
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
