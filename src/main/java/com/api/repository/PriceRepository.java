@@ -22,6 +22,9 @@ public interface PriceRepository extends JpaRepository<Price, UUID> {
     )
     Optional<Price> findLatestPriceByProductBarcode(@NonNull String barcode);
 
+    @Query("SELECT p FROM Price p JOIN FETCH p.product WHERE p.product.barcode = ?1")
+    List<Price> findAllByProductBarcode(@NonNull String barcode);
+
     @Override
     @NonNull
     @Query("SELECT p FROM Price p JOIN FETCH p.product")
