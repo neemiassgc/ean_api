@@ -2,7 +2,6 @@ package com.api.pojo;
 
 import static com.api.projection.Projection.*;
 
-import com.api.entity.Price;
 import lombok.Builder;
 
 import java.io.BufferedReader;
@@ -21,14 +20,14 @@ public final class DomainUtils {
         return new BigDecimal((priceInput.replace(",", ".")));
     }
 
-    @Builder(builderMethodName = "productWithAllPricesBuilder")
-    public static ProductWithAllPrices productWithAllPrices(
+    @Builder(builderMethodName = "productWithManyPricesBuilder")
+    public static ProductWithManyPrices productWithManyPrices(
         final String description,
         final String barcode,
         final Integer sequenceCode,
         final List<PriceWithInstant> prices
     ) {
-        return new ProductWithAllPrices() {
+        return new ProductWithManyPrices() {
             @Override
             public String getDescription() {
                 return description;

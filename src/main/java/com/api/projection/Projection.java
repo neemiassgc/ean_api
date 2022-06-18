@@ -25,7 +25,7 @@ public final class Projection {
         PriceWithInstant getLatestPrice();
     }
 
-    public interface ProductWithAllPrices extends ProductBase {
+    public interface ProductWithManyPrices extends ProductBase {
         List<PriceWithInstant> getPrices();
     }
 

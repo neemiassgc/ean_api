@@ -41,20 +41,20 @@ public class DomainMapper {
             .build();
     }
 
-    public List<ProductWithAllPrices> toProductListWithAllPrices(final List<Price> prices) {
+    public List<ProductWithManyPrices> toProductListWithManyPrices(final List<Price> prices) {
         Objects.requireNonNull(prices, "Prices cannot be null");
 
         final Map<Product, List<Price>> mapOfProducts = prices.stream()
             .collect(Collectors.groupingBy(Price::getProduct, HashMap::new, Collectors.toList()));
 
-        return mapOfProducts.values().stream().map(this::toProductWithAllPrices).collect(Collectors.toList());
+        return mapOfProducts.values().stream().map(this::toProductWithManyPrices).collect(Collectors.toList());
     }
 
-    public ProductWithAllPrices toProductWithAllPrices(final List<Price> priceList) {
+    public ProductWithManyPrices toProductWithManyPrices(final List<Price> priceList) {
         Objects.requireNonNull(priceList, "Price cannot be null");
         final Product product = priceList.get(0).getProduct();
 
-        return DomainUtils.productWithAllPricesBuilder()
+        return DomainUtils.productWithManyPricesBuilder()
             .description(product.getDescription())
             .barcode(product.getBarcode())
             .sequenceCode(product.getSequenceCode())
