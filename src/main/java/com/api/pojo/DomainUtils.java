@@ -21,7 +21,7 @@ public final class DomainUtils {
     }
 
     @Builder(builderMethodName = "productWithManyPricesBuilder")
-    public static ProductWithManyPrices productWithManyPrices(
+    public static ProductBase productWithManyPrices(
         final String description,
         final String barcode,
         final Integer sequenceCode,
@@ -51,7 +51,7 @@ public final class DomainUtils {
     }
 
     @Builder(builderMethodName = "productWithLatestPriceBuilder")
-    public static ProductWithLatestPrice productWithLatestPrice(
+    public static ProductBase productWithLatestPrice(
         final String description,
         final String barcode,
         final Integer sequenceCode,

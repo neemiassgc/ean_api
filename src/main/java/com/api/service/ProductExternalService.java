@@ -128,7 +128,7 @@ public class ProductExternalService {
         return new SessionInstance(resourcesMap.get("instance_id"), ajaxIdentifier);
     }
 
-    public Optional<Projection.ProductWithLatestPrice> fetchByEanCode(final String barcode) {
+    public Optional<Projection.ProductBase> fetchByEanCode(final String barcode) {
         Objects.requireNonNull(barcode);
 
         final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();

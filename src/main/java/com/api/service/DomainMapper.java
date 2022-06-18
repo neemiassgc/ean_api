@@ -17,11 +17,13 @@ import static com.api.projection.Projection.*;
 @Service
 public class DomainMapper {
 
-    public Price mapToPrice(final ProductWithLatestPrice productWithLatestPrice) {
-        Objects.requireNonNull(productWithLatestPrice, "InputItemDTO cannot be null");
+    public Price mapToPrice(final ProductBase productBase) {
+        if (!(productBase instanceof ProductWithLatestPrice))
+            throw new IllegalArgumentException("ProductBase must be of type ProductWithLatestPrice");
+
+        final ProductWithLatestPrice productWithLatestPrice = (ProductWithLatestPrice) productBase;
 
         final Product product = new Product();
-
         product.setDescription(productWithLatestPrice.getDescription());
         product.setSequenceCode(productWithLatestPrice.getSequenceCode());
         product.setBarcode(productWithLatestPrice.getBarcode());
@@ -29,7 +31,7 @@ public class DomainMapper {
         return new Price(productWithLatestPrice.getLatestPrice().getPrice().doubleValue(), product);
     }
 
-    public ProductWithLatestPrice toProductWithLatestPrice(final Price price) {
+    public ProductBase toProductWithLatestPrice(final Price price) {
         Objects.requireNonNull(price, "Price cannot be null");
 
         return DomainUtils
@@ -41,7 +43,7 @@ public class DomainMapper {
             .build();
     }
 
-    public List<ProductWithManyPrices> toProductListWithManyPrices(final List<Price> prices) {
+    public List<ProductBase> toProductListWithManyPrices(final List<Price> prices) {
         Objects.requireNonNull(prices, "Prices cannot be null");
 
         final Map<Product, List<Price>> mapOfProducts = prices.stream()
@@ -50,7 +52,7 @@ public class DomainMapper {
         return mapOfProducts.values().stream().map(this::toProductWithManyPrices).collect(Collectors.toList());
     }
 
-    public ProductWithManyPrices toProductWithManyPrices(final List<Price> priceList) {
+    public ProductBase toProductWithManyPrices(final List<Price> priceList) {
         Objects.requireNonNull(priceList, "Price cannot be null");
         final Product product = priceList.get(0).getProduct();
 

@@ -12,22 +12,22 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Objects;
 
+import static com.api.projection.Projection.ProductBase;
 import static com.api.projection.Projection.PriceWithInstant;
-import static com.api.projection.Projection.ProductWithLatestPrice;
 
-public final class ProductWithLatestPriceDeserializer extends StdDeserializer<ProductWithLatestPrice> {
+public final class ProductBaseDeserializer extends StdDeserializer<ProductBase> {
 
-    public ProductWithLatestPriceDeserializer() {
+    public ProductBaseDeserializer() {
         this(null);
     }
 
-    public ProductWithLatestPriceDeserializer(Class<?> vc) {
+    public ProductBaseDeserializer(Class<?> vc) {
         super(vc);
     }
 
     @Override
     @Nullable
-    public ProductWithLatestPrice deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+    public ProductBase deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
         final JsonNode jsonNode = p.getCodec().readTree(p);
 
         final JsonNode item = jsonNode.get("item");
