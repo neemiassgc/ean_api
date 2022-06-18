@@ -2,6 +2,7 @@ package com.api.repository;
 
 import com.api.entity.Price;
 import lombok.NonNull;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,7 +17,7 @@ public interface PriceRepository extends JpaRepository<Price, UUID> {
     List<Price> findAllLatestPrice();
 
     @Query("SELECT p FROM Price p JOIN FETCH p.product WHERE p.product.barcode = ?1 ORDER BY p.instant DESC")
-    List<Price> findAllByProductBarcode(@NonNull String barcode);
+    List<Price> findAllByProductBarcode(@NonNull String barcode, Pageable pageable);
 
     @Override
     @NonNull
