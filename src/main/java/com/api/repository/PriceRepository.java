@@ -15,7 +15,7 @@ public interface PriceRepository extends JpaRepository<Price, UUID> {
     @Query("SELECT p FROM Price p JOIN FETCH p.product WHERE p.instant IN (SELECT MAX(pr.instant) FROM Price pr GROUP BY pr.product)")
     List<Price> findAllLatestPrice();
 
-    @Query("SELECT p FROM Price p JOIN FETCH p.product WHERE p.product.barcode = ?1")
+    @Query("SELECT p FROM Price p JOIN FETCH p.product WHERE p.product.barcode = ?1 ORDER BY p.instant DESC")
     List<Price> findAllByProductBarcode(@NonNull String barcode);
 
     @Override
