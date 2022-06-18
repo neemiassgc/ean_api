@@ -38,4 +38,8 @@ public class PersistenceService {
 
         return (P) productBase;
     }
+
+    public <P extends ProductBase> P findProductByBarcode(@NonNull final String barcode) {
+        return findProductByBarcode(barcode, Integer.MAX_VALUE);
+    }
 }
