@@ -1,6 +1,6 @@
 package com.api.projection;
 
-import com.api.projection.deserializer.ProductWithLatestPriceDeserializer;
+import com.api.projection.deserializer.ProductBaseDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +14,13 @@ public final class Projection {
 
     private Projection() {}
 
-    private interface ProductBase {
+    public interface ProductBase {
         String getDescription();
         String getBarcode();
         Integer getSequenceCode();
     }
 
-    @JsonDeserialize(using = ProductWithLatestPriceDeserializer.class)
+    @JsonDeserialize(using = ProductBaseDeserializer.class)
     public interface ProductWithLatestPrice extends ProductBase {
         PriceWithInstant getLatestPrice();
     }
