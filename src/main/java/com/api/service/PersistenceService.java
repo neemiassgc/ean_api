@@ -46,6 +46,12 @@ public class PersistenceService {
         return (P) productBase;
     }
 
+    @SuppressWarnings("unchecked")
+    public <P extends ProductBase> List<P> findAllProducts() {
+        final List<Price> priceList = priceRepository.findAll();
+        return (List<P>) domainMapper.toProductListWithManyPrices(priceList);
+    }
+
     public <P extends ProductBase> P findProductByBarcode(@NonNull final String barcode) {
         return findProductByBarcode(barcode, Integer.MAX_VALUE);
     }
