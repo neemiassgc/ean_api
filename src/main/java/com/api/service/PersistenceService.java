@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.api.projection.Projection.ProductBase;
 
@@ -26,13 +27,19 @@ public class PersistenceService {
 
     @SuppressWarnings("unchecked")
     public <P extends ProductBase> P findProductByBarcode(@NonNull final String barcode, int limit) {
-        final List<Price> priceList = priceRepository.findAllByProductBarcode(barcode, PageRequest.ofSize(limit));
+        final List<Price> priceList =
+        priceRepository.findAllByProductBarcode(
+            barcode,
+            PageRequest.ofSize(limit == 0 ? Integer.MAX_VALUE : limit)
+        );
 
         if (!priceList.isEmpty())
             return (P) domainMapper.toProductWithManyPrices(priceList);
 
-        final ProductBase productBase = productExternalService.fetchByEanCode(barcode)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        final Optional<ProductBase> optionalProductBase = productExternalService.fetchByEanCode(barcode);
+
+        final ProductBase productBase = optionalProductBase
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         priceRepository.save(domainMapper.mapToPrice(productBase));
 
