@@ -1,10 +1,7 @@
 package com.api.controller;
 
 import com.api.error.ErrorTemplate;
-import com.api.projection.BarcodeInput;
-import com.api.repository.PriceRepository;
-import com.api.service.DomainMapper;
-import com.api.service.ProductService;
+import com.api.service.PersistenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,35 +11,30 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.api.projection.Projection.*;
+import static com.api.projection.Projection.ProductBase;
 
 @RestController
 @RequestMapping(path = "/api")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ProductController {
 
-    private final ProductService productService;
-    private final DomainMapper domainMapper;
-    private final PriceRepository priceRepository;
-
-    @PostMapping(path = "/products", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductWithLatestPrice create(@RequestBody @Valid BarcodeInput barcodeInput) {
-        return domainMapper.toProductWithLatestPrice(priceRepository.findLatestPriceByProductBarcode(barcodeInput.getBarcode()).get());
-    }
+    private final PersistenceService persistenceService;
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ProductWithAllPrices> getAll() {
-        return domainMapper.toProductListWithAllPrices(priceRepository.findAll());
+    public List<ProductBase> getAll() {
+        return persistenceService.findAllProducts();
     }
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ProductWithAllPrices getByBarcode(@PathVariable("barcode") String barcode) {
-        return domainMapper.toProductWithAllPrices(priceRepository.findAllByProductBarcode(barcode));
+    public ProductBase getByBarcode(
+        @PathVariable("barcode") String barcode,
+        @RequestParam(name = "lop", required = false, defaultValue = "0") int limitOfPrices
+    ) {
+        return persistenceService.findProductByBarcode(barcode, limitOfPrices);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
