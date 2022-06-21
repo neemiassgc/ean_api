@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Objects;
 
-import static com.api.projection.Projection.ProductBase;
 import static com.api.projection.Projection.PriceWithInstant;
+import static com.api.projection.Projection.ProductBase;
 
 public final class ProductBaseDeserializer extends StdDeserializer<ProductBase> {
 
