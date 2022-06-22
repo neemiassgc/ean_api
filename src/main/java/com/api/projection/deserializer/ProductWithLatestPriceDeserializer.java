@@ -1,7 +1,6 @@
 package com.api.projection.deserializer;
 
 import com.api.pojo.DomainUtils;
-import com.api.projection.Projection;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -16,13 +15,13 @@ import java.util.Objects;
 import static com.api.projection.Projection.PriceWithInstant;
 import static com.api.projection.Projection.ProductWithLatestPrice;
 
-public final class ProductBaseDeserializer extends StdDeserializer<ProductWithLatestPrice> {
+public final class ProductWithLatestPriceDeserializer extends StdDeserializer<ProductWithLatestPrice> {
 
-    public ProductBaseDeserializer() {
+    public ProductWithLatestPriceDeserializer() {
         this(null);
     }
 
-    public ProductBaseDeserializer(Class<?> vc) {
+    public ProductWithLatestPriceDeserializer(Class<?> vc) {
         super(vc);
     }
 
