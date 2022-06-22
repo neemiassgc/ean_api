@@ -5,6 +5,8 @@ import com.api.pojo.SessionInstance;
 import com.api.projection.Projection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -35,6 +37,7 @@ public class ProductExternalService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
+    @Setter(AccessLevel.PRIVATE)
     private SessionInstance sessionInstance;
 
     @Autowired
@@ -171,9 +174,5 @@ public class ProductExternalService {
                 }
             }
         );
-    }
-
-    private void setSessionInstance(SessionInstance sessionInstance) {
-        this.sessionInstance = sessionInstance;
     }
 }
