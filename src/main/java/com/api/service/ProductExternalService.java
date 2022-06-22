@@ -131,7 +131,7 @@ public class ProductExternalService {
         return new SessionInstance(resourcesMap.get("instance_id"), ajaxIdentifier);
     }
 
-    public Optional<ProductBase> fetchByEanCode(final String barcode) {
+    public Optional<ProductBase> fetchByBarcode(final String barcode) {
         Objects.requireNonNull(barcode);
 
         final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -161,13 +161,13 @@ public class ProductExternalService {
 
                     return Optional.ofNullable(productWithLatestPrice).or(() -> {
                         this.setSessionInstance(this.newSessionInstance());
-                        return fetchByEanCode(barcode);
+                        return fetchByBarcode(barcode);
                     });
                 }
 
                 catch (InvalidDefinitionException ide) {
                     this.setSessionInstance(this.newSessionInstance());
-                    return fetchByEanCode(barcode);
+                    return fetchByBarcode(barcode);
                 }
             }
         );
