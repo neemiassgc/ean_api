@@ -4,6 +4,7 @@ import com.api.pojo.DomainUtils;
 import com.api.pojo.SessionInstance;
 import com.api.projection.Projection;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -25,6 +26,8 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.api.projection.Projection.ProductBase;
 
 @Service
 public class ProductExternalService {
@@ -128,7 +131,7 @@ public class ProductExternalService {
         return new SessionInstance(resourcesMap.get("instance_id"), ajaxIdentifier);
     }
 
-    public Optional<Projection.ProductBase> fetchByEanCode(final String barcode) {
+    public Optional<ProductBase> fetchByEanCode(final String barcode) {
         Objects.requireNonNull(barcode);
 
         final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -154,17 +157,12 @@ public class ProductExternalService {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
 
                 try {
-                    final Projection.ProductWithLatestPrice productWithLatestPrice =
-                        objectMapper.readValue(json, Projection.ProductWithLatestPrice.class);
+                    final ProductBase productWithLatestPrice = objectMapper.readValue(json, Projection.ProductWithLatestPrice.class);
 
-                    if (Objects.isNull(productWithLatestPrice)) {
-                        this.setSessionInstance(this.getASessionInstance());
                         return fetchByEanCode(barcode);
-                    }
+                    });
+                }
 
-                    return Optional.of(productWithLatestPrice);
-                } catch (Exception e)  {
-                    return Optional.empty();
                 }
             }
         );
