@@ -3,6 +3,7 @@ package com.api.service;
 import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.pojo.DomainUtils;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,12 +18,7 @@ import static com.api.projection.Projection.*;
 @Service
 public class DomainMapper {
 
-    public Price mapToPrice(final ProductBase productBase) {
-        if (!(productBase instanceof ProductWithLatestPrice))
-            throw new IllegalArgumentException("ProductBase must be of type ProductWithLatestPrice");
-
-        final ProductWithLatestPrice productWithLatestPrice = (ProductWithLatestPrice) productBase;
-
+    public Price mapToPrice(@NonNull ProductWithLatestPrice productWithLatestPrice) {
         final Product product = new Product();
         product.setDescription(productWithLatestPrice.getDescription());
         product.setSequenceCode(productWithLatestPrice.getSequenceCode());
