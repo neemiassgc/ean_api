@@ -124,7 +124,7 @@ public class ProductExternalService {
         );
     }
 
-    public SessionInstance getASessionInstance() {
+    public SessionInstance newSessionInstance() {
         final Map<String, String> resourcesMap = this.initialScrapingRequest();
         final String ajaxIdentifier = this.loginRequest(resourcesMap);
 
@@ -159,10 +159,15 @@ public class ProductExternalService {
                 try {
                     final ProductBase productWithLatestPrice = objectMapper.readValue(json, Projection.ProductWithLatestPrice.class);
 
+                    return Optional.ofNullable(productWithLatestPrice).or(() -> {
+                        this.setSessionInstance(this.newSessionInstance());
                         return fetchByEanCode(barcode);
                     });
                 }
 
+                catch (InvalidDefinitionException ide) {
+                    this.setSessionInstance(this.newSessionInstance());
+                    return fetchByEanCode(barcode);
                 }
             }
         );
