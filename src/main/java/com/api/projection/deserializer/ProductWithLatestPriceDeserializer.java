@@ -1,6 +1,7 @@
 package com.api.projection.deserializer;
 
 import com.api.pojo.DomainUtils;
+import com.api.projection.Projection;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -13,9 +14,9 @@ import java.time.Instant;
 import java.util.Objects;
 
 import static com.api.projection.Projection.PriceWithInstant;
-import static com.api.projection.Projection.ProductBase;
+import static com.api.projection.Projection.ProductWithLatestPrice;
 
-public final class ProductBaseDeserializer extends StdDeserializer<ProductBase> {
+public final class ProductBaseDeserializer extends StdDeserializer<ProductWithLatestPrice> {
 
     public ProductBaseDeserializer() {
         this(null);
@@ -27,7 +28,7 @@ public final class ProductBaseDeserializer extends StdDeserializer<ProductBase> 
 
     @Override
     @Nullable
-    public ProductBase deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+    public ProductWithLatestPrice deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
         final JsonNode jsonNode = p.getCodec().readTree(p);
 
         final JsonNode item = jsonNode.get("item");
