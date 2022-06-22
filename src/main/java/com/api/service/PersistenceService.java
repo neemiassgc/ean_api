@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.api.projection.Projection.ProductBase;
+import static com.api.projection.Projection.ProductWithLatestPrice;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -25,8 +25,7 @@ public class PersistenceService {
     private final ProductExternalService productExternalService;
     private final DomainMapper domainMapper;
 
-    @SuppressWarnings("unchecked")
-    public <P extends ProductBase> P findProductByBarcode(@NonNull final String barcode, int limit) {
+    public ProductBase findProductByBarcode(@NonNull final String barcode, int limit) {
         final List<Price> priceList =
         priceRepository.findAllByProductBarcode(
             barcode,
@@ -34,25 +33,22 @@ public class PersistenceService {
         );
 
         if (!priceList.isEmpty())
-            return (P) domainMapper.toProductWithManyPrices(priceList);
+            return domainMapper.toProductWithManyPrices(priceList);
 
-        final Optional<ProductBase> optionalProductBase = productExternalService.fetchByEanCode(barcode);
+        final ProductBase productBase = productExternalService.fetchByBarcode(barcode)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        final ProductBase productBase = optionalProductBase
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        priceRepository.save(domainMapper.mapToPrice((ProductWithLatestPrice) productBase));
 
-        priceRepository.save(domainMapper.mapToPrice(productBase));
-
-        return (P) productBase;
+        return productBase;
     }
 
-    @SuppressWarnings("unchecked")
-    public <P extends ProductBase> List<P> findAllProducts() {
+    public List<ProductBase> findAllProducts() {
         final List<Price> priceList = priceRepository.findAll();
-        return (List<P>) domainMapper.toProductListWithManyPrices(priceList);
+        return domainMapper.toProductListWithManyPrices(priceList);
     }
 
-    public <P extends ProductBase> P findProductByBarcode(@NonNull final String barcode) {
-        return findProductByBarcode(barcode, Integer.MAX_VALUE);
+    public ProductBase findProductByBarcode(@NonNull final String barcode) {
+        return findProductByBarcode(barcode, 0);
     }
 }
