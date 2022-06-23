@@ -48,6 +48,11 @@ public class PersistenceService {
         return domainMapper.toProductListWithManyPrices(priceList);
     }
 
+    public <I extends ProductBase> List<I> findAllProductsWithLatestPrice() {
+        //noinspection unchecked
+        return (List<I>) domainMapper.toProductListWithLatestPrice(priceRepository.findAllLatestPrice());
+    }
+
     public ProductBase findProductByBarcode(@NonNull final String barcode) {
         return findProductByBarcode(barcode, 0);
     }
