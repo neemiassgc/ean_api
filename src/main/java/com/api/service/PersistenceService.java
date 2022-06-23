@@ -16,6 +16,7 @@ import java.util.List;
 import static com.api.projection.Projection.ProductBase;
 import static com.api.projection.Projection.ProductWithLatestPrice;
 
+@SuppressWarnings("unchecked")
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PersistenceService {
@@ -25,7 +26,7 @@ public class PersistenceService {
     private final ProductExternalService productExternalService;
     private final DomainMapper domainMapper;
 
-    public ProductBase findProductByBarcode(@NonNull final String barcode, int limit) {
+    public <I extends ProductBase> I findProductByBarcode(@NonNull final String barcode, int limit) {
         final List<Price> priceList =
         priceRepository.findAllByProductBarcode(
             barcode,
@@ -33,23 +34,22 @@ public class PersistenceService {
         );
 
         if (!priceList.isEmpty())
-            return domainMapper.toProductWithManyPrices(priceList);
+            return (I) domainMapper.toProductWithManyPrices(priceList);
 
         final ProductBase productBase = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         priceRepository.save(domainMapper.mapToPrice((ProductWithLatestPrice) productBase));
 
-        return productBase;
+        return (I) productBase;
     }
 
-    public List<ProductBase> findAllProducts() {
+    public <I extends ProductBase> List<I> findAllProducts() {
         final List<Price> priceList = priceRepository.findAll();
-        return domainMapper.toProductListWithManyPrices(priceList);
+        return (List<I>) domainMapper.toProductListWithManyPrices(priceList);
     }
 
     public <I extends ProductBase> List<I> findAllProductsWithLatestPrice() {
-        //noinspection unchecked
         return (List<I>) domainMapper.toProductListWithLatestPrice(priceRepository.findAllLatestPrice());
     }
 
