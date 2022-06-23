@@ -1,7 +1,7 @@
 package com.api.repository;
 
 import com.api.entity.Product;
-import com.api.projection.Projection;
+import static com.api.projection.Projection.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -18,7 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
         "pri.price AS latestPrice, pri.instant AS instant FROM Price pri JOIN pri.product pro WHERE pro.barcode = ?1 " +
         "AND pri.instant = (SELECT MAX(pr.instant) FROM Price pr WHERE pr.product.barcode = ?1 GROUP BY pr.product)"
     )
-    Optional<Projection.ProductWithLatestPrice> findByBarcodeWithLatestPrice(final String barcode);
+    Optional<ProductWithLatestPrice> findByBarcodeWithLatestPrice(final String barcode);
 
     List<Product> findAllByOrderByDescriptionAsc();
 }
