@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -24,8 +25,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,20 +43,26 @@ public class ProductExternalService {
 
     @Autowired
     public ProductExternalService(final RestTemplateBuilder restTemplateBuilder, final ObjectMapper objectMapper) {
-        final Supplier<RestTemplate> restTemplateSupplier = () -> {
-            final CloseableHttpClient httpClient =
-                HttpClientBuilder.create()
-                    .setRedirectStrategy(DefaultRedirectStrategy.INSTANCE)
-                    .setDefaultCookieStore(new BasicCookieStore())
-                    .build();
+        final int twoSeconds = (int) Duration.ofSeconds(2).toMillis();
+        final RequestConfig requestConfig = RequestConfig
+            .custom()
+            .setConnectionRequestTimeout(twoSeconds)
+            .setConnectTimeout(twoSeconds)
+            .setConnectTimeout(twoSeconds)
+            .build();
 
-            return restTemplateBuilder
-                .rootUri("https://apex.savegnago.com.br/apexmobile")
-                .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
+        final CloseableHttpClient httpClient =
+            HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .setRedirectStrategy(DefaultRedirectStrategy.INSTANCE)
+                .setDefaultCookieStore(new BasicCookieStore())
                 .build();
-        };
 
-        this.restTemplate = restTemplateSupplier.get();
+        this.restTemplate = restTemplateBuilder
+            .rootUri("https://apex.savegnago.com.br/apexmobile")
+            .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
+            .build();
+
         this.objectMapper = objectMapper;
         this.sessionInstance = SessionInstance.EMPTY_SESSION;
     }
