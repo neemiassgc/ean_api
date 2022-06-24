@@ -1,6 +1,7 @@
 package com.api.projection.deserializer;
 
 import com.api.pojo.DomainUtils;
+import com.api.projection.ProjectionFactory;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -39,7 +40,7 @@ public final class ProductWithLatestPriceDeserializer extends StdDeserializer<Pr
         final PriceWithInstant latestPrice =
             new PriceWithInstant(DomainUtils.parsePrice(item.get(4).get("value").asText()), Instant.now());
 
-        return DomainUtils.productWithLatestPriceBuilder()
+        return ProjectionFactory.productWithLatestPriceBuilder()
             .description(item.get(1).get("value").asText())
             .barcode(item.get(5).get("value").asText())
             .sequenceCode(item.get(2).get("value").asInt())

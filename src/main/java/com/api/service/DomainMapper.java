@@ -2,7 +2,7 @@ package com.api.service;
 
 import com.api.entity.Price;
 import com.api.entity.Product;
-import com.api.pojo.DomainUtils;
+import com.api.projection.ProjectionFactory;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ public class DomainMapper {
     }
 
     public ProductBase toProductWithLatestPrice(@NonNull final Price price) {
-        return DomainUtils
+        return ProjectionFactory
             .productWithLatestPriceBuilder()
             .description(price.getProduct().getDescription())
             .barcode(price.getProduct().getBarcode())
@@ -47,7 +47,7 @@ public class DomainMapper {
     public ProductBase toProductWithManyPrices(@NonNull final List<Price> priceList) {
         final Product product = priceList.get(0).getProduct();
 
-        return DomainUtils.productWithManyPricesBuilder()
+        return ProjectionFactory.productWithManyPricesBuilder()
             .description(product.getDescription())
             .barcode(product.getBarcode())
             .sequenceCode(product.getSequenceCode())
