@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -22,6 +23,8 @@ public final class Projection {
 
     @JsonDeserialize(using = ProductWithLatestPriceDeserializer.class)
     public interface ProductWithLatestPrice extends ProductBase {
+
+        @Value("#{new com.api.projection.Projection.PriceWithInstant(new java.math.BigDecimal(target.latestPrice.toString()), target.instant)}")
         PriceWithInstant getLatestPrice();
     }
 
