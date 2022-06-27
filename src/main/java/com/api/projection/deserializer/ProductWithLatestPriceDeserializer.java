@@ -7,7 +7,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -28,14 +30,15 @@ public final class ProductWithLatestPriceDeserializer extends StdDeserializer<Pr
 
     @Override
     @Nullable
-    public ProductWithLatestPrice deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+    public ProductWithLatestPrice deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         final JsonNode jsonNode = p.getCodec().readTree(p);
 
         final JsonNode item = jsonNode.get("item");
 
         if (Objects.isNull(item)) return null;
 
-        if (item.get(5).get("value").asText().isEmpty()) throw new IllegalStateException("Item name is empty");
+        if (item.get(5).get("value").asText().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found", new IllegalStateException("Item name is empty"));
 
         final PriceWithInstant latestPrice =
             new PriceWithInstant(DomainUtils.parsePrice(item.get(4).get("value").asText()), Instant.now());
