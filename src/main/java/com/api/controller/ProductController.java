@@ -8,10 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -22,6 +26,7 @@ import static com.api.projection.Projection.ProductBase;
 @RestController
 @RequestMapping(path = "/api")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Validated
 public class ProductController {
 
     private final PersistenceService persistenceService;
@@ -33,8 +38,8 @@ public class ProductController {
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ProductBase getByBarcode(
-        @PathVariable("barcode") String barcode,
-        @RequestParam(name = "lop", required = false, defaultValue = "0") int limitOfPrices
+        @PathVariable("barcode") @NotBlank @Size(min = 13, max = 13) String barcode,
+        @RequestParam(name = "lop", required = false, defaultValue = "0") @PositiveOrZero int limitOfPrices
     ) {
         return persistenceService.findProductByBarcode(barcode, limitOfPrices);
     }
@@ -46,6 +51,17 @@ public class ProductController {
             .getFieldErrors()
             .stream()
             .map(fieldError -> new Violation(fieldError.getField(), fieldError.getDefaultMessage()))
+            .collect(Collectors.toSet());
+
+        return new ErrorTemplate(violations);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ErrorTemplate handleConstraintViolationException(final ConstraintViolationException cve) {
+        final Set<Violation> violations = cve.getConstraintViolations()
+            .stream()
+            .map(constraint -> new Violation(constraint.getInvalidValue().toString(), constraint.getMessage()))
             .collect(Collectors.toSet());
 
         return new ErrorTemplate(violations);
