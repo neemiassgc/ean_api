@@ -1,5 +1,7 @@
 package com.api.controller;
 
+import com.api.annotation.Barcode;
+import com.api.annotation.Number;
 import com.api.error.ErrorTemplate;
 import com.api.error.Violation;
 import com.api.service.PersistenceService;
@@ -13,9 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -38,10 +38,11 @@ public class ProductController {
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ProductBase getByBarcode(
-        @PathVariable("barcode") @NotBlank @Size(min = 13, max = 13) String barcode,
-        @RequestParam(name = "lop", required = false, defaultValue = "0") @PositiveOrZero int limitOfPrices
+        @PathVariable("barcode") @Barcode String barcode,
+        @RequestParam(name = "lop", required = false, defaultValue = "0")
+        @Number(message = "lop must be a positive number or zero") String limitOfPrices
     ) {
-        return persistenceService.findProductByBarcode(barcode, limitOfPrices);
+        return persistenceService.findProductByBarcode(barcode, Integer.parseInt(limitOfPrices));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
