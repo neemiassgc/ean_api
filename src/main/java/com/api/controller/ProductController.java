@@ -1,6 +1,7 @@
 package com.api.controller;
 
 import com.api.error.ErrorTemplate;
+import com.api.error.Violation;
 import com.api.service.PersistenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.api.projection.Projection.ProductBase;
@@ -40,19 +42,19 @@ public class ProductController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorTemplate handleMethodArgumentNotValid(final MethodArgumentNotValidException mnv) {
-        final List<String> reasons = mnv.getBindingResult()
+        final Set<Violation> violations = mnv.getBindingResult()
             .getFieldErrors()
             .stream()
-            .map(fe -> "'"+fe.getField()+"' "+fe.getDefaultMessage())
-            .collect(Collectors.toList());
+            .map(fieldError -> new Violation(fieldError.getField(), fieldError.getDefaultMessage()))
+            .collect(Collectors.toSet());
 
-        return new ErrorTemplate(HttpStatus.BAD_REQUEST, reasons);
+        return new ErrorTemplate(violations);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorTemplate> handleResponseStatusException(final ResponseStatusException rse) {
+    public ResponseEntity<String> handleResponseStatusException(final ResponseStatusException rse) {
         return ResponseEntity
             .status(rse.getStatus())
-            .body(new ErrorTemplate(rse.getStatus(), List.of(Objects.requireNonNullElseGet(rse.getReason(), () -> "No reasons"))));
+            .body(Objects.requireNonNullElseGet(rse.getReason(), () -> "No reasons"));
     }
 }
