@@ -1,30 +1,24 @@
 package com.api.error;
 
 import lombok.Getter;
-import lombok.Setter;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
+@RequiredArgsConstructor
 public final class ErrorTemplate {
 
-    private final List<String> reasons;
-    private final HttpStatus status;
-
-    public ErrorTemplate(final HttpStatus status, final List<String> reasons) {
-        this.status = status;
-        this.reasons = reasons;
-    }
+    private final Set<Violation> violations;
 
     @Override
     public String toString() {
-        final String template = "ErrorTemplate{status=%s, reasons=[%s]}";
         return String.format(
-            template,
-            status.value()+" "+status.getReasonPhrase(),
-            String.join(", ", this.reasons)
+            "violation={%s}",
+            violations.stream()
+                .map(Violation::toString)
+                .collect(Collectors.joining())
         );
     }
 }
