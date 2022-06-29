@@ -56,8 +56,4 @@ public class PersistenceService {
     public void saveProductWithPrice(final ProductWithLatestPrice productWithLatestPrice) {
         priceRepository.save(domainMapper.mapToPrice(productWithLatestPrice));
     }
-
-    public ProductBase findProductByBarcode(@NonNull final String barcode) {
-        return findProductByBarcode(barcode, 0);
-    }
 }
