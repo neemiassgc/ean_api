@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.api.projection.Projection.*;
@@ -27,7 +26,7 @@ public class DomainMapper {
         return new Price(productWithLatestPrice.getLatestPrice().getPrice().doubleValue(), product);
     }
 
-    public ProductBase toProductWithLatestPrice(@NonNull final Price price) {
+    public ProductWithLatestPrice toProductWithLatestPrice(@NonNull final Price price) {
         return ProjectionFactory
             .productWithLatestPriceBuilder()
             .description(price.getProduct().getDescription())
@@ -37,14 +36,14 @@ public class DomainMapper {
             .build();
     }
 
-    public List<ProductBase> toProductListWithManyPrices(@NonNull final List<Price> prices) {
+    public List<ProductWithManyPrices> toProductListWithManyPrices(@NonNull final List<Price> prices) {
         final Map<Product, List<Price>> mapOfProducts = prices.stream()
             .collect(Collectors.groupingBy(Price::getProduct, HashMap::new, Collectors.toList()));
 
         return mapOfProducts.values().stream().map(this::toProductWithManyPrices).collect(Collectors.toList());
     }
 
-    public ProductBase toProductWithManyPrices(@NonNull final List<Price> priceList) {
+    public ProductWithManyPrices toProductWithManyPrices(@NonNull final List<Price> priceList) {
         final Product product = priceList.get(0).getProduct();
 
         return ProjectionFactory.productWithManyPricesBuilder()
@@ -58,7 +57,7 @@ public class DomainMapper {
             .build();
     }
 
-    public List<ProductBase> toProductListWithLatestPrice(@NonNull final List<Price> priceList) {
+    public List<ProductWithLatestPrice> toProductListWithLatestPrice(@NonNull final List<Price> priceList) {
         return priceList.stream().map(this::toProductWithLatestPrice).collect(Collectors.toList());
     }
 }
