@@ -32,6 +32,14 @@ public final class Projection {
         List<PriceWithInstant> getPrices();
     }
 
+    public interface Paged<T> {
+        int getCurrentPage();
+        int getTotalPages();
+        int getNumberOfItems();
+        boolean getHasNext();
+        T getContent();
+    }
+
     @Getter
     @RequiredArgsConstructor
     @ToString
