@@ -1,20 +1,20 @@
 package com.api.service;
 
 import com.api.entity.Price;
+import static com.api.projection.Projection.*;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-
-import static com.api.projection.Projection.ProductBase;
-import static com.api.projection.Projection.ProductWithLatestPrice;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 @Service
@@ -44,13 +44,13 @@ public class PersistenceService {
         return (I) productBase;
     }
 
-    public <I extends ProductBase> List<I> findAllProducts() {
+    public List<ProductWithManyPrices> findAllProducts() {
         final List<Price> priceList = priceRepository.findAll();
-        return (List<I>) domainMapper.toProductListWithManyPrices(priceList);
+        return domainMapper.toProductListWithManyPrices(priceList);
     }
 
-    public <I extends ProductBase> List<I> findAllProductsWithLatestPrice() {
-        return (List<I>) domainMapper.toProductListWithLatestPrice(priceRepository.findAllLatestPrice());
+    public List<ProductWithLatestPrice> findAllProductsWithLatestPrice() {
+        return domainMapper.toProductListWithLatestPrice(priceRepository.findAllLatestPrice());
     }
 
     public void saveProductWithPrice(final ProductWithLatestPrice productWithLatestPrice) {
