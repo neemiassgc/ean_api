@@ -1,5 +1,9 @@
 package com.api.pojo;
 
+import lombok.NonNull;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +14,11 @@ import java.util.stream.Collectors;
 public final class DomainUtils {
 
     private DomainUtils() {}
+
+    public static Pageable parsePage(@NonNull final String value) {
+        final String[] split = value.split("-");
+        return PageRequest.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+    }
 
     public static BigDecimal parsePrice(final String priceInput) {
         return new BigDecimal((priceInput.replace(",", ".")));
