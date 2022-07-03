@@ -4,6 +4,7 @@ import com.api.annotation.Barcode;
 import com.api.annotation.Number;
 import com.api.error.ErrorTemplate;
 import com.api.error.Violation;
+import com.api.pojo.DomainUtils;
 import com.api.service.PersistenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.api.projection.Projection.ProductBase;
+import static com.api.projection.Projection.*;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -32,8 +34,13 @@ public class ProductController {
     private final PersistenceService persistenceService;
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ProductBase> getAll() {
-        return persistenceService.findAllProducts();
+    public ResponseEntity<?> getAll(
+        @RequestParam(name = "pag", required = false)
+        @Pattern(regexp = "\\d{1,3}-\\d{1,3}", message = "pag must match digit-digit") String pag
+    ) {
+        if (Objects.isNull(pag))
+            return ResponseEntity.ok(persistenceService.findAllProducts());
+        return ResponseEntity.ok(persistenceService.findAllPagedProducts(DomainUtils.parsePage(pag)));
     }
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
