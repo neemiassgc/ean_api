@@ -2,11 +2,14 @@ package com.api.service;
 
 import com.api.entity.Price;
 import static com.api.projection.Projection.*;
+
+import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -47,6 +51,14 @@ public class PersistenceService {
     public List<ProductWithManyPrices> findAllProducts() {
         final List<Price> priceList = priceRepository.findAll();
         return domainMapper.toProductListWithManyPrices(priceList);
+    }
+
+    public Paged<List<ProductWithManyPrices>> findAllPagedProducts(final Pageable pageable) {
+        final Page<UUID> page = productRepository.findAllId(pageable);
+        final List<ProductWithManyPrices> productWithManyPricesList =
+            domainMapper.toProductListWithManyPrices(priceRepository.findAllByProductId(page.getContent()));
+
+        return ProjectionFactory.paged(page, productWithManyPricesList);
     }
 
     public List<ProductWithLatestPrice> findAllProductsWithLatestPrice() {
