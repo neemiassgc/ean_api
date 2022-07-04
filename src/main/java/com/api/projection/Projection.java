@@ -44,7 +44,7 @@ public final class Projection {
     @RequiredArgsConstructor
     @ToString
     public static class PriceWithInstant {
-        final BigDecimal price;
+        final BigDecimal value;
         final Instant instant;
     }
 }

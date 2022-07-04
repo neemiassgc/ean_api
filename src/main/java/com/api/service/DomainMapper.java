@@ -24,7 +24,7 @@ public class DomainMapper {
         product.setSequenceCode(productWithLatestPrice.getSequenceCode());
         product.setBarcode(productWithLatestPrice.getBarcode());
 
-        return new Price(productWithLatestPrice.getLatestPrice().getPrice().doubleValue(), product);
+        return new Price(productWithLatestPrice.getLatestPrice().getValue().doubleValue(), product);
     }
 
     public ProductWithLatestPrice toProductWithLatestPrice(@NonNull final Price price) {
