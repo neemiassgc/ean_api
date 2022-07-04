@@ -76,7 +76,30 @@ class ProductControllerTest {
         verify(persistenceService, times(1)).findAllProducts();
         verify(persistenceService, only()).findAllProducts();
     }
-    
+
+    @Test
+    void when_GET_getAll_should_response_a_paged_product_list_with_200() throws Exception {
+        given(persistenceService.findAllPagedProducts(Mockito.any(Pageable.class))).willReturn(getPagedProductList());
+
+        mockMvc.perform(get("/api/products?pag=0-3")
+            .characterEncoding("UTF-8")
+            .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content", hasSize(3)))
+        .andExpect(jsonPath("$.content[0].prices").isArray())
+        .andExpect(jsonPath("$.content[*].prices[*]", hasSize(9)))
+        .andExpect(jsonPath("$.content[0].prices[*].value", contains(5.45, 3.67, 8.5)))
+        .andExpect(jsonPath("$.totalPages").value(1))
+        .andExpect(jsonPath("$.numberOfItems").value(3))
+        .andExpect(jsonPath("$.hasNext").value(false))
+        .andExpect(jsonPath("$.currentPage").value(0));
+
+        verify(persistenceService, never()).findAllProducts();
+    }
+
     @Test
     void when_GET_getByBarcode_should_response_a_product_with_all_prices_with_200() throws Exception {
         final String validBarcode = "7891962057620";
