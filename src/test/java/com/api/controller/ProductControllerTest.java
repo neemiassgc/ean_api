@@ -3,18 +3,19 @@ package com.api.controller;
 import com.api.service.PersistenceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import static com.api.controller.ProductControllerTestUtils.getNewProduct;
-import static com.api.controller.ProductControllerTestUtils.getProductList;
+import static com.api.controller.ProductControllerTestUtils.*;
 import static com.api.projection.Projection.ProductWithManyPrices;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
@@ -54,7 +55,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$", hasSize(3)))
         .andExpect(jsonPath("$[*].prices.*").isArray())
         .andExpect(jsonPath("$[*].prices.*", hasSize(9)))
-        .andExpect(jsonPath("$[0].prices[0].price").value(5.45));
+        .andExpect(jsonPath("$[0].prices[0].value").value(5.45));
 
         verify(persistenceService, times(1)).findAllProducts();
         verify(persistenceService, only()).findAllProducts();
@@ -75,7 +76,7 @@ class ProductControllerTest {
         verify(persistenceService, times(1)).findAllProducts();
         verify(persistenceService, only()).findAllProducts();
     }
-
+    
     @Test
     void when_GET_getByBarcode_should_response_a_product_with_all_prices_with_200() throws Exception {
         final String validBarcode = "7891962057620";
@@ -93,7 +94,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.sequenceCode", is(134262)))
         .andExpect(jsonPath("$.barcode", is(validBarcode)))
         .andExpect(jsonPath("$.prices", hasSize(3)))
-        .andExpect(jsonPath("$.prices[*].price", contains(5.45, 8.56, 6.3)));
+        .andExpect(jsonPath("$.prices[*].value", contains(5.45, 8.56, 6.3)));
 
         verify(persistenceService, times(1)).findProductByBarcode(eq(validBarcode), eq(0));
         verify(persistenceService, only()).findProductByBarcode(eq(validBarcode), eq(0));
@@ -118,7 +119,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.sequenceCode", is(134262)))
         .andExpect(jsonPath("$.barcode", is(validBarcode)))
         .andExpect(jsonPath("$.prices").doesNotExist())
-        .andExpect(jsonPath("$.latestPrice.price", is(2.6)));
+        .andExpect(jsonPath("$.latestPrice.value", is(2.6)));
 
         verify(persistenceService, times(1)).findProductByBarcode(eq(validBarcode), eq(limitOfPrices));
         verify(persistenceService, only()).findProductByBarcode(eq(validBarcode), eq(limitOfPrices));
@@ -142,7 +143,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.sequenceCode", is(134262)))
         .andExpect(jsonPath("$.barcode", is(validBarcode)))
         .andExpect(jsonPath("$.prices", hasSize(2)))
-        .andExpect(jsonPath("$.prices[*].price", contains(2.6, 3.4)));
+        .andExpect(jsonPath("$.prices[*].value", contains(2.6, 3.4)));
 
         verify(persistenceService, times(1)).findProductByBarcode(eq(validBarcode), eq(limitOfPrices));
         verify(persistenceService, only()).findProductByBarcode(eq(validBarcode), eq(limitOfPrices));
