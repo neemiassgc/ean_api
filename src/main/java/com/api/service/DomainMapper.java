@@ -7,6 +7,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +51,10 @@ public class DomainMapper {
             .description(product.getDescription())
             .barcode(product.getBarcode())
             .sequenceCode(product.getSequenceCode())
-            .prices(
-                priceList.stream().map(price ->
-                    new PriceWithInstant(BigDecimal.valueOf(price.getPrice()), price.getInstant()))
-                    .collect(Collectors.toList()))
+            .prices(priceList.stream()
+                .sorted(Comparator.comparing(Price::getInstant).reversed())
+                .map(price -> new PriceWithInstant(BigDecimal.valueOf(price.getPrice()), price.getInstant()))
+                .collect(Collectors.toList()))
             .build();
     }
 
