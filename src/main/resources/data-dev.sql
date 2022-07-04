@@ -11,7 +11,7 @@ INSERT INTO products (id, description, barcode, sequence_code) VALUES
 ('3f30dc5c-5ce1-4556-a648-de8e55b0f6be', 'OLEO MARIA', '7896036093085', 1184),
 ('f3a9f940-9c07-4986-a655-8b91119dae8a', 'PAO BAUDUC 400G INTE', '7891962057620', 134262);
 
-INSERT INTO prices (id, product_id, price, instant) VALUES
+INSERT INTO prices (id, product_id, value, instant) VALUES
 ('7530644e-bdfd-467d-a80a-ab126b9bdc8b', '04f3dfdd-c811-4cc7-8e82-62d8406ad32c', 16.5, '2022-05-27T12:12:21.058Z'),
 ('85d76264-0855-4d48-b4ec-4b9ce860a575', '04f3dfdd-c811-4cc7-8e82-62d8406ad32c', 6.61, '2022-02-16T01:19:47.929Z'),
 ('1ea91cf3-f2ed-4b5d-8b0c-e77ab88d89c2', '04f3dfdd-c811-4cc7-8e82-62d8406ad32c', 9.85, '2021-12-26T23:18:48.352Z'),

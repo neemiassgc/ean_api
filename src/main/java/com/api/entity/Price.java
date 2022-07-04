@@ -18,7 +18,7 @@ public class Price {
     @GeneratedValue
     private UUID id;
 
-    private Double price;
+    private Double value;
 
     @Column(name = "instant", columnDefinition = "TIMESTAMPTZ")
     private Instant instant = Instant.now();
@@ -27,16 +27,16 @@ public class Price {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices"))
     private Product product;
 
-    public Price(final Double price, final Product product) {
-        this(price, Instant.now(), product);
+    public Price(final Double value, final Product product) {
+        this(value, Instant.now(), product);
     }
 
-    public Price(final Double price, final Instant instant, final Product product) {
-        this(null, price, instant, product);
+    public Price(final Double value, final Instant instant, final Product product) {
+        this(null, value, instant, product);
     }
 
     @Override
     public String toString() {
-        return String.format("Price{id=%s, price=%s, created=%s, product=%s}", id, price, instant, product);
+        return String.format("Price{id=%s, value=%s, created=%s, product=%s}", id, value, instant, product);
     }
 }
