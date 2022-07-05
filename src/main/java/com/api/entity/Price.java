@@ -3,6 +3,7 @@ package com.api.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ public class Price {
     @GeneratedValue
     private UUID id;
 
-    private Double value;
+    private BigDecimal value;
 
     @Column(name = "instant", columnDefinition = "TIMESTAMPTZ")
     private Instant instant = Instant.now();
@@ -27,11 +28,11 @@ public class Price {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices"))
     private Product product;
 
-    public Price(final Double value, final Product product) {
+    public Price(final BigDecimal value, final Product product) {
         this(value, Instant.now(), product);
     }
 
-    public Price(final Double value, final Instant instant, final Product product) {
+    public Price(final BigDecimal value, final Instant instant, final Product product) {
         this(null, value, instant, product);
     }
 

@@ -24,7 +24,7 @@ public class DomainMapper {
         product.setSequenceCode(productWithLatestPrice.getSequenceCode());
         product.setBarcode(productWithLatestPrice.getBarcode());
 
-        return new Price(productWithLatestPrice.getLatestPrice().getValue().doubleValue(), product);
+        return new Price(productWithLatestPrice.getLatestPrice().getValue(), product);
     }
 
     public ProductWithLatestPrice toProductWithLatestPrice(@NonNull final Price price) {
@@ -33,7 +33,7 @@ public class DomainMapper {
             .description(price.getProduct().getDescription())
             .barcode(price.getProduct().getBarcode())
             .sequenceCode(price.getProduct().getSequenceCode())
-            .latestPrice(new PriceWithInstant(BigDecimal.valueOf(price.getValue()), price.getInstant()))
+            .latestPrice(new PriceWithInstant(price.getValue(), price.getInstant()))
             .build();
     }
 
@@ -53,7 +53,7 @@ public class DomainMapper {
             .sequenceCode(product.getSequenceCode())
             .prices(priceList.stream()
                 .sorted(Comparator.comparing(Price::getInstant).reversed())
-                .map(price -> new PriceWithInstant(BigDecimal.valueOf(price.getValue()), price.getInstant()))
+                .map(price -> new PriceWithInstant(price.getValue(), price.getInstant()))
                 .collect(Collectors.toList()))
             .build();
     }
