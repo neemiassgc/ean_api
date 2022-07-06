@@ -106,4 +106,20 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.content[*].barcode", contains("7891962057620")))
         .andExpect(jsonPath("$.content[*].prices[*]", hasSize(1)));
     }
+
+    @Test
+    void when_GET_getAll_violating_parameter_pag_should_response_400() throws Exception {
+        final String violatedPag = "0-)";
+
+        mockMvc.perform(get(DEFAULT_URL).queryParam("pag", violatedPag)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.violations").isArray())
+        .andExpect(jsonPath("$.violations", hasSize(1)))
+        .andExpect(jsonPath("$.violations[0].field").value(violatedPag))
+        .andExpect(jsonPath("$.violations[0].violationMessage").value("pag must match digit-digit"));
+    }
 }
