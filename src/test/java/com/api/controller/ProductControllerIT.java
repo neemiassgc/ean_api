@@ -129,7 +129,6 @@ public class ProductControllerIT {
 
         mockMvc.perform(get(DEFAULT_URL+"/"+barcode)
             .characterEncoding(StandardCharsets.UTF_8)
-            .contentType(MediaType.APPLICATION_JSON)
         )
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -139,5 +138,18 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.prices").isArray())
         .andExpect(jsonPath("$.prices", hasSize(10)))
         .andExpect(jsonPath("$.prices[*].value", contains(12.70, 19.00, 16.50, 6.61, 16.80, 9.85, 10.60, 16.10, 12.60, 19.10)));
+    }
+
+    @Test
+    void when_GET_getByBarcode_where_barcode_does_not_exist_should_response_not_found() throws Exception {
+        final String nonExistingBarcode = "7891000055129";
+
+        mockMvc.perform(get(DEFAULT_URL+"/"+nonExistingBarcode)
+            .characterEncoding(StandardCharsets.UTF_8)
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(content().encoding(StandardCharsets.UTF_8))
+        .andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE+";charset=UTF-8"))
+        .andExpect(content().string("Product not found"));
     }
 }
