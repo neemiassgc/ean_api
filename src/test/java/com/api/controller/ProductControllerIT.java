@@ -68,4 +68,27 @@ public class ProductControllerIT {
         )
         .andExpect(jsonPath("$.content[*].prices[*]", hasSize(40)));
     }
+
+    @Test
+    void when_GET_getAll_should_response_the_middle_page_of_paged_products_with_200() throws Exception {
+        final String middlePag = "1-5";
+
+        mockMvc.perform(get(DEFAULT_URL).queryParam("pag", middlePag)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content", hasSize(5)))
+        .andExpect(jsonPath("$.currentPage").value(1))
+        .andExpect(jsonPath("$.totalPages").value(3))
+        .andExpect(jsonPath("$.numberOfItems").value(5))
+        .andExpect(jsonPath("$.hasNext").value(true))
+        .andExpect(
+            jsonPath("$.content[*].barcode",
+            contains("7897534852624", "7896004004501", "7891098010575", "7896036093085", "7896656800018"))
+        )
+        .andExpect(jsonPath("$.content[*].prices[*]", hasSize(25)));
+    }
 }
