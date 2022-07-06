@@ -91,4 +91,24 @@ public class ProductControllerIT {
         )
         .andExpect(jsonPath("$.content[*].prices[*]", hasSize(25)));
     }
+
+    @Test
+    void when_GET_getAll_should_response_the_last_page_of_paged_products_with_200() throws Exception {
+        final String lastPage = "2-5";
+
+        mockMvc.perform(get(DEFAULT_URL).queryParam("pag", lastPage)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.currentPage").value(2))
+        .andExpect(jsonPath("$.totalPages").value(3))
+        .andExpect(jsonPath("$.numberOfItems").value(1))
+        .andExpect(jsonPath("$.hasNext").value(false))
+        .andExpect(jsonPath("$.content[*].barcode", contains("7891962057620")))
+        .andExpect(jsonPath("$.content[*].prices[*]", hasSize(1)));
+    }
 }
