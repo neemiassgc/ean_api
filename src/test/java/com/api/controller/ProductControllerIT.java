@@ -122,4 +122,22 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.violations[0].field").value(violatedPag))
         .andExpect(jsonPath("$.violations[0].violationMessage").value("pag must match digit-digit"));
     }
+
+    @Test
+    void when_GET_getByBarcode_should_response_a_product_with_200() throws Exception {
+        final String barcode = "7891000055120";
+
+        mockMvc.perform(get(DEFAULT_URL+"/"+barcode)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.description").value("ACHOC PO NESCAU 800G"))
+        .andExpect(jsonPath("$.sequenceCode").value(29250))
+        .andExpect(jsonPath("$.barcode").value(barcode))
+        .andExpect(jsonPath("$.prices").isArray())
+        .andExpect(jsonPath("$.prices", hasSize(10)))
+        .andExpect(jsonPath("$.prices[*].value", contains(12.70, 19.00, 16.50, 6.61, 16.80, 9.85, 10.60, 16.10, 12.60, 19.10)));
+    }
 }
