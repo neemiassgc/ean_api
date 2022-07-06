@@ -38,7 +38,7 @@ public final class ProductWithLatestPriceDeserializer extends StdDeserializer<Pr
         if (Objects.isNull(item)) return null;
 
         if (item.get(5).get("value").asText().isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not found", new IllegalStateException("Item name is empty"));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found", new IllegalStateException("Item name is empty"));
 
         final PriceWithInstant latestPrice =
             new PriceWithInstant(DomainUtils.parsePrice(item.get(4).get("value").asText()), Instant.now());
