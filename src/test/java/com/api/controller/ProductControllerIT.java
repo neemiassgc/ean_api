@@ -152,4 +152,21 @@ public class ProductControllerIT {
         .andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE+";charset=UTF-8"))
         .andExpect(content().string("Product not found"));
     }
+
+    @Test
+    void when_GET_getByBarcode_where_barcode_is_violated_should_response_bad_request() throws Exception {
+        final String violatedBarcode = "7890foobar";
+
+        mockMvc.perform(get(DEFAULT_URL+"/"+violatedBarcode)
+            .characterEncoding(StandardCharsets.UTF_8)
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.violations").isArray())
+        .andExpect(jsonPath("$.violations", hasSize(2)))
+        .andExpect(jsonPath("$.violations[0].field").value(violatedBarcode))
+        .andExpect(jsonPath("$.violations[1].field").value(violatedBarcode))
+        .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must contain only numbers"))
+        .andExpect(jsonPath("$.violations[1].violationMessage").value("barcode must has 13 characters"));
+    }
 }
