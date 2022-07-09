@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +23,20 @@ public class PriceRepositoryIT {
 
         assertThat(latestPrices).hasSize(11);
         assertThat(latestPrices).allSatisfy(price -> assertThat(price.getProduct()).isNotNull());
-        assertThat(latestPrices).extracting("price", Double.class).containsExactly(5.65, 3.5, 6.49, 8.49);
+        assertThat(latestPrices).extracting("value", BigDecimal.class)
+            .containsExactly(
+                new BigDecimal("12.70"),
+                new BigDecimal("4.06"),
+                new BigDecimal("18.00"),
+                new BigDecimal("5.29"),
+                new BigDecimal("3.75"),
+                new BigDecimal("9.74"),
+                new BigDecimal("11.30"),
+                new BigDecimal("5.65"),
+                new BigDecimal("3.50"),
+                new BigDecimal("6.49"),
+                new BigDecimal("8.49")
+            );
 
     }
 
