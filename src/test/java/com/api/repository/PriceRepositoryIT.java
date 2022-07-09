@@ -34,4 +34,13 @@ public class PriceRepositoryIT {
         assertThat(prices).hasSize(66);
         assertThat(prices).allSatisfy(price -> assertThat(price.getProduct()).isNotNull());
     }
+
+    @Test
+    void should_return_all_prices_for_a_given_product_barcode_findAllByProductBarcode() {
+        final List<Price> prices = priceRepository.findAllByProductBarcode("7891000055120", PageRequest.ofSize(10));
+
+        assertThat(prices).isNotNull();
+        assertThat(prices).hasSize(10);
+        assertThat(prices).allSatisfy(price -> assertThat(price).isNotNull());
+    }
 }
