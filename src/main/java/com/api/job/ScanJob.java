@@ -1,6 +1,7 @@
 package com.api.job;
 
-import com.api.service.PersistenceService;
+import com.api.entity.Price;
+import com.api.repository.PriceRepository;
 import com.api.service.ProductExternalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,19 +20,19 @@ import static com.api.projection.Projection.ProductWithLatestPrice;
 public class ScanJob implements Job {
 
     private final ProductExternalService productExternalService;
-    private final PersistenceService persistenceService;
+    private final PriceRepository priceRepository;
 
     @Override
     public void execute(JobExecutionContext context) {
-        final List<ProductWithLatestPrice> productsWithLatestPrice = persistenceService.findAllProductsWithLatestPrice();
+        final List<Price> allLatestPrices = priceRepository.findAllLatestPrice();
 
-        for (ProductWithLatestPrice productFromDB : productsWithLatestPrice) {
-            productExternalService.fetchByBarcode(productFromDB.getBarcode())
-                .map(product -> (ProductWithLatestPrice) product)
-                .ifPresent(externalProduct -> {
-                    if (!(productFromDB.getLatestPrice().equals(externalProduct.getLatestPrice()))) {
-                        persistenceService.saveProductWithPrice(externalProduct);
-                    }
+        for (final Price oldPrice : allLatestPrices) {
+            productExternalService.fetchByBarcode(oldPrice.getProduct().getBarcode())
+                .map(productBase -> ((ProductWithLatestPrice) productBase).getLatestPrice())
+                .map(priceWithInstant -> new Price(priceWithInstant.getValue(), priceWithInstant.getInstant(), oldPrice.getProduct()))
+                .ifPresent((newPrice) -> {
+                    if (!oldPrice.getValue().equals(newPrice.getValue()))
+                        priceRepository.save(newPrice);
                 });
         }
     }
