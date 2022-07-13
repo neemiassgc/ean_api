@@ -1,6 +1,7 @@
 package com.api.repository;
 
 import com.api.entity.Price;
+import com.api.entity.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,6 +9,8 @@ import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,6 +19,9 @@ public class PriceRepositoryIT {
 
     @Autowired
     private PriceRepository priceRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Test
     void should_return_all_latest_prices_with_their_products_findAllLatestPrice() {
@@ -56,5 +62,19 @@ public class PriceRepositoryIT {
         assertThat(prices).isNotNull();
         assertThat(prices).hasSize(10);
         assertThat(prices).allSatisfy(price -> assertThat(price).isNotNull());
+    }
+
+    @Test
+    void should_return_all_prices_by_a_product_id_list_findAllByProductId() {
+        final List<UUID> UUIDList = List.of(
+            UUID.fromString("3bf5543e-923d-46ff-ae36-127575fd30f8"),
+            UUID.fromString("f3a9f940-9c07-4986-a655-8b91119dae8a"),
+            UUID.fromString("04f3dfdd-c811-4cc7-8e82-62d8406ad32c"),
+            UUID.fromString("f346cc85-bb05-4a3a-baf7-28d13d07f381")
+        );
+
+        final List<Price> fetchedPrices = priceRepository.findAllByProductId(UUIDList);
+
+        assertThat(fetchedPrices).hasSize(29);
     }
 }
