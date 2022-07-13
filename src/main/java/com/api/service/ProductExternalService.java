@@ -167,15 +167,16 @@ public class ProductExternalService {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
 
                 try {
-                    final ProductBase productWithLatestPrice = objectMapper.readValue(json, Projection.ProductWithLatestPrice.class);
+                    final ProductBase productWithLatestPrice =
+                        objectMapper.readValue(json, Projection.ProductWithLatestPrice.class);
 
-                    return Optional.ofNullable(productWithLatestPrice).or(() -> {
-                        this.setSessionInstance(this.newSessionInstance());
-                        return fetchByBarcode(barcode);
-                    });
+                    return Optional.of(productWithLatestPrice);
                 }
+                catch (InvalidDefinitionException | IllegalStateException exception) {
+                    if (exception instanceof IllegalStateException)
+                        if (exception.getMessage().equals("Item name is empty"))
+                            return Optional.empty();
 
-                catch (InvalidDefinitionException ide) {
                     this.setSessionInstance(this.newSessionInstance());
                     return fetchByBarcode(barcode);
                 }
