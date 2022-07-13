@@ -20,7 +20,7 @@ class ProductExternalServiceIT {
     @Test
     void should_return_a_product() {
         final String existingBarcode = "7896336014230";
-        
+
         final Optional<ProductWithLatestPrice> optionalProduct =
             productExternalServiceUnderTest.fetchByBarcode(existingBarcode)
                 .map(p -> (ProductWithLatestPrice) p);
@@ -30,5 +30,17 @@ class ProductExternalServiceIT {
         assertThat(optionalProduct.get()).extracting("description").isEqualTo("PASTA AMENDOIM FIRST");
         assertThat(optionalProduct.get()).extracting("barcode").isEqualTo(existingBarcode);
         assertThat(optionalProduct.get()).extracting("sequenceCode").isEqualTo(137638);
+    }
+
+    @Test
+    void should_return_an_empty_optional() {
+        final String nonExistingBarcode = "7896336014765";
+
+        final Optional<ProductWithLatestPrice> optionalProduct =
+            productExternalServiceUnderTest.fetchByBarcode(nonExistingBarcode)
+                .map(p -> (ProductWithLatestPrice) p);
+
+        assertThat(optionalProduct).isNotNull();
+        assertThat(optionalProduct.isPresent()).isFalse();
     }
 }
