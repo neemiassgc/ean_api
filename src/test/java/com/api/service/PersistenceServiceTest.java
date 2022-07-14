@@ -16,6 +16,8 @@ public class PersistenceServiceTest {
     private ProductExternalService productExternalService;
     private DomainMapper domainMapper;
 
+    private final String DEFAULT_BARCODE = "7891000055120";
+
     @BeforeAll
     void init() {
         this.priceRepository = mock(PriceRepository.class);
