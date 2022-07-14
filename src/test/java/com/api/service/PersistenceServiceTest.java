@@ -133,5 +133,33 @@ public class PersistenceServiceTest {
             verify(priceRepository, never()).save(any(Price.class));
             verify(domainMapper, never()).mapToPrice(any());
         }
+
+        @Test
+        @DisplayName("When limit is seven then should return a product with seven prices")
+        void should_return_a_product_with_a_few_prices() {
+            // given
+            final int limit = 7;
+            final Pageable pageRequest = PageRequest.ofSize(limit);
+            final List<Price> listWithSevenPrices = pricesForTesting.stream().limit(limit).collect(Collectors.toList());
+
+            given(priceRepository.findAllByProductBarcode(eq(DEFAULT_BARCODE), eq(pageRequest)))
+                .willReturn(listWithSevenPrices);
+
+            given(domainMapper.toProductWithManyPrices(eq(listWithSevenPrices)))
+                .willReturn(getDefaultProductWithManyPrices(listWithSevenPrices));
+
+            // when
+            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 7);
+
+            // then
+            assertThat(actualProduct).isNotNull();
+            assertThat(actualProduct.getPrices()).hasSize(7);
+
+            verify(priceRepository, times(1)).findAllByProductBarcode(anyString(), any(Pageable.class));
+            verify(domainMapper, times(1)).toProductWithManyPrices(anyList());
+            verify(productExternalService, never()).fetchByBarcode(anyString());
+            verify(priceRepository, never()).save(any(Price.class));
+            verify(domainMapper, never()).mapToPrice(any());
+        }
     }
 }
