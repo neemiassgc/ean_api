@@ -106,5 +106,32 @@ public class PersistenceServiceTest {
             verify(priceRepository, never()).save(any(Price.class));
             verify(domainMapper, never()).mapToPrice(any(ProductWithLatestPrice.class));
         }
+
+        @Test
+        @DisplayName("When the limit is zero then should return a product with all its prices")
+        void should_return_a_product_with_all_its_prices() {
+            // given
+            final int limit = 0;
+            final Pageable pageRequest = PageRequest.ofSize(Integer.MAX_VALUE);
+
+            given(priceRepository.findAllByProductBarcode(eq(DEFAULT_BARCODE), eq(pageRequest)))
+                .willReturn(pricesForTesting);
+
+            given(domainMapper.toProductWithManyPrices(eq(pricesForTesting)))
+                .willReturn(getDefaultProductWithManyPrices(pricesForTesting));
+
+            // when
+            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0);
+
+            // then
+            assertThat(actualProduct).isNotNull();
+            assertThat(actualProduct.getPrices()).hasSize(16);
+
+            verify(priceRepository, times(1)).findAllByProductBarcode(anyString(), any(Pageable.class));
+            verify(domainMapper, times(1)).toProductWithManyPrices(anyList());
+            verify(productExternalService, never()).fetchByBarcode(anyString());
+            verify(priceRepository, never()).save(any(Price.class));
+            verify(domainMapper, never()).mapToPrice(any());
+        }
     }
 }
