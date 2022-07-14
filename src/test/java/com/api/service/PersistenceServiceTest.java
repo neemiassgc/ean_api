@@ -34,5 +34,26 @@ public class PersistenceServiceTest {
     @Nested
     class FindProductByBarcodeTest {
 
+        @Test
+        @DisplayName("Given a negative limit then should throw an exception")
+        void when_limit_is_negative_should_throw_an_exception() {
+            // given
+            final int negativeLimit = -4;
+
+            // when
+            final Throwable actualException =
+                catchThrowable(() -> persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, negativeLimit));
+
+            // then
+            assertThat(actualException).isNotNull();
+            assertThat(actualException).isExactlyInstanceOf(IllegalArgumentException.class);
+            assertThat(actualException.getMessage()).isEqualTo("limit must be a positive number or zero");
+
+            verify(priceRepository, never()).findAllByProductBarcode(eq(DEFAULT_BARCODE), any(Pageable.class));
+            verify(domainMapper, never()).toProductListWithManyPrices(anyList());
+            verify(productExternalService, never()).fetchByBarcode(eq(DEFAULT_BARCODE));
+            verify(priceRepository, never()).save(any(Price.class));
+            verify(domainMapper, never()).mapToPrice(any(ProductWithLatestPrice.class));
+        }
     }
 }
