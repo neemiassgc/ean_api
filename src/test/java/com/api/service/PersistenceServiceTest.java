@@ -1,10 +1,15 @@
 package com.api.service;
 
+import com.api.entity.Price;
+import static com.api.projection.Projection.*;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 import org.junit.jupiter.api.*;
+import org.springframework.data.domain.Pageable;
 
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PersistenceServiceTest {
@@ -27,7 +32,7 @@ public class PersistenceServiceTest {
     }
 
     @Nested
-    private class FindProductByBarcodeTest {
-        
+    class FindProductByBarcodeTest {
+
     }
 }
