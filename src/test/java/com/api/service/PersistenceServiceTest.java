@@ -2,8 +2,7 @@ package com.api.service;
 
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 
 import static org.mockito.Mockito.mock;
 
@@ -25,5 +24,10 @@ public class PersistenceServiceTest {
         this.productExternalService = mock(ProductExternalService.class);
         this.domainMapper = mock(DomainMapper.class);
         persistenceServiceUnderTest =  new PersistenceService(productRepository, priceRepository, productExternalService, domainMapper);
+    }
+
+    @Nested
+    private class FindProductByBarcodeTest {
+        
     }
 }
