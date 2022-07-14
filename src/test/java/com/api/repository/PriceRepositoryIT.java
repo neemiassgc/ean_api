@@ -1,7 +1,6 @@
 package com.api.repository;
 
 import com.api.entity.Price;
-import com.api.entity.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,7 +8,6 @@ import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
