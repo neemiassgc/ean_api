@@ -31,6 +31,8 @@ public class PersistenceService {
     private final DomainMapper domainMapper;
 
     public <I extends ProductBase> I findProductByBarcode(@NonNull final String barcode, int limit) {
+        if (limit < 0) throw new IllegalArgumentException("limit must be a positive number or zero");
+
         final List<Price> priceList =
         priceRepository.findAllByProductBarcode(
             barcode,
@@ -53,7 +55,7 @@ public class PersistenceService {
         return domainMapper.toProductListWithManyPrices(priceList);
     }
 
-    public Paged<List<ProductWithManyPrices>> findAllPagedProducts(final Pageable pageable) {
+    public Paged<List<ProductWithManyPrices>> findAllPagedProducts(@NonNull final Pageable pageable) {
         final Page<UUID> page = productRepository.findAllId(pageable);
         final List<ProductWithManyPrices> productWithManyPricesList =
             domainMapper.toProductListWithManyPrices(priceRepository.findAllByProductId(page.getContent()));
@@ -65,7 +67,7 @@ public class PersistenceService {
         return domainMapper.toProductListWithLatestPrice(priceRepository.findAllLatestPrice());
     }
 
-    public void saveProductWithPrice(final ProductWithLatestPrice productWithLatestPrice) {
+    public void saveProductWithPrice(@NonNull final ProductWithLatestPrice productWithLatestPrice) {
         priceRepository.save(domainMapper.mapToPrice(productWithLatestPrice));
     }
 }
