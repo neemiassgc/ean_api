@@ -4,13 +4,19 @@ import com.api.entity.Price;
 import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
+import org.assertj.core.api.InstanceOfAssertFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.api.projection.Projection.*;
@@ -160,6 +166,42 @@ public class PersistenceServiceTest {
             verify(productExternalService, never()).fetchByBarcode(anyString());
             verify(priceRepository, never()).save(any(Price.class));
             verify(domainMapper, never()).mapToPrice(any());
+        }
+
+        @Test
+        @DisplayName("When a product cannot be found in the db then should look in the external service")
+        void should_return_a_product_from_external_service() {
+            // given
+            final Price aPrice = pricesForTesting.get(0);
+            final ProductWithLatestPrice aProduct = ProjectionFactory.productWithLatestPriceBuilder()
+                .barcode(DEFAULT_BARCODE)
+                .description("A default product")
+                .sequenceCode(12345)
+                .latestPrice(new PriceWithInstant(aPrice.getValue(), aPrice.getInstant()))
+                .build();
+
+            given(priceRepository.findAllByProductBarcode(eq(DEFAULT_BARCODE), eq(PageRequest.ofSize(Integer.MAX_VALUE))))
+                .willReturn(Collections.emptyList());
+
+            given(productExternalService.fetchByBarcode(eq(DEFAULT_BARCODE)))
+                .willReturn(Optional.of(aProduct));
+
+            // when
+            final ProductWithLatestPrice actualProduct =
+                persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0);
+
+            // then
+            assertThat(actualProduct).isNotNull();
+            assertThat(actualProduct).extracting("latestPrice").isNotNull();
+            assertThat(actualProduct).extracting("latestPrice.value").isNotNull();
+            assertThat(actualProduct).extracting("latestPrice.value").isEqualTo(new BigDecimal("59.90"));
+            assertThat(actualProduct).isNotNull();
+
+            verify(priceRepository, times(1)).findAllByProductBarcode(anyString(), any(Pageable.class));
+            verify(domainMapper, never()).toProductWithManyPrices(anyList());
+            verify(productExternalService, times(1)).fetchByBarcode(anyString());
+            verify(priceRepository, times(1)).save(isNull());
+            verify(domainMapper, times(1)).mapToPrice(any(ProductWithLatestPrice.class));
         }
     }
 }
