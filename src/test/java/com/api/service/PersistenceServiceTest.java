@@ -231,4 +231,24 @@ public class PersistenceServiceTest {
             verify(priceRepository, never()).save(isNotNull());
         }
     }
+
+    @Test
+    @DisplayName("Testing findAllProducts method")
+    void should_return_all_products_with_all_their_prices() {
+        // given
+        given(priceRepository.findAll()).willReturn(pricesForTesting);
+        given(domainMapper.toProductListWithManyPrices(eq(pricesForTesting)))
+            .willReturn(List.of(getDefaultProductWithManyPrices(pricesForTesting)));
+
+        // when
+        final List<ProductWithManyPrices> actualListOfProducts = persistenceServiceUnderTest.findAllProducts();
+
+        // then
+        assertThat(actualListOfProducts).isNotNull();
+        assertThat(actualListOfProducts).hasSize(1);
+        assertThat(actualListOfProducts.get(0).getPrices()).hasSize(16);
+
+        verify(priceRepository, times(1)).findAll();
+        verify(domainMapper, times(1)).toProductListWithManyPrices(anyList());
+    }
 }
