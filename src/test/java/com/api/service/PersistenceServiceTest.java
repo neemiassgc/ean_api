@@ -203,5 +203,32 @@ public class PersistenceServiceTest {
             verify(priceRepository, times(1)).save(isNull());
             verify(domainMapper, times(1)).mapToPrice(any(ProductWithLatestPrice.class));
         }
+
+        @Test
+        @DisplayName("Should throw an exception when no products can be found in both places")
+        void when_cannot_find_a_product_should_throw_an_exception() {
+            // given
+            given(priceRepository.findAllByProductBarcode(eq(DEFAULT_BARCODE), eq(PageRequest.ofSize(Integer.MAX_VALUE))))
+                    .willReturn(Collections.emptyList());
+
+            given(productExternalService.fetchByBarcode(eq(DEFAULT_BARCODE))).willReturn(Optional.empty());
+
+            // when
+            final Throwable actualThrowable = catchThrowable(() ->
+                    persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0)
+            );
+
+            // then
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isExactlyInstanceOf(ResponseStatusException.class);
+            assertThat(((ResponseStatusException) actualThrowable).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(((ResponseStatusException) actualThrowable).getReason()).isEqualTo("Product not found");
+
+            verify(priceRepository, times(1)).findAllByProductBarcode(anyString(), any(Pageable.class));
+            verify(domainMapper, never()).toProductWithManyPrices(anyList());
+            verify(productExternalService, times(1)).fetchByBarcode(anyString());
+            verify(domainMapper, never()).mapToPrice(any(ProductWithLatestPrice.class));
+            verify(priceRepository, never()).save(isNotNull());
+        }
     }
 }
