@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import static com.api.projection.Projection.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -62,6 +64,22 @@ public class PersistenceServiceTest {
                 .collect(Collectors.toList())
             )
             .build();
+    }
+
+    private List<ProductWithLatestPrice> getProductListWithLatestPrice(final int quantity) {
+        final List<ProductWithLatestPrice> listToReturn = new ArrayList<>(quantity);
+        for (int i = 0; i < quantity; i++) {
+            listToReturn.add(
+                ProjectionFactory.productWithLatestPriceBuilder()
+                    .description("CAFE UTAM 500G")
+                    .barcode(DEFAULT_BARCODE)
+                    .sequenceCode(2909)
+                    .latestPrice(new PriceWithInstant(new BigDecimal("16.90"), Instant.now()))
+                    .build()
+            );
+        }
+        
+        return listToReturn;
     }
 
     private List<Price> getSomePrices() {
@@ -172,12 +190,7 @@ public class PersistenceServiceTest {
         void should_return_a_product_from_external_service() {
             // given
             final Price aPrice = pricesForTesting.get(0);
-            final ProductWithLatestPrice aProduct = ProjectionFactory.productWithLatestPriceBuilder()
-                .barcode(DEFAULT_BARCODE)
-                .description("A default product")
-                .sequenceCode(12345)
-                .latestPrice(new PriceWithInstant(aPrice.getValue(), aPrice.getInstant()))
-                .build();
+            final ProductWithLatestPrice aProduct = getProductListWithLatestPrice(1).get(0);
 
             given(priceRepository.findAllByProductBarcode(eq(DEFAULT_BARCODE), eq(PageRequest.ofSize(Integer.MAX_VALUE))))
                 .willReturn(Collections.emptyList());
@@ -193,7 +206,7 @@ public class PersistenceServiceTest {
             assertThat(actualProduct).isNotNull();
             assertThat(actualProduct).extracting("latestPrice").isNotNull();
             assertThat(actualProduct).extracting("latestPrice.value").isNotNull();
-            assertThat(actualProduct).extracting("latestPrice.value").isEqualTo(new BigDecimal("59.90"));
+            assertThat(actualProduct).extracting("latestPrice.value").isEqualTo(new BigDecimal("16.90"));
             assertThat(actualProduct).isNotNull();
 
             verify(priceRepository, times(1)).findAllByProductBarcode(anyString(), any(Pageable.class));
