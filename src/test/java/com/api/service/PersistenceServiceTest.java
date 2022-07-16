@@ -4,7 +4,6 @@ import com.api.entity.Price;
 import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
-import org.assertj.core.api.InstanceOfAssertFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,13 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.api.projection.Projection.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
