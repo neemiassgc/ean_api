@@ -78,7 +78,7 @@ public class PersistenceServiceTest {
                     .build()
             );
         }
-        
+
         return listToReturn;
     }
 
@@ -301,5 +301,24 @@ public class PersistenceServiceTest {
         verify(productRepository, times(1)).findAllId(any(Pageable.class));
         verify(domainMapper, times(1)).toProductListWithManyPrices(anyList());
         verify(priceRepository, times(1)).findAllByProductId(anyList());
+    }
+
+    @Test
+    @DisplayName("Testing findAllProductsWithLatestPrice method")
+    void should_return_all_products_with_their_latest_price() {
+        // given
+        given(priceRepository.findAllLatestPrice()).willReturn(pricesForTesting);
+        given(domainMapper.toProductListWithLatestPrice(eq(pricesForTesting)))
+            .willReturn(getProductListWithLatestPrice(5));
+
+        // when
+        final List<ProductWithLatestPrice> actualProducts = persistenceServiceUnderTest.findAllProductsWithLatestPrice();
+
+        // then
+        assertThat(actualProducts).isNotNull();
+        assertThat(actualProducts).hasSize(5);
+
+        verify(priceRepository, times(1)).findAllLatestPrice();
+        verify(domainMapper, times(1)).toProductListWithLatestPrice(anyList());
     }
 }
