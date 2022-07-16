@@ -321,4 +321,22 @@ public class PersistenceServiceTest {
         verify(priceRepository, times(1)).findAllLatestPrice();
         verify(domainMapper, times(1)).toProductListWithLatestPrice(anyList());
     }
+
+    @Test
+    @DisplayName("Testing saveProductWithPrice method")
+    void should_save_a_product_with_its_price() {
+        // given
+        final Price aPrice = new Price(new BigDecimal("15.65"), null);
+        final ProductWithLatestPrice aProductWithLatestPrice = getProductListWithLatestPrice(1).get(0);
+
+        given(priceRepository.save(eq(aPrice))).will(invocation -> invocation.getArgument(0, Price.class));
+        given(domainMapper.mapToPrice(eq(aProductWithLatestPrice))).willReturn(aPrice);
+
+        // when
+        persistenceServiceUnderTest.saveProductWithPrice(aProductWithLatestPrice);
+
+        // then
+        verify(priceRepository, times(1)).save(any(Price.class));
+        verify(domainMapper, times(1)).mapToPrice(any(ProductWithLatestPrice.class));
+    }
 }
