@@ -6,16 +6,15 @@ import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.junit.jupiter.api.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -250,5 +249,44 @@ public class PersistenceServiceTest {
 
         verify(priceRepository, times(1)).findAll();
         verify(domainMapper, times(1)).toProductListWithManyPrices(anyList());
+    }
+
+    @Test
+    @DisplayName("Testing findAllPagedProducts method")
+    void should_return_a_list_of_paged_products() {
+        // given
+        final Page<UUID> page = new PageImpl<>(List.of(
+            UUID.fromString("04f3dfdd-c811-4cc7-8e82-62d8406ad32c"),
+            UUID.fromString("d55960d3-c270-4e5c-baa3-7923a5254365"),
+            UUID.fromString("3bf5543e-923d-46ff-ae36-127575fd30f8"),
+            UUID.fromString("758c7235-abd7-4a3e-b94b-87e610ce385e")
+        ));
+
+        given(productRepository.findAllId(eq(PageRequest.ofSize(10)))).willReturn(page);
+        given(domainMapper.toProductListWithManyPrices(anyList())).willReturn(
+            List.of(
+                getDefaultProductWithManyPrices(getSomePrices()),
+                getDefaultProductWithManyPrices(getSomePrices()),
+                getDefaultProductWithManyPrices(getSomePrices()),
+                getDefaultProductWithManyPrices(getSomePrices())
+            )
+        );
+        given(priceRepository.findAllByProductId(eq(page.getContent()))).willReturn(pricesForTesting);
+
+        // when
+        final Paged<List<ProductWithManyPrices>> actualPagedList =
+            persistenceServiceUnderTest.findAllPagedProducts(PageRequest.ofSize(10));
+
+        //then
+        assertThat(actualPagedList).isNotNull();
+        assertThat(actualPagedList).extracting("currentPage").isEqualTo(0);
+        assertThat(actualPagedList).extracting("totalPages").isEqualTo(1);
+        assertThat(actualPagedList).extracting("numberOfItems").isEqualTo(4);
+        assertThat(actualPagedList).extracting("hasNext").isEqualTo(false);
+        assertThat(actualPagedList.getContent()).hasSize(4);
+
+        verify(productRepository, times(1)).findAllId(any(Pageable.class));
+        verify(domainMapper, times(1)).toProductListWithManyPrices(anyList());
+        verify(priceRepository, times(1)).findAllByProductId(anyList());
     }
 }
