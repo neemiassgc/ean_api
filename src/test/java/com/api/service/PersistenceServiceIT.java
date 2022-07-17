@@ -40,5 +40,23 @@ public class PersistenceServiceIT {
                     new BigDecimal("5.65"), new BigDecimal("9.90"), new BigDecimal("10.75"), new BigDecimal("7.50")
                 );
         }
+
+        @Test
+        @DisplayName("Should return a few products from drop with a given limit")
+        void should_return_a_few_products_from_db() {
+            final int limit = 2;
+
+            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(GLOBAL_BARCODE, limit);
+
+            assertThat(actualProduct).isNotNull();
+            assertThat(actualProduct).extracting(ProductBase::getDescription).isEqualTo("ALCOOL HIG AZULIM 50");
+            assertThat(actualProduct).extracting(ProductBase::getBarcode).isEqualTo("7897534852624");
+            assertThat(actualProduct).extracting(ProductBase::getSequenceCode).isEqualTo(137513);
+            assertThat(actualProduct.getPrices()).isNotNull();
+            assertThat(actualProduct.getPrices()).hasSize(2);
+            assertThat(actualProduct.getPrices()).extracting(PriceWithInstant::getValue)
+                .containsExactly(new BigDecimal("5.65"), new BigDecimal("9.90"));
+
+        }
     }
 }
