@@ -17,6 +17,8 @@ public class PersistenceServiceIT {
     @Autowired
     private PersistenceService persistenceServiceUnderTest;
 
+    private final String GLOBAL_BARCODE = "7897534852624";
+
     @Nested
     class FindProductByBarcodeTest {
 
@@ -24,9 +26,8 @@ public class PersistenceServiceIT {
         @DisplayName("When limit is zero then should return all products from db")
         void should_return_all_products_from_db() {
             final int limit = 0;
-            final String barcode = "7897534852624";
 
-            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(barcode, limit);
+            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(GLOBAL_BARCODE, limit);
 
             assertThat(actualProduct).isNotNull();
             assertThat(actualProduct).extracting(ProductBase::getDescription).isEqualTo("ALCOOL HIG AZULIM 50");
