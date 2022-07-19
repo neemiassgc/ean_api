@@ -3,19 +3,29 @@ package com.api.service;
 import static com.api.projection.Projection.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.api.repository.PriceRepository;
+import com.api.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 @SpringBootTest
+@Transactional
 public class PersistenceServiceIT {
 
     @Autowired
     private PersistenceService persistenceServiceUnderTest;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private PriceRepository priceRepository;
 
     private final String GLOBAL_BARCODE = "7897534852624";
 
@@ -57,6 +67,24 @@ public class PersistenceServiceIT {
             assertThat(actualProduct.getPrices()).extracting(PriceWithInstant::getValue)
                 .containsExactly(new BigDecimal("5.65"), new BigDecimal("9.90"));
 
+        }
+
+        @Test
+        @DisplayName("Should fetch from the external service and save it in the db")
+        void should_return_a_product_from_the_external_service() {
+            final String barcode = "7891095005178";
+
+            final ProductWithLatestPrice actualProduct = persistenceServiceUnderTest.findProductByBarcode(barcode, 0);
+            final long actualProductsCount = productRepository.count();
+            final long actualPricesCount = priceRepository.count();
+
+            assertThat(actualProduct).isNotNull();
+            assertThat(actualProduct).extracting(ProductBase::getDescription).isEqualTo("AMEND YOKI");
+            assertThat(actualProduct).extracting(ProductBase::getBarcode).isEqualTo("7891095005178");
+            assertThat(actualProduct).extracting(ProductBase::getSequenceCode).isEqualTo(8769);
+            assertThat(actualProduct.getLatestPrice()).isNotNull();
+            assertThat(actualProductsCount).isEqualTo(12);
+            assertThat(actualPricesCount).isEqualTo(67);
         }
     }
 }
