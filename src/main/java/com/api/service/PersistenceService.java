@@ -1,8 +1,6 @@
 package com.api.service;
 
 import com.api.entity.Price;
-import static com.api.projection.Projection.*;
-
 import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
@@ -18,7 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
+import static com.api.projection.Projection.*;
 
 @SuppressWarnings("unchecked")
 @Service
@@ -42,10 +41,13 @@ public class PersistenceService {
         if (!priceList.isEmpty())
             return (I) domainMapper.toProductWithManyPrices(priceList);
 
+        // Save a new product
         final ProductBase productBase = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        priceRepository.save(domainMapper.mapToPrice((ProductWithLatestPrice) productBase));
+        final Price priceToSave = domainMapper.mapToPrice((ProductWithLatestPrice) productBase);
+        productRepository.save(priceToSave.getProduct());
+        priceRepository.save(priceToSave);
 
         return (I) productBase;
     }
