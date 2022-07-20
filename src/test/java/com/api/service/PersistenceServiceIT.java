@@ -141,4 +141,17 @@ public class PersistenceServiceIT {
         assertThat(firstPage.getNumberOfItems()).isEqualTo(4);
         assertThat(firstPage.getHasNext()).isTrue();
     }
+
+    @Test
+    @DisplayName("Should return the second page of three pages - findAllPagedProducts")
+    void should_return_the_second_page_of_paged_products() {
+        final Paged<List<ProductWithManyPrices>> secondPage = persistenceServiceUnderTest.findAllPagedProducts(PageRequest.of(1, 4));
+
+        assertThat(secondPage).isNotNull();
+        assertThat(secondPage.getContent()).hasSize(4);
+        assertThat(secondPage.getCurrentPage()).isEqualTo(1);
+        assertThat(secondPage.getTotalPages()).isEqualTo(3);
+        assertThat(secondPage.getNumberOfItems()).isEqualTo(4);
+        assertThat(secondPage.getHasNext()).isTrue();
+    }
 }
