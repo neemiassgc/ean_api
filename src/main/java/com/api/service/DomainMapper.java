@@ -4,6 +4,7 @@ import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.projection.ProjectionFactory;
 import lombok.NonNull;
+import org.apache.logging.log4j.util.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -41,7 +42,9 @@ public class DomainMapper {
         final Map<Product, List<Price>> mapOfProducts = prices.stream()
             .collect(Collectors.groupingBy(Price::getProduct, HashMap::new, Collectors.toList()));
 
-        return mapOfProducts.values().stream().map(this::toProductWithManyPrices).collect(Collectors.toList());
+        return mapOfProducts.values().stream().map(this::toProductWithManyPrices)
+            .sorted(Comparator.comparing(ProductBase::getDescription))
+            .collect(Collectors.toList());
     }
 
     public ProductWithManyPrices toProductWithManyPrices(@NonNull final List<Price> priceList) {
