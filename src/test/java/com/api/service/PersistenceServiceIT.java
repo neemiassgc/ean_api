@@ -154,4 +154,17 @@ public class PersistenceServiceIT {
         assertThat(secondPage.getNumberOfItems()).isEqualTo(4);
         assertThat(secondPage.getHasNext()).isTrue();
     }
+
+    @Test
+    @DisplayName("Should return the last page of three pages - findAllPagedProducts")
+    void should_return_the_third_page_of_paged_products() {
+        final Paged<List<ProductWithManyPrices>> thirdPage = persistenceServiceUnderTest.findAllPagedProducts(PageRequest.of(2, 4));
+
+        assertThat(thirdPage).isNotNull();
+        assertThat(thirdPage.getContent()).hasSize(3);
+        assertThat(thirdPage.getCurrentPage()).isEqualTo(2);
+        assertThat(thirdPage.getTotalPages()).isEqualTo(3);
+        assertThat(thirdPage.getNumberOfItems()).isEqualTo(3);
+        assertThat(thirdPage.getHasNext()).isFalse();
+    }
 }
