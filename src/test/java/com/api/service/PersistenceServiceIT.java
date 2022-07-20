@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -126,5 +127,18 @@ public class PersistenceServiceIT {
         assertThat(actualProducts.get(0).getPrices().stream().mapToDouble(it -> it.getValue().doubleValue()))
             .containsExactly(12.7, 19.0, 16.5, 6.61, 16.8, 9.85, 10.6, 16.1, 12.6, 19.1);
 
+    }
+
+    @Test
+    @DisplayName("Should return the first page of three pages - findAllPagedProducts")
+    void should_return_the_first_page_of_paged_products() {
+        final Paged<List<ProductWithManyPrices>> firstPage = persistenceServiceUnderTest.findAllPagedProducts(PageRequest.ofSize(4));
+
+        assertThat(firstPage).isNotNull();
+        assertThat(firstPage.getContent()).hasSize(4);
+        assertThat(firstPage.getCurrentPage()).isEqualTo(0);
+        assertThat(firstPage.getTotalPages()).isEqualTo(3);
+        assertThat(firstPage.getNumberOfItems()).isEqualTo(4);
+        assertThat(firstPage.getHasNext()).isTrue();
     }
 }
