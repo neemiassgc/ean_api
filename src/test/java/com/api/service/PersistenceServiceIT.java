@@ -192,4 +192,21 @@ public class PersistenceServiceIT {
         assertThat(thirdPage.getContent().get(0).getPrices().stream().mapToDouble(it -> it.getValue().doubleValue()))
             .containsExactly(6.49, 1.49);
     }
+
+    @Test
+    @DisplayName("Testing findAllProductsWithLatestPrice method")
+    void should_return_all_products_with_latest_price() {
+        final List<ProductWithLatestPrice> products = persistenceServiceUnderTest.findAllProductsWithLatestPrice();
+
+        assertThat(products).isNotNull();
+        assertThat(products).hasSize(11);
+
+        // Verifying order of the products
+        assertThat(products).extracting("barcode")
+            .containsExactly(
+                "7891000055120", "7897534852624", "7896336010058", "7898279792299",
+                "7896045104482", "7891962047560", "7896656800018", "7896004004501",
+                "7891098010575", "7896036093085", "7891962057620"
+            );
+    }
 }
