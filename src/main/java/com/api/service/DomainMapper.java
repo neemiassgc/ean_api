@@ -62,6 +62,9 @@ public class DomainMapper {
     }
 
     public List<ProductWithLatestPrice> toProductListWithLatestPrice(@NonNull final List<Price> priceList) {
-        return priceList.stream().map(this::toProductWithLatestPrice).collect(Collectors.toList());
+        return priceList.stream()
+            .map(this::toProductWithLatestPrice)
+            .sorted(Comparator.comparing(ProductWithLatestPrice::getDescription))
+            .collect(Collectors.toList());
     }
 }
