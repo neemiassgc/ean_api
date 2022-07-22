@@ -183,5 +183,13 @@ public class PersistenceServiceIT {
         assertThat(thirdPage.getTotalPages()).isEqualTo(3);
         assertThat(thirdPage.getNumberOfItems()).isEqualTo(3);
         assertThat(thirdPage.getHasNext()).isFalse();
+
+        // Testing the order of the products
+        assertThat(thirdPage.getContent()).extracting("barcode")
+            .containsExactly("7891098010575", "7896036093085", "7891962057620");
+
+        // testing the order of the prices
+        assertThat(thirdPage.getContent().get(0).getPrices().stream().mapToDouble(it -> it.getValue().doubleValue()))
+            .containsExactly(6.49, 1.49);
     }
 }
