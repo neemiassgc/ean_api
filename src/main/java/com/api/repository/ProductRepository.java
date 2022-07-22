@@ -12,6 +12,6 @@ import java.util.UUID;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    @Query("SELECT p.id FROM Product p")
+    @Query("SELECT p.id FROM Product p ORDER BY p.description asc")
     Page<UUID> findAllId(Pageable pageable);
 }
