@@ -45,9 +45,7 @@ public class PersistenceService {
         final ProductBase productBase = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        final Price priceToSave = domainMapper.mapToPrice((ProductWithLatestPrice) productBase);
-        productRepository.save(priceToSave.getProduct());
-        priceRepository.save(priceToSave);
+        this.saveProductWithPrice((ProductWithLatestPrice) productBase);
 
         return (I) productBase;
     }
@@ -70,6 +68,8 @@ public class PersistenceService {
     }
 
     public void saveProductWithPrice(@NonNull final ProductWithLatestPrice productWithLatestPrice) {
-        priceRepository.save(domainMapper.mapToPrice(productWithLatestPrice));
+        final Price priceToSave = domainMapper.mapToPrice(productWithLatestPrice);
+        productRepository.save(priceToSave.getProduct());
+        priceRepository.save(priceToSave);
     }
 }
