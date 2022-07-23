@@ -3,6 +3,7 @@ package com.api.service;
 import static com.api.projection.Projection.*;
 import static org.assertj.core.api.Assertions.*;
 
+import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @SpringBootTest
@@ -208,5 +210,24 @@ public class PersistenceServiceIT {
                 "7896045104482", "7891962047560", "7896656800018", "7896004004501",
                 "7891098010575", "7896036093085", "7891962057620"
             );
+    }
+
+    @Test
+    @DisplayName("Testing saveProductWithPrice method")
+    void should_save_a_product() {
+        final ProductWithLatestPrice productWithLatestPrice = ProjectionFactory.productWithLatestPriceBuilder()
+            .latestPrice(new PriceWithInstant(new BigDecimal("10.5"), Instant.now()))
+            .barcode("2938371637412")
+            .description("Any description")
+            .sequenceCode(123456)
+            .build();
+
+        persistenceServiceUnderTest.saveProductWithPrice(productWithLatestPrice);
+
+        final long actualTotalOfProducts = productRepository.count();
+        final long actualTotalOfPrices = priceRepository.count();
+
+        assertThat(actualTotalOfProducts).isEqualTo(12);
+        assertThat(actualTotalOfPrices).isEqualTo(67);
     }
 }
