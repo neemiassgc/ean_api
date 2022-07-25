@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -23,7 +22,10 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.util.Pair;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -37,7 +39,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static com.api.projection.Projection.ProductBase;
 
@@ -214,7 +215,7 @@ public class ProductExternalService {
 
         final HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(body, headers);
 
-        log.info("Fetching for information about a product by barcode");
+        log.info("Fetching for information about a product by barcode "+barcode);
         return restTemplate.execute(
             "/wwv_flow.show",
             HttpMethod.POST,
