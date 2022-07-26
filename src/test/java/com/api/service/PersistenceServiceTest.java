@@ -195,6 +195,8 @@ public class PersistenceServiceTest {
             given(productExternalService.fetchByBarcode(eq(DEFAULT_BARCODE)))
                 .willReturn(Optional.of(aProduct));
 
+            given(domainMapper.mapToPrice(eq(aProduct))).willReturn(aPrice);
+
             // when
             final ProductWithLatestPrice actualProduct =
                 persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0);
@@ -209,7 +211,7 @@ public class PersistenceServiceTest {
             verify(priceRepository, times(1)).findAllByProductBarcode(anyString(), any(Pageable.class));
             verify(domainMapper, never()).toProductWithManyPrices(anyList());
             verify(productExternalService, times(1)).fetchByBarcode(anyString());
-            verify(priceRepository, times(1)).save(isNull());
+            verify(priceRepository, times(1)).save(eq(aPrice));
             verify(domainMapper, times(1)).mapToPrice(any(ProductWithLatestPrice.class));
         }
 
