@@ -33,12 +33,12 @@ public class ProductControllerIT {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(11)))
-        .andExpect(jsonPath("$[0].description").value("ALCOOL HIG AZULIM 50"))
-        .andExpect(jsonPath("$[0].sequenceCode").value(is(137513)))
-        .andExpect(jsonPath("$[0].barcode").value("7897534852624"))
+        .andExpect(jsonPath("$[0].description").value("ACHOC PO NESCAU 800G"))
+        .andExpect(jsonPath("$[0].sequenceCode").value(is(29250)))
+        .andExpect(jsonPath("$[0].barcode").value("7891000055120"))
         .andExpect(jsonPath("$[*].prices[*].value", hasSize(66)))
-        .andExpect(jsonPath("$[0].prices[*].value", contains(5.65, 9.9, 10.75, 7.5)))
-        .andExpect(jsonPath("$[1].prices[*].value", contains(11.30, 6.57, 4.31, 7.04, 14.3, 13.40, 17.40, 12.00, 3.26, 17.7, 11.50)));
+        .andExpect(jsonPath("$[0].prices[*].value", contains(12.7, 19.0, 16.5, 6.61, 16.8, 9.85, 10.6, 16.1, 12.6, 19.1)))
+        .andExpect(jsonPath("$[1].prices[*].value", contains(5.65, 9.9, 10.75, 7.5)));
     }
 
     @Test
@@ -59,9 +59,9 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.hasNext").value(true))
         .andExpect(
             jsonPath("$.content[*].barcode",
-            contains("7896336010058", "7891000055120", "7898279792299", "7891962047560", "7896045104482"))
+            contains("7891000055120", "7897534852624", "7896336010058", "7898279792299", "7896045104482"))
         )
-        .andExpect(jsonPath("$.content[*].prices[*]", hasSize(40)));
+        .andExpect(jsonPath("$.content[*].prices[*]", hasSize(38)));
     }
 
     @Test
@@ -82,9 +82,9 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.hasNext").value(true))
         .andExpect(
             jsonPath("$.content[*].barcode",
-            contains("7897534852624", "7896004004501", "7891098010575", "7896036093085", "7896656800018"))
+            contains("7891962047560", "7896656800018", "7896004004501", "7891098010575", "7896036093085"))
         )
-        .andExpect(jsonPath("$.content[*].prices[*]", hasSize(25)));
+        .andExpect(jsonPath("$.content[*].prices[*]", hasSize(27)));
     }
 
     @Test
@@ -166,7 +166,7 @@ public class ProductControllerIT {
         .andExpect(jsonPath("$.violations", hasSize(2)))
         .andExpect(jsonPath("$.violations[0].field").value(violatedBarcode))
         .andExpect(jsonPath("$.violations[1].field").value(violatedBarcode))
-        .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must contain only numbers"))
-        .andExpect(jsonPath("$.violations[1].violationMessage").value("barcode must has 13 characters"));
+        .andExpect(jsonPath("$.violations[1].violationMessage").value("barcode must has 13 characters"))
+        .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must contain only numbers"));
     }
 }
