@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, UUID> {
+public interface ProductRepository extends JpaRepository<Product, UUID>, ProductRepositoryCustom {
 
     @Query("SELECT p.id FROM Product p ORDER BY p.description asc")
     Page<UUID> findAllId(Pageable pageable);
