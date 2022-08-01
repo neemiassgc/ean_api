@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.*;
 import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
+import com.api.repository.ProductRepositoryCustomImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,10 @@ import java.util.List;
 
 @SpringBootTest
 @Transactional
-public class PersistenceServiceIT {
+public class ProductRepositoryCustomImplIT {
 
     @Autowired
-    private PersistenceService persistenceServiceUnderTest;
+    private ProductRepositoryCustomImpl productRepositoryCustomImplUnderTest;
 
     @Autowired
     private ProductRepository productRepository;
@@ -43,7 +44,7 @@ public class PersistenceServiceIT {
         void should_return_all_products_from_db() {
             final int limit = 0;
 
-            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(GLOBAL_BARCODE, limit);
+            final ProductWithManyPrices actualProduct = productRepositoryCustomImplUnderTest.findProductByBarcode(GLOBAL_BARCODE, limit);
 
             assertThat(actualProduct).isNotNull();
             assertThat(actualProduct).extracting(ProductBase::getDescription).isEqualTo("ALCOOL HIG AZULIM 50");
@@ -62,7 +63,7 @@ public class PersistenceServiceIT {
         void should_return_a_few_products_from_db() {
             final int limit = 2;
 
-            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(GLOBAL_BARCODE, limit);
+            final ProductWithManyPrices actualProduct = productRepositoryCustomImplUnderTest.findProductByBarcode(GLOBAL_BARCODE, limit);
 
             assertThat(actualProduct).isNotNull();
             assertThat(actualProduct).extracting(ProductBase::getDescription).isEqualTo("ALCOOL HIG AZULIM 50");
@@ -80,7 +81,7 @@ public class PersistenceServiceIT {
         void should_return_a_product_from_the_external_service() {
             final String barcode = "7891095005178";
 
-            final ProductWithLatestPrice actualProduct = persistenceServiceUnderTest.findProductByBarcode(barcode, 0);
+            final ProductWithLatestPrice actualProduct = productRepositoryCustomImplUnderTest.findProductByBarcode(barcode, 0);
             final long actualProductsCount = productRepository.count();
             final long actualPricesCount = priceRepository.count();
 
@@ -99,7 +100,7 @@ public class PersistenceServiceIT {
             final String nonExistentBarcode = "134810923434";
 
             final Throwable actualThrowable = catchThrowable(() -> {
-                persistenceServiceUnderTest.findProductByBarcode(nonExistentBarcode, 0);
+                productRepositoryCustomImplUnderTest.findProductByBarcode(nonExistentBarcode, 0);
             });
 
             assertThat(actualThrowable).isNotNull();
@@ -113,7 +114,7 @@ public class PersistenceServiceIT {
     @DisplayName("Testing findAllProducts method")
     @Test
     void should_return_all_the_products() {
-        final List<ProductWithManyPrices> actualProducts = persistenceServiceUnderTest.findAllProducts();
+        final List<ProductWithManyPrices> actualProducts = productRepositoryCustomImplUnderTest.findAllProducts();
 
         assertThat(actualProducts).hasSize(11);
         assertThat(actualProducts).flatExtracting(ProductWithManyPrices::getPrices).hasSize(66);
@@ -134,7 +135,7 @@ public class PersistenceServiceIT {
     @Test
     @DisplayName("Should return the first page of three pages - findAllPagedProducts")
     void should_return_the_first_page_of_paged_products() {
-        final Paged<List<ProductWithManyPrices>> firstPage = persistenceServiceUnderTest.findAllPagedProducts(PageRequest.ofSize(4));
+        final Paged<List<ProductWithManyPrices>> firstPage = productRepositoryCustomImplUnderTest.findAllPagedProducts(PageRequest.ofSize(4));
 
         assertThat(firstPage).isNotNull();
         assertThat(firstPage.getContent()).hasSize(4);
@@ -155,7 +156,7 @@ public class PersistenceServiceIT {
     @Test
     @DisplayName("Should return the second page of three pages - findAllPagedProducts")
     void should_return_the_second_page_of_paged_products() {
-        final Paged<List<ProductWithManyPrices>> secondPage = persistenceServiceUnderTest.findAllPagedProducts(PageRequest.of(1, 4));
+        final Paged<List<ProductWithManyPrices>> secondPage = productRepositoryCustomImplUnderTest.findAllPagedProducts(PageRequest.of(1, 4));
 
         assertThat(secondPage).isNotNull();
         assertThat(secondPage.getContent()).hasSize(4);
@@ -177,7 +178,7 @@ public class PersistenceServiceIT {
     @Test
     @DisplayName("Should return the last page of three pages - findAllPagedProducts")
     void should_return_the_third_page_of_paged_products() {
-        final Paged<List<ProductWithManyPrices>> thirdPage = persistenceServiceUnderTest.findAllPagedProducts(PageRequest.of(2, 4));
+        final Paged<List<ProductWithManyPrices>> thirdPage = productRepositoryCustomImplUnderTest.findAllPagedProducts(PageRequest.of(2, 4));
 
         assertThat(thirdPage).isNotNull();
         assertThat(thirdPage.getContent()).hasSize(3);
@@ -198,7 +199,7 @@ public class PersistenceServiceIT {
     @Test
     @DisplayName("Testing findAllProductsWithLatestPrice method")
     void should_return_all_products_with_latest_price() {
-        final List<ProductWithLatestPrice> products = persistenceServiceUnderTest.findAllProductsWithLatestPrice();
+        final List<ProductWithLatestPrice> products = productRepositoryCustomImplUnderTest.findAllProductsWithLatestPrice();
 
         assertThat(products).isNotNull();
         assertThat(products).hasSize(11);
@@ -222,7 +223,7 @@ public class PersistenceServiceIT {
             .sequenceCode(123456)
             .build();
 
-        persistenceServiceUnderTest.saveProductWithPrice(productWithLatestPrice);
+        productRepositoryCustomImplUnderTest.saveProductWithPrice(productWithLatestPrice);
 
         final long actualTotalOfProducts = productRepository.count();
         final long actualTotalOfPrices = priceRepository.count();
