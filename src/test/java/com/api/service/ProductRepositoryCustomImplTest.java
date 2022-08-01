@@ -4,6 +4,7 @@ import com.api.entity.Price;
 import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
+import com.api.repository.ProductRepositoryCustomImpl;
 import org.junit.jupiter.api.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,9 +25,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PersistenceServiceTest {
+public class ProductRepositoryCustomImplTest {
 
-    private PersistenceService persistenceServiceUnderTest;
+    private ProductRepositoryCustomImpl productRepositoryCustomImplUnderTest;
     private PriceRepository priceRepository;
     private ProductRepository productRepository;
     private ProductExternalService productExternalService;
@@ -47,7 +48,9 @@ public class PersistenceServiceTest {
         this.productRepository = mock(ProductRepository.class);
         this.productExternalService = mock(ProductExternalService.class);
         this.domainMapper = mock(DomainMapper.class);
-        this.persistenceServiceUnderTest =  new PersistenceService(productRepository, priceRepository, productExternalService, domainMapper);
+        this.productRepositoryCustomImplUnderTest =
+            new ProductRepositoryCustomImpl(this.priceRepository, this.productExternalService, this.domainMapper);
+        this.productRepositoryCustomImplUnderTest.setProductRepository(productRepository);
     }
 
     private ProductWithManyPrices getDefaultProductWithManyPrices(final List<Price> priceList) {
@@ -113,7 +116,7 @@ public class PersistenceServiceTest {
 
             // when
             final Throwable actualException =
-                catchThrowable(() -> persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, negativeLimit));
+                catchThrowable(() -> productRepositoryCustomImplUnderTest.findProductByBarcode(DEFAULT_BARCODE, negativeLimit));
 
             // then
             assertThat(actualException).isNotNull();
@@ -141,7 +144,7 @@ public class PersistenceServiceTest {
                 .willReturn(getDefaultProductWithManyPrices(pricesForTesting));
 
             // when
-            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0);
+            final ProductWithManyPrices actualProduct = productRepositoryCustomImplUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0);
 
             // then
             assertThat(actualProduct).isNotNull();
@@ -169,7 +172,7 @@ public class PersistenceServiceTest {
                 .willReturn(getDefaultProductWithManyPrices(listWithSevenPrices));
 
             // when
-            final ProductWithManyPrices actualProduct = persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 7);
+            final ProductWithManyPrices actualProduct = productRepositoryCustomImplUnderTest.findProductByBarcode(DEFAULT_BARCODE, 7);
 
             // then
             assertThat(actualProduct).isNotNull();
@@ -199,7 +202,7 @@ public class PersistenceServiceTest {
 
             // when
             final ProductWithLatestPrice actualProduct =
-                persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0);
+                productRepositoryCustomImplUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0);
 
             // then
             assertThat(actualProduct).isNotNull();
@@ -226,7 +229,7 @@ public class PersistenceServiceTest {
 
             // when
             final Throwable actualThrowable = catchThrowable(() ->
-                    persistenceServiceUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0)
+                    productRepositoryCustomImplUnderTest.findProductByBarcode(DEFAULT_BARCODE, 0)
             );
 
             // then
@@ -252,7 +255,7 @@ public class PersistenceServiceTest {
             .willReturn(List.of(getDefaultProductWithManyPrices(pricesForTesting)));
 
         // when
-        final List<ProductWithManyPrices> actualListOfProducts = persistenceServiceUnderTest.findAllProducts();
+        final List<ProductWithManyPrices> actualListOfProducts = productRepositoryCustomImplUnderTest.findAllProducts();
 
         // then
         assertThat(actualListOfProducts).isNotNull();
@@ -287,7 +290,7 @@ public class PersistenceServiceTest {
 
         // when
         final Paged<List<ProductWithManyPrices>> actualPagedList =
-            persistenceServiceUnderTest.findAllPagedProducts(PageRequest.ofSize(10));
+            productRepositoryCustomImplUnderTest.findAllPagedProducts(PageRequest.ofSize(10));
 
         //then
         assertThat(actualPagedList).isNotNull();
@@ -311,7 +314,7 @@ public class PersistenceServiceTest {
             .willReturn(getProductListWithLatestPrice(5));
 
         // when
-        final List<ProductWithLatestPrice> actualProducts = persistenceServiceUnderTest.findAllProductsWithLatestPrice();
+        final List<ProductWithLatestPrice> actualProducts = productRepositoryCustomImplUnderTest.findAllProductsWithLatestPrice();
 
         // then
         assertThat(actualProducts).isNotNull();
@@ -332,7 +335,7 @@ public class PersistenceServiceTest {
         given(domainMapper.mapToPrice(eq(aProductWithLatestPrice))).willReturn(aPrice);
 
         // when
-        persistenceServiceUnderTest.saveProductWithPrice(aProductWithLatestPrice);
+        productRepositoryCustomImplUnderTest.saveProductWithPrice(aProductWithLatestPrice);
 
         // then
         verify(priceRepository, times(1)).save(any(Price.class));
