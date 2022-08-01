@@ -1,12 +1,15 @@
-package com.api.service;
+package com.api.repository;
 
 import com.api.entity.Price;
 import com.api.projection.ProjectionFactory;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import com.api.repository.ProductRepositoryCustom;
+import com.api.service.DomainMapper;
+import com.api.service.ProductExternalService;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +23,13 @@ import java.util.UUID;
 import static com.api.projection.Projection.*;
 
 @SuppressWarnings("unchecked")
-@Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class PersistenceService {
+@Service
+public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
-    private final ProductRepository productRepository;
+    @Setter(onMethod_ = @Autowired, onParam_ = @Lazy)
+    private ProductRepository productRepository;
+
     private final PriceRepository priceRepository;
     private final ProductExternalService productExternalService;
     private final DomainMapper domainMapper;
