@@ -2,12 +2,11 @@ package com.api.repository;
 
 import com.api.entity.Price;
 import com.api.projection.ProjectionFactory;
-import com.api.repository.PriceRepository;
-import com.api.repository.ProductRepository;
-import com.api.repository.ProductRepositoryCustom;
 import com.api.service.DomainMapper;
 import com.api.service.ProductExternalService;
-import lombok.*;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -74,7 +73,6 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     public void saveProductWithPrice(@NonNull final ProductWithLatestPrice productWithLatestPrice) {
         final Price priceToSave = domainMapper.mapToPrice(productWithLatestPrice);
-        productRepository.save(priceToSave.getProduct());
         priceRepository.save(priceToSave);
     }
 }
