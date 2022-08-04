@@ -35,6 +35,9 @@ public class Product {
     @Column(name = "sequence_code", nullable = false)
     private Integer sequenceCode;
 
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Price> prices;
+
     @Builder
     public Product(final String description, final String barcode, final Integer sequenceCode) {
         this.description = description;
