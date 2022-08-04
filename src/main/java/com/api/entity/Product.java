@@ -1,5 +1,7 @@
 package com.api.entity;
 
+import com.api.projection.deserializer.ProductDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
 
 import javax.persistence.*;
@@ -7,6 +9,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+@JsonDeserialize(using = ProductDeserializer.class)
 @Entity(name = "Product")
 @Table(
     name = "products",
