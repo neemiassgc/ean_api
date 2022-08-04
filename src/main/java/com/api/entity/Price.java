@@ -25,7 +25,7 @@ public class Price {
     private Instant instant = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices"))
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices"), nullable = false)
     private Product product;
 
     public Price(final BigDecimal value, final Product product) {
