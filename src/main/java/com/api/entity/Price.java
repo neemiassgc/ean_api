@@ -26,6 +26,7 @@ public class Price {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_product_prices"), nullable = false)
+    @Setter(AccessLevel.PACKAGE)
     private Product product;
 
     public Price(final BigDecimal value, final Product product) {
