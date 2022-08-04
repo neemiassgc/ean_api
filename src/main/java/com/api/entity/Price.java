@@ -29,6 +29,10 @@ public class Price {
     @Setter(AccessLevel.PACKAGE)
     private Product product;
 
+    public Price(final BigDecimal value) {
+        this(value, null);
+    }
+
     public Price(final BigDecimal value, final Product product) {
         this(value, Instant.now(), product);
     }
