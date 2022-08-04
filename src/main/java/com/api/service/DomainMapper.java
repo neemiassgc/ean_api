@@ -2,6 +2,7 @@ package com.api.service;
 
 import static com.api.projection.Projection.*;
 
+import com.api.entity.Price;
 import com.api.entity.Product;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -26,5 +27,9 @@ public class DomainMapper {
                 return product.getSequenceCode();
             }
         };
+    }
+
+    public PriceWithInstant mapToPriceWithInstant(@NonNull final Price price) {
+        return new PriceWithInstant(price.getValue(), price.getInstant());
     }
 }
