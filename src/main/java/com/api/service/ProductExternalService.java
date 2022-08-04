@@ -1,9 +1,9 @@
 package com.api.service;
 
+import com.api.entity.Product;
 import com.api.entity.SessionStorage;
 import com.api.pojo.DomainUtils;
 import com.api.pojo.SessionInstance;
-import com.api.projection.Projection;
 import com.api.repository.SessionStorageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
@@ -39,8 +39,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.api.projection.Projection.ProductBase;
 
 @Service
 @Log4j2
@@ -197,7 +195,7 @@ public class ProductExternalService {
         return new SessionInstance(sessionStorage.getInstance()+"", pairOfResources.getFirst());
     }
 
-    public Optional<ProductBase> fetchByBarcode(final String barcode) {
+    public Optional<Product> fetchByBarcode(final String barcode) {
         Objects.requireNonNull(barcode);
 
         final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -224,10 +222,9 @@ public class ProductExternalService {
                 final String json = DomainUtils.readFromInputStream(clientHttpResponse.getBody());
 
                 try {
-                    final ProductBase productWithLatestPrice =
-                        objectMapper.readValue(json, Projection.ProductWithLatestPrice.class);
+                    final Product newProductToPersist = objectMapper.readValue(json, Product.class);
 
-                    return Optional.of(productWithLatestPrice);
+                    return Optional.of(newProductToPersist);
                 }
                 catch (InvalidDefinitionException | IllegalStateException exception) {
                     if (exception instanceof IllegalStateException)
