@@ -3,8 +3,9 @@ package com.api.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.UUID;
 
 @Entity(name = "Product")
 @Table(
@@ -75,5 +76,10 @@ public class Product {
 
         price.setProduct(this);
         this.prices.add(price);
+    }
+
+    public boolean removePrice(@NonNull final Price price) {
+        price.setProduct(null);
+        return this.prices.remove(price);
     }
 }
