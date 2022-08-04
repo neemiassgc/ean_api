@@ -70,12 +70,14 @@ public class Product {
             && Objects.equals(this.sequenceCode, that.sequenceCode);
     }
 
-    public void addPrice(@NonNull final Price price) {
+    public Product addPrice(@NonNull final Price price) {
         if (!Objects.isNull(price.getProduct()))
             throw new IllegalStateException("Product is already assigned to a Price");
 
         price.setProduct(this);
         this.prices.add(price);
+
+        return this;
     }
 
     public boolean removePrice(@NonNull final Price price) {
