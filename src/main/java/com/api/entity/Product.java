@@ -1,9 +1,6 @@
 package com.api.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.*;
@@ -70,5 +67,13 @@ public class Product {
         return Objects.equals(this.description, that.description)
             && Objects.equals(this.barcode, that.barcode)
             && Objects.equals(this.sequenceCode, that.sequenceCode);
+    }
+
+    public void addPrice(@NonNull final Price price) {
+        if (!Objects.isNull(price.getProduct()))
+            throw new IllegalStateException("Product is already assigned to a Price");
+
+        price.setProduct(this);
+        this.prices.add(price);
     }
 }
