@@ -4,10 +4,14 @@ import com.api.entity.Product;
 import com.api.repository.ProductRepository;
 import com.api.repository.ProductRepositoryCustomImpl;
 import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -78,5 +82,28 @@ public class ProductRepositoryCustomImplTest {
         verify(productRepository, times(1)).findByBarcode(eq(targetBarcode));
         verify(productExternalService, times(1)).fetchByBarcode(eq(targetBarcode));
         verify(productRepository, times(1)).save(eq(defaultProduct));
+    }
+
+    @DisplayName("When a product does not exist anywhere then throws an exception - processByBarcode")
+    @Test
+    void should_throw_an_exception() {
+        // given
+        final String targetBarcode = defaultProduct.getBarcode();
+        given(productRepository.findByBarcode(eq(targetBarcode))).willReturn(Optional.empty());
+        given(productExternalService.fetchByBarcode(eq(targetBarcode))).willReturn(Optional.empty());
+
+        // when
+        final Throwable actualException =
+            catchThrowable(() -> productRepositoryCustomImplUnderTest.processByBarcode(targetBarcode));
+
+        // then
+        assertThat(actualException).isNotNull();
+        assertThat(actualException).isInstanceOf(ResponseStatusException.class);
+        assertThat(((ResponseStatusException)actualException).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(((ResponseStatusException)actualException).getReason()).isEqualTo("Product not found");
+
+        verify(productRepository, times(1)).findByBarcode(eq(targetBarcode));
+        verify(productExternalService, times(1)).fetchByBarcode(eq(targetBarcode));
+        verify(productRepository, never()).save(eq(defaultProduct));
     }
 }
