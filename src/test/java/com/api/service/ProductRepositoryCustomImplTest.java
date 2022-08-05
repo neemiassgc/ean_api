@@ -57,4 +57,26 @@ public class ProductRepositoryCustomImplTest {
        verify(productRepository, times(1)).findByBarcode(eq(targetBarcode));
        verify(productRepository, only()).findByBarcode(eq(targetBarcode));
     }
+
+    @DisplayName("When a product does not exist in DB then checks in the external service  - processByBarcode")
+    @Test
+    void should_return_a_product_from_the_external_service() {
+        // given
+        final String targetBarcode = defaultProduct.getBarcode();
+        given(productRepository.findByBarcode(eq(targetBarcode))).willReturn(Optional.empty());
+        given(productExternalService.fetchByBarcode(eq(targetBarcode)))
+            .willReturn(Optional.of(defaultProduct));
+        given(productRepository.save(eq(defaultProduct)))
+            .willAnswer(invocation ->  invocation.getArgument(0, Product.class));
+
+        // when
+        final Product actualProduct = productRepositoryCustomImplUnderTest.processByBarcode(targetBarcode);
+
+        // then
+        assertThat(actualProduct).isEqualTo(defaultProduct);
+
+        verify(productRepository, times(1)).findByBarcode(eq(targetBarcode));
+        verify(productExternalService, times(1)).fetchByBarcode(eq(targetBarcode));
+        verify(productRepository, times(1)).save(eq(defaultProduct));
+    }
 }
