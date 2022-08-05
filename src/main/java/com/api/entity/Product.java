@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @JsonDeserialize(using = ProductDeserializer.class)
 @Entity(name = "Product")
@@ -37,7 +35,7 @@ public class Product {
     private Integer sequenceCode;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Collection<Price> prices;
+    private List<Price> prices = new ArrayList<>();
 
     @Builder
     public Product(final String description, final String barcode, final Integer sequenceCode) {
@@ -86,5 +84,9 @@ public class Product {
     public boolean removePrice(@NonNull final Price price) {
         price.setProduct(null);
         return this.prices.remove(price);
+    }
+
+    public List<Price> getPrices() {
+        return Collections.unmodifiableList(prices);
     }
 }
