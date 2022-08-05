@@ -1,18 +1,21 @@
 package com.api.job;
 
 import com.api.entity.Price;
-import com.api.repository.PriceRepository;
+import com.api.entity.Product;
+import com.api.repository.ProductRepository;
 import com.api.service.ProductExternalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-
-import static com.api.projection.Projection.ProductWithLatestPrice;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -20,20 +23,26 @@ import static com.api.projection.Projection.ProductWithLatestPrice;
 public class ScanJob implements Job {
 
     private final ProductExternalService productExternalService;
-    private final PriceRepository priceRepository;
+    private final ProductRepository productRepository;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void execute(JobExecutionContext context) {
-        final List<Price> allLatestPrices = priceRepository.findAllLatestPrice();
+        final List<Product> products = productRepository.findAllWithLastPrice();
 
-        for (final Price oldPrice : allLatestPrices) {
-            productExternalService.fetchByBarcode(oldPrice.getProduct().getBarcode())
-                .map(productBase -> ((ProductWithLatestPrice) productBase).getLatestPrice())
-                .map(priceWithInstant -> new Price(priceWithInstant.getValue(), priceWithInstant.getInstant(), oldPrice.getProduct()))
-                .ifPresent((newPrice) -> {
-                    if (!oldPrice.getValue().equals(newPrice.getValue()))
-                        priceRepository.save(newPrice);
-                });
+        for (Product product : products) {
+            final Price newPrice = productExternalService.fetchByBarcode(product.getBarcode())
+                .map(it -> {
+                    final Price priceToReturn = it.getPrices().get(0);
+                    it.removePrice(priceToReturn);
+                    return priceToReturn;
+                })
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+            if (product.getPrices().get(0).getValue().equals(newPrice.getValue()))
+                continue;
+
+            productRepository.save(product.addPrice(newPrice));
         }
     }
 }
