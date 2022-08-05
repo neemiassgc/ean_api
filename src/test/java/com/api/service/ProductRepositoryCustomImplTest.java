@@ -39,4 +39,22 @@ public class ProductRepositoryCustomImplTest {
             new ProductRepositoryCustomImpl(this.productExternalService);
         this.productRepositoryCustomImplUnderTest.setProductRepository(productRepository);
     }
+
+    @DisplayName("When a product already exists in DB then returns it - processByBarcode")
+    @Test
+    void should_return_a_product_from_db() {
+        // given
+        final String targetBarcode = defaultProduct.getBarcode();
+        given(productRepository.findByBarcode(eq(targetBarcode)))
+            .willReturn(Optional.of(defaultProduct));
+
+        // when
+        final Product actualProduct = productRepositoryCustomImplUnderTest.processByBarcode(targetBarcode);
+
+        // then
+       assertThat(actualProduct).isEqualTo(defaultProduct);
+
+       verify(productRepository, times(1)).findByBarcode(eq(targetBarcode));
+       verify(productRepository, only()).findByBarcode(eq(targetBarcode));
+    }
 }
