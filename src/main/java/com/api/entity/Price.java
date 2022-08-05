@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -39,6 +40,24 @@ public class Price {
 
     public Price(final BigDecimal value, final Instant instant, final Product product) {
         this(null, value, instant, product);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, value, instant, product.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Price)) return false;
+
+        final Price that = (Price) obj;
+
+        return Objects.equals(this.id, that.getId()) &&
+            Objects.equals(this.value, that.getValue()) &&
+            Objects.equals(this.instant, that.getInstant()) &&
+            Objects.equals(this.product, that.getProduct());
     }
 
     @Override
