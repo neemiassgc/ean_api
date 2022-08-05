@@ -7,11 +7,14 @@ import com.api.repository.ProductRepositoryCustomImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @SpringBootTest
 @Transactional(readOnly = true)
@@ -52,5 +55,21 @@ public class ProductRepositoryCustomImplIT {
         assertThat(product.getId()).isNotNull();
         assertThat(productRepository.count()).isEqualTo(12);
         assertThat(priceRepository.count()).isEqualTo(67);
+    }
+
+    @Test
+    public void should_return_throw_an_exception() {
+        final String targetBarcode = "1391840815511";
+        final Runnable exceptional = () ->
+            productRepositoryCustomImplUnderTest.processByBarcode(targetBarcode);
+
+        final Throwable actualThrowable = catchThrowable(exceptional::run);
+
+        assertThat(actualThrowable).isNotNull();
+        assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+        assertThat((ResponseStatusException)actualThrowable).satisfies(exception -> {
+            assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(exception.getReason()).isEqualTo("Product not found");
+        });
     }
 }
