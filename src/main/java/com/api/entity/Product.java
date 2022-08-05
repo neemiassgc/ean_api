@@ -66,9 +66,9 @@ public class Product {
         if (!(obj instanceof Product)) return false;
 
         final Product that = (Product) obj;
-        return Objects.equals(this.description, that.description)
-            && Objects.equals(this.barcode, that.barcode)
-            && Objects.equals(this.sequenceCode, that.sequenceCode);
+        return Objects.equals(this.description, that.getDescription())
+            && Objects.equals(this.barcode, that.getBarcode())
+            && Objects.equals(this.sequenceCode, that.getSequenceCode());
     }
 
     public Product addPrice(@NonNull final Price price) {
