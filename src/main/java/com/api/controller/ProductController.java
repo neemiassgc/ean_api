@@ -9,7 +9,6 @@ import com.api.service.DomainMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -17,9 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.Pattern;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.api.projection.Projection.Paged;
@@ -37,46 +34,38 @@ public class ProductController {
     private final DomainMapper domainMapper;
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
-    public RepresentationModel<?> getAll(
-        @RequestParam(name = "pag", required = false)
-        @Pattern(regexp = "\\d{1,3}-\\d{1,3}", message = "pag must match digit-digit") String pag
-    ) {
-        if (Objects.isNull(pag)) {
-            final List<EntityModel<SimpleProduct>> modelList =
-                domainMapper.mapToSimpleProductList(productRepository.findAll())
-                    .stream()
-                    .map(simpleProduct -> {
-                        final Link link = linkTo(methodOn(PriceController.class).searchByProductBarcode(simpleProduct.getBarcode()))
-                            .withRel("prices");
+    public List<RepresentationModel<?>> getAll() {
+        return domainMapper.mapToSimpleProductList(productRepository.findAll())
+            .stream()
+            .map(simpleProduct -> EntityModel.of(simpleProduct).addIf(true, () ->
+                linkTo(methodOn(PriceController.class)
+                    .searchByProductBarcode(simpleProduct.getBarcode()))
+                    .withSelfRel()
+            ))
+            .collect(Collectors.toList());
+    }
 
-                        return EntityModel.of(simpleProduct).add(link);
-                    }).collect(Collectors.toList());
-
-            return CollectionModel.of(modelList);
-        }
-
+    @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RepresentationModel<?> getAll(@RequestParam(name = "pag") String pag) {
         final Page<Product> productPage = productRepository.findAll(DomainUtils.parsePage(pag));
 
-        final List<EntityModel<SimpleProduct>> modelList = productPage.getContent()
+        final List<EntityModel<SimpleProduct>> modelList =
+            domainMapper.mapToSimpleProductList(productPage.getContent())
             .stream()
-            .map(domainMapper::mapToSimpleProduct)
-            .map(simpleProduct -> {
-                final Link link = linkTo(methodOn(PriceController.class).searchByProductBarcode(simpleProduct.getBarcode()))
-                    .withRel("prices");
-
-                return EntityModel.of(simpleProduct).add(link);
-            }).collect(Collectors.toList());
-
-        final Link linkToNextPage =
-            linkTo(methodOn(this.getClass()).getAll((productPage.getNumber() + 1)+"-"+productPage.getSize()))
-                .withRel("next page");
+            .map(simpleProduct -> EntityModel.of(simpleProduct).addIf(true, () ->
+                linkTo(methodOn(PriceController.class)
+                    .searchByProductBarcode(simpleProduct.getBarcode()))
+                    .withRel("prices")
+            ))
+            .collect(Collectors.toList());
 
         final EntityModel<Paged<List<EntityModel<SimpleProduct>>>> entityModelToResponse =
             EntityModel.of(ProjectionFactory.paged(productPage, modelList));
 
-        if (productPage.hasNext()) entityModelToResponse.add(linkToNextPage);
-
-        return entityModelToResponse;
+        return entityModelToResponse.addIf(productPage.hasNext(), () ->
+            linkTo(methodOn(this.getClass()).getAll((productPage.getNumber() + 1)+"-"+productPage.getSize()))
+                .withRel("next page")
+        );
     }
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
