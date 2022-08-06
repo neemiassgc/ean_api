@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -226,5 +225,25 @@ class ProductControllerTest {
 
         verify(productRepository, times(1)).findAll(eq(pageableInUse));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(subList));
+    }
+
+    @Test
+    void when_GET_getAll_should_not_response_any_products_with_200() throws Exception  {
+        final Pageable pageableInUse = PageRequest.of(3, 1);
+
+        given(productRepository.findAll(eq(pageableInUse)))
+            .willReturn(new PageImpl<>(Collections.emptyList(), pageableInUse, 0));
+
+        mockMvc.perform(get("/api/products?pag=3-1")
+            .characterEncoding("UTF-8")
+            .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+
+        verify(productRepository, times(1)).findAll(eq(pageableInUse));
+        verify(productRepository, only()).findAll(eq(pageableInUse));
     }
 }
