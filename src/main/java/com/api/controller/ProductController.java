@@ -40,7 +40,7 @@ public class ProductController {
             .map(simpleProduct -> EntityModel.of(simpleProduct).addIf(true, () ->
                 linkTo(methodOn(PriceController.class)
                     .searchByProductBarcode(simpleProduct.getBarcode()))
-                    .withSelfRel()
+                    .withRel("prices")
             ))
             .collect(Collectors.toList());
     }
