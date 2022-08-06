@@ -29,10 +29,12 @@ public final class ProductDeserializer extends StdDeserializer<Product> {
 
         final JsonNode item = jsonNode.get("item");
 
-        if (!Objects.nonNull(item)) throw new IllegalStateException("Item node does not exist");
+        if (!Objects.nonNull(item))
+            // Possibly, the session is not valid, and it's necessary to create a new one
+            throw new IllegalStateException("Item node does not exist");
 
         if (item.get(5).get("value").asText().isEmpty())
-            throw new IllegalStateException("Item name is empty");
+            throw new IllegalStateException("Item name is empty"); // When a product doesn't exist
 
         final Price latestPrice =
             new Price(DomainUtils.parsePrice(item.get(4).get("value").asText()));
