@@ -11,11 +11,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -112,5 +112,24 @@ class ProductControllerTest {
 
         verify(productRepository, times(1)).findAll();
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(Resources.products));
+    }
+
+    @Test
+    void when_GET_getAll_should_response_a_empty_json_with_200() throws Exception  {
+        given(productRepository.findAll()).willReturn(Collections.emptyList());
+        given(domainMapper.mapToSimpleProductList(eq(Collections.emptyList())))
+            .willReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/products")
+            .characterEncoding("UTF-8")
+            .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$").isEmpty());
+
+        verify(productRepository, times(1)).findAll();
+        verify(domainMapper, times(1)).mapToSimpleProductList(eq(Collections.emptyList()));
     }
 }
