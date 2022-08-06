@@ -197,4 +197,34 @@ class ProductControllerTest {
         verify(productRepository, times(1)).findAll(eq(pageableInUse));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(subList));
     }
+
+    @Test
+    void when_GET_getAll_should_response_the_last_page_of_products_with_200() throws Exception  {
+        final Pageable pageableInUse = PageRequest.of(2, 1);
+        final List<Product> subList = Resources.products.subList(2, 3);
+
+        given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
+        given(domainMapper.mapToSimpleProductList(eq(subList))).willReturn(Resources.simpleProducts.subList(2, 3));
+
+        mockMvc.perform(get("/api/products?pag=2-1")
+            .characterEncoding("UTF-8")
+            .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
+        .andExpect(jsonPath("$.content[0].sequenceCode").value(2909))
+        .andExpect(jsonPath("$.content[0].barcode").value("7896656800018"))
+        .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
+        .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
+        .andExpect(jsonPath("$.numberOfItems").value(1))
+        .andExpect(jsonPath("$.hasNext").value(false))
+        .andExpect(jsonPath("$.totalPages").value(3))
+        .andExpect(jsonPath("$.links").isArray())
+        .andExpect(jsonPath("$.links").isEmpty());
+
+        verify(productRepository, times(1)).findAll(eq(pageableInUse));
+        verify(domainMapper, times(1)).mapToSimpleProductList(eq(subList));
+    }
 }
