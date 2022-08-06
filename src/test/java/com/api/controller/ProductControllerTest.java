@@ -2,12 +2,17 @@ package com.api.controller;
 
 import com.api.entity.Product;
 import com.api.projection.Projection;
+import com.api.projection.ProjectionFactory;
 import com.api.repository.ProductRepository;
 import com.api.service.DomainMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -131,5 +136,35 @@ class ProductControllerTest {
 
         verify(productRepository, times(1)).findAll();
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(Collections.emptyList()));
+    }
+
+    @Test
+    void when_GET_getAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
+        final Pageable pageableInUse = PageRequest.of(0, 1);
+        final List<Product> subList = Resources.products.subList(0, 1);
+
+        given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
+        given(domainMapper.mapToSimpleProductList(eq(subList))).willReturn(Resources.simpleProducts.subList(0, 1));
+
+        mockMvc.perform(get("/api/products?pag=0-1")
+            .characterEncoding("UTF-8")
+            .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content[0].description").value("ACHOC PO NESCAU 800G"))
+        .andExpect(jsonPath("$.content[0].sequenceCode").value(29250))
+        .andExpect(jsonPath("$.content[0].barcode").value("7891000055120"))
+        .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
+        .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
+        .andExpect(jsonPath("$.numberOfItems").value(1))
+        .andExpect(jsonPath("$.hasNext").value(true))
+        .andExpect(jsonPath("$.totalPages").value(3))
+        .andExpect(jsonPath("$.links[0].rel").value("next page"))
+        .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-1"));
+
+        verify(productRepository, times(1)).findAll(eq(pageableInUse));
+        verify(domainMapper, times(1)).mapToSimpleProductList(eq(subList));
     }
 }
