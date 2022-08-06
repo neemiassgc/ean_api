@@ -16,3 +16,6 @@ spring:
 
   profiles:
     active: dev
+
+  hateoas:
+    use-hal-as-default-json-media-type: false
