@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 public final class Projection {
 
@@ -22,7 +23,7 @@ public final class Projection {
         int getTotalPages();
         int getNumberOfItems();
         boolean getHasNext();
-        T getContent();
+        List<T> getContent();
     }
 
     @Getter
