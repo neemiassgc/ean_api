@@ -1,8 +1,8 @@
 package com.api.service;
 
+import com.api.entity.Product;
 import com.api.entity.SessionStorage;
 import com.api.pojo.SessionInstance;
-import com.api.projection.ProjectionFactory;
 import com.api.repository.SessionStorageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,18 +19,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.api.projection.Projection.PriceWithInstant;
-import static com.api.projection.Projection.ProductWithLatestPrice;
 import static com.api.service.ProductExternalServiceTestTools.getGenericHtmlContent;
 import static com.api.service.ProductExternalServiceTestTools.newSessionStorage;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -214,26 +209,24 @@ public class ProductExternalServiceTest {
     }
 
     @Test
-    @DisplayName("Should return a projection - fetchByBarcode")
-    void given_a_valid_barcode_then_should_return_a_projection_fetchByBarcode() throws JsonProcessingException {
+    @DisplayName("Should return a product - fetchByBarcode")
+    void given_a_valid_barcode_then_should_return_a_product_fetchByBarcode() throws JsonProcessingException {
         // given
         setup(it -> {
             given(it.findTopByOrderByCreationDateDesc())
                 .willReturn(Optional.of(newSessionStorage(LocalDate.now())));
         });
 
-        final String existingBarcode = "123456789101";
-
-        final ProductWithLatestPrice expectedProjection = ProjectionFactory.productWithLatestPriceBuilder()
-            .description("description")
-            .barcode(existingBarcode)
-            .latestPrice(new PriceWithInstant(new BigDecimal("16.40"), Instant.now()))
-            .sequenceCode(123456)
+        final String existingBarcode = "7896036093085";
+        final Product expectedProduct = Product.builder()
+            .description("OLEO MARIA")
+            .barcode("7896036093085")
+            .sequenceCode(1184)
             .build();
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
-        given(this.objectMapperMock.readValue(anyString(), eq(ProductWithLatestPrice.class)))
-            .willReturn(expectedProjection);
+        given(this.objectMapperMock.readValue(anyString(), eq(Product.class)))
+            .willReturn(expectedProduct);
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
             eq(HttpMethod.POST),
@@ -245,19 +238,20 @@ public class ProductExternalServiceTest {
         );
 
         // when
-        final Optional<ProductWithLatestPrice> actualProjection =
-            this.productExternalServiceUnderTest.fetchByBarcode(existingBarcode).map(p -> (ProductWithLatestPrice)p);
+        final Optional<Product> actualProjection =
+            this.productExternalServiceUnderTest.fetchByBarcode(existingBarcode);
 
         // then
         assertThat(actualProjection).isNotNull();
         assertThat(actualProjection.orElse(null)).isNotNull();
-        assertThat(actualProjection.get()).extracting("description").isEqualTo("description");
-        assertThat(actualProjection.get()).extracting("latestPrice.value").isEqualTo(new BigDecimal("16.40"));
-        assertThat(actualProjection.get()).extracting("barcode").isEqualTo("123456789101");
+        assertThat(actualProjection.get()).extracting("description").isEqualTo("OLEO MARIA");
+        assertThat(actualProjection.get()).extracting("sequenceCode").isEqualTo(1184);
+        assertThat(actualProjection.get().getPrices()).isEmpty();
+        assertThat(actualProjection.get()).extracting("barcode").isEqualTo(existingBarcode);
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(ProductWithLatestPrice.class));
+        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Product.class));
         verify(this.sessionStorageRepository, times(1)).findTopByOrderByCreationDateDesc();
         verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
     }
@@ -274,13 +268,8 @@ public class ProductExternalServiceTest {
         final String nonExistingBarcode = "1983471983474";
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
-
-        given(
-            this.objectMapperMock.readValue(
-                anyString(),
-                eq(ProductWithLatestPrice.class)
-            )
-        ).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        given(this.objectMapperMock.readValue(anyString(), eq(Product.class)))
+            .willThrow(new IllegalStateException("Item name is empty"));
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -293,17 +282,14 @@ public class ProductExternalServiceTest {
         );
 
         // when
-        final Throwable throwable = catchThrowable(() -> this.productExternalServiceUnderTest.fetchByBarcode("123089173479802134"));
+        final Optional<Product> emptyOptional = productExternalServiceUnderTest.fetchByBarcode(nonExistingBarcode);
 
         // then
-        assertThat(throwable).isNotNull();
-        assertThat(throwable).isExactlyInstanceOf(ResponseStatusException.class);
-        assertThat((ResponseStatusException) throwable).extracting("status").isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat((ResponseStatusException) throwable).extracting("reason").isEqualTo("Product not found");
+        assertThat(emptyOptional).isNotPresent();
 
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(ProductWithLatestPrice.class));
+        verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Product.class));
         verify(this.sessionStorageRepository, times(1)).findTopByOrderByCreationDateDesc();
         verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
 
@@ -319,20 +305,20 @@ public class ProductExternalServiceTest {
                 .willReturn(Optional.of(newSessionStorage(LocalDate.now().minusMonths(1))));
         });
 
-        final ProductWithLatestPrice expectedProjection = ProjectionFactory.productWithLatestPriceBuilder()
-            .description("description")
-            .barcode("123456789101")
-            .latestPrice(new PriceWithInstant(new BigDecimal("16.40"), Instant.now()))
-            .sequenceCode(123456)
+        final String existingBarcode = "7896036093085";
+        final Product expectedProduct = Product.builder()
+            .description("OLEO MARIA")
+            .barcode("7896036093085")
+            .sequenceCode(1184)
             .build();
 
         this.reusableSessionInstance();
 
         given(this.restTemplateMock.httpEntityCallback(any(HttpEntity.class), eq(String.class))).willReturn(null);
 
-        given(this.objectMapperMock.readValue(anyString(), eq(ProductWithLatestPrice.class)))
+        given(this.objectMapperMock.readValue(anyString(), eq(Product.class)))
             .willThrow(InvalidDefinitionException.class)
-            .willReturn(expectedProjection);
+            .willReturn(expectedProduct);
 
         given(this.restTemplateMock.execute(
             eq("/wwv_flow.show"),
@@ -345,20 +331,20 @@ public class ProductExternalServiceTest {
         );
 
         //when
-        final Optional<ProductWithLatestPrice> actualDTO =
-            this.productExternalServiceUnderTest.fetchByBarcode("it is not a barcode")
-            .map(p -> (ProductWithLatestPrice)p);
+        final Optional<Product> actualProduct =
+            this.productExternalServiceUnderTest.fetchByBarcode("it is not a barcode");
 
         //then
-        assertThat(actualDTO).isNotNull();
-        assertThat(actualDTO.orElse(null)).isNotNull();
-        assertThat(actualDTO.get()).extracting("description").isEqualTo("description");
-        assertThat(actualDTO.get()).extracting("latestPrice.value").isEqualTo(new BigDecimal("16.40"));
-        assertThat(actualDTO.get()).extracting("barcode").isEqualTo("123456789101");
+        assertThat(actualProduct).isNotNull();
+        assertThat(actualProduct.orElse(null)).isNotNull();
+        assertThat(actualProduct.get()).extracting("description").isEqualTo("OLEO MARIA");
+        assertThat(actualProduct.get().getPrices()).isEmpty();
+        assertThat(actualProduct.get()).extracting("sequenceCode").isEqualTo(1184);
+        assertThat(actualProduct.get()).extracting("barcode").isEqualTo(existingBarcode);
 
         verify(this.restTemplateMock, times(2)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(2)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
-        verify(this.objectMapperMock, times(2)).readValue(anyString(), eq(ProductWithLatestPrice.class));
+        verify(this.objectMapperMock, times(2)).readValue(anyString(), eq(Product.class));
 
         // reusableNewInstance
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
