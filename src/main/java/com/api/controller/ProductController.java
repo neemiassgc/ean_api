@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -38,14 +37,7 @@ public class ProductController {
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         final List<EntityModel<SimpleProduct>> responseBody =
-            domainMapper.mapToSimpleProductList(productRepository.findAll())
-            .stream()
-            .map(simpleProduct -> EntityModel.of(simpleProduct).addIf(true, () ->
-                linkTo(methodOn(PriceController.class)
-                    .searchByProductBarcode(simpleProduct.getBarcode()))
-                    .withRel("prices")
-            ))
-            .collect(Collectors.toList());
+            makeMapping(productRepository.findAll());
 
         return ResponseEntity.ok(responseBody);
     }
@@ -56,15 +48,7 @@ public class ProductController {
 
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
-        final List<EntityModel<SimpleProduct>> modelList =
-            domainMapper.mapToSimpleProductList(productPage.getContent())
-            .stream()
-            .map(simpleProduct -> EntityModel.of(simpleProduct).addIf(true, () ->
-                linkTo(methodOn(PriceController.class)
-                    .searchByProductBarcode(simpleProduct.getBarcode()))
-                    .withRel("prices")
-            ))
-            .collect(Collectors.toList());
+        final List<EntityModel<SimpleProduct>> modelList = makeMapping(productPage.getContent());
 
         final EntityModel<Paged<EntityModel<SimpleProduct>>> responseBody =
             EntityModel.of(ProjectionFactory.paged(productPage, modelList));
@@ -80,13 +64,34 @@ public class ProductController {
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getByBarcode(@PathVariable("barcode") @Barcode String barcode) {
         final Product productToProcess = productRepository.processByBarcode(barcode);
+
         final Link linkToPrices = linkTo(methodOn(PriceController.class).searchByProductBarcode(barcode))
             .withRel("prices");
+
+        final Link linkToSelf = linkTo(methodOn(this.getClass()).getByBarcode(barcode)).withSelfRel();
+
         final SimpleProduct simpleProductToResponse = domainMapper.mapToSimpleProduct(productToProcess);
 
         final EntityModel<SimpleProduct> responseBody =
-            EntityModel.of(simpleProductToResponse, linkToPrices);
+            EntityModel.of(simpleProductToResponse, linkToPrices, linkToSelf);
 
         return ResponseEntity.ok(responseBody);
+    }
+
+    private List<EntityModel<SimpleProduct>> makeMapping(List<Product> inputList) {
+        return domainMapper.mapToSimpleProductList(inputList)
+            .stream()
+            .map(it -> {
+                final Link linkToPrices = linkTo(methodOn(PriceController.class)
+                    .searchByProductBarcode(it.getBarcode()))
+                    .withRel("prices");
+
+                final Link linkToSelf = linkTo(methodOn(this.getClass())
+                    .getByBarcode(it.getBarcode()))
+                    .withSelfRel();
+
+                return EntityModel.of(it).add(linkToPrices, linkToSelf);
+            })
+            .collect(Collectors.toList());
     }
 }
