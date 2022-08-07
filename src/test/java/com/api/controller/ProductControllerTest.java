@@ -278,4 +278,29 @@ class ProductControllerTest {
         verify(productRepository, times(1)).processByBarcode(eq(barcode));
         verify(productRepository, only()).processByBarcode(eq(barcode));
     }
+
+    @Test
+    @DisplayName("GET /api/products/7891000055120 -> 200 - OK")
+    void when_GET_getByBarcode_should_return_a_product_with_200() throws Exception  {
+        final String barcode = "7891000055120";
+
+        given(productRepository.processByBarcode(eq(barcode))).willReturn(Resources.products.get(0));
+        given(domainMapper.mapToSimpleProduct(Resources.products.get(0)))
+            .willReturn(Resources.simpleProducts.get(0));
+
+        mockMvc.perform(get("/api/products/"+barcode)
+            .characterEncoding("UTF-8")
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.description").value("ACHOC PO NESCAU 800G"))
+        .andExpect(jsonPath("$.sequenceCode").value(29250))
+        .andExpect(jsonPath("$.barcode").value("7891000055120"))
+        .andExpect(jsonPath("$.links[0].rel").value("prices"))
+        .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/prices?barcode=7891000055120"));
+
+        verify(productRepository, times(1)).processByBarcode(eq(barcode));
+        verify(domainMapper, times(1)).mapToSimpleProduct(Resources.products.get(0));
+    }
 }
