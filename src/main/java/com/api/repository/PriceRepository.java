@@ -13,4 +13,6 @@ import java.util.UUID;
 public interface PriceRepository extends JpaRepository<Price, UUID> {
 
     List<Price> findByProductBarcode(String barcode, Sort sort);
+
+    List<Price> findByProductBarcode(String barcode, Pageable pageable);
 }
