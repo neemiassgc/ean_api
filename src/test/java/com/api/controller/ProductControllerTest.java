@@ -96,7 +96,8 @@ class ProductControllerTest {
     }
 
     @Test
-    void when_GET_getAll_should_response_all_products_with_200() throws Exception {
+    @DisplayName("GET /api/products -> 200 OK")
+    void when_GET_getAll_should_return_all_products_with_200() throws Exception {
         final String urlBase = "http://localhost/api/prices?barcode=";
         given(productRepository.findAll()).willReturn(Resources.products);
         given(domainMapper.mapToSimpleProductList(eq(Resources.products))).willReturn(Resources.simpleProducts);
@@ -124,6 +125,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/products -> 200 OK")
     void when_GET_getAll_should_response_a_empty_json_with_200() throws Exception  {
         given(productRepository.findAll()).willReturn(Collections.emptyList());
         given(domainMapper.mapToSimpleProductList(eq(Collections.emptyList())))
@@ -143,6 +145,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/products?pag=0-1 -> 200 OK")
     void when_GET_getAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
         final Pageable pageableInUse = PageRequest.of(0, 1);
         final List<Product> subList = Resources.products.subList(0, 1);
@@ -173,6 +176,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/products?pag=1-1 -> 200 OK")
     void when_GET_getAll_should_response_the_middle_page_of_products_with_200() throws Exception  {
         final Pageable pageableInUse = PageRequest.of(1, 1);
         final List<Product> subList = Resources.products.subList(1, 2);
@@ -203,6 +207,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/products?pag=2-1 -> 200 OK")
     void when_GET_getAll_should_response_the_last_page_of_products_with_200() throws Exception  {
         final Pageable pageableInUse = PageRequest.of(2, 1);
         final List<Product> subList = Resources.products.subList(2, 3);
@@ -233,6 +238,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/products?pag=3-1 -> 200 OK")
     void when_GET_getAll_should_not_response_any_products_with_200() throws Exception  {
         final Pageable pageableInUse = PageRequest.of(3, 1);
 
