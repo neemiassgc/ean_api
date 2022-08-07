@@ -3,6 +3,7 @@ package com.api.pojo;
 import lombok.NonNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,9 +16,13 @@ public final class DomainUtils {
 
     private DomainUtils() {}
 
-    public static Pageable parsePage(@NonNull final String value) {
+    public static Pageable parsePage(@NonNull final String value, @NonNull Sort sort) {
         final String[] split = value.split("-");
-        return PageRequest.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+        return PageRequest.of(
+            Integer.parseInt(split[0]),
+            Integer.parseInt(split[1]),
+            sort
+        );
     }
 
     public static BigDecimal parsePrice(final String priceInput) {
