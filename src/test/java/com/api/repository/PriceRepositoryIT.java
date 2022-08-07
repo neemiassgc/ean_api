@@ -4,6 +4,7 @@ import com.api.entity.Price;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class PriceRepositoryIT {
     @Test
     void should_return_a_list_of_prices_of_a_product() {
         final String barcode = "7896036093085";
-        final List<Price> priceList = priceRepository.findByProductBarcodeOrderByInstantDesc(barcode);
+        final List<Price> priceList = priceRepository.findByProductBarcode(barcode, Sort.by("instant").descending());
         final Iterator<BigDecimal> valuesToCheckInOrder = List.of(
             new BigDecimal("3.50"),
             new BigDecimal("2.50"),
