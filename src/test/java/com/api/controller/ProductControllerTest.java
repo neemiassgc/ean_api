@@ -21,8 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -98,7 +97,9 @@ class ProductControllerTest {
     @Test
     @DisplayName("GET /api/products -> 200 OK")
     void when_GET_getAll_should_return_all_products_with_200() throws Exception {
-        final String urlBase = "http://localhost/api/prices?barcode=";
+        final String urlBaseToPrices = "http://localhost/api/prices?barcode=";
+        final String urlBaseToSelf = "http://localhost/api/products/";
+
         given(productRepository.findAll()).willReturn(Resources.products);
         given(domainMapper.mapToSimpleProductList(eq(Resources.products))).willReturn(Resources.simpleProducts);
 
@@ -110,13 +111,19 @@ class ProductControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(3)))
-        .andExpect(
-            jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018"))
-        )
+        .andExpect(jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018")))
+        .andExpect(jsonPath("$[*].links[0].rel", everyItem(equalTo("prices"))))
         .andExpect(
             jsonPath(
                 "$[*].links[0].href",
-                contains(urlBase+"7891000055120", urlBase+"7896336010058", urlBase+"7896656800018")
+                contains(urlBaseToPrices+"7891000055120", urlBaseToPrices+"7896336010058", urlBaseToPrices+"7896656800018")
+            )
+        )
+        .andExpect(jsonPath("$[*].links[1].rel", everyItem(equalTo("self"))))
+        .andExpect(
+            jsonPath(
+                "$[*].links[1].href",
+                contains(urlBaseToSelf+"7891000055120", urlBaseToSelf+"7896336010058", urlBaseToSelf+"7896656800018")
             )
         );
 
@@ -165,6 +172,8 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.content[0].barcode").value("7891000055120"))
         .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
         .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
+        .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
+        .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7891000055120"))
         .andExpect(jsonPath("$.numberOfItems").value(1))
         .andExpect(jsonPath("$.hasNext").value(true))
         .andExpect(jsonPath("$.totalPages").value(3))
@@ -196,6 +205,8 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.content[0].barcode").value("7896336010058"))
         .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
         .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896336010058"))
+        .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
+        .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896336010058"))
         .andExpect(jsonPath("$.numberOfItems").value(1))
         .andExpect(jsonPath("$.hasNext").value(true))
         .andExpect(jsonPath("$.totalPages").value(3))
@@ -227,6 +238,8 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.content[0].barcode").value("7896656800018"))
         .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
         .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
+        .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
+        .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
         .andExpect(jsonPath("$.numberOfItems").value(1))
         .andExpect(jsonPath("$.hasNext").value(false))
         .andExpect(jsonPath("$.totalPages").value(3))
@@ -298,7 +311,9 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.sequenceCode").value(29250))
         .andExpect(jsonPath("$.barcode").value("7891000055120"))
         .andExpect(jsonPath("$.links[0].rel").value("prices"))
-        .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/prices?barcode=7891000055120"));
+        .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
+        .andExpect(jsonPath("$.links[1].rel").value("self"))
+        .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
 
         verify(productRepository, times(1)).processByBarcode(eq(barcode));
         verify(domainMapper, times(1)).mapToSimpleProduct(Resources.products.get(0));
