@@ -9,6 +9,8 @@ import com.api.service.DomainMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
@@ -37,14 +39,15 @@ public class ProductController {
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         final List<EntityModel<SimpleProduct>> responseBody =
-            makeMapping(productRepository.findAll());
+            makeMapping(productRepository.findAll(Sort.by("description").ascending()));
 
         return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll(@RequestParam(name = "pag") String pag) {
-        final Page<Product> productPage = productRepository.findAll(DomainUtils.parsePage(pag));
+    final Page<Product> productPage =
+            productRepository.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
 
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 

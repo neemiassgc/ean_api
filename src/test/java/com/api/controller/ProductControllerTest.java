@@ -7,11 +7,13 @@ import com.api.service.DomainMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -100,7 +102,7 @@ class ProductControllerTest {
         final String urlBaseToPrices = "http://localhost/api/prices?barcode=";
         final String urlBaseToSelf = "http://localhost/api/products/";
 
-        given(productRepository.findAll()).willReturn(Resources.products);
+        given(productRepository.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Resources.products);
         given(domainMapper.mapToSimpleProductList(eq(Resources.products))).willReturn(Resources.simpleProducts);
 
         mockMvc.perform(get("/api/products")
@@ -127,14 +129,14 @@ class ProductControllerTest {
             )
         );
 
-        verify(productRepository, times(1)).findAll();
+        verify(productRepository, times(1)).findAll((ArgumentMatchers.any(Sort.class)));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(Resources.products));
     }
 
     @Test
     @DisplayName("GET /api/products -> 200 OK")
     void when_GET_getAll_should_response_a_empty_json_with_200() throws Exception  {
-        given(productRepository.findAll()).willReturn(Collections.emptyList());
+        given(productRepository.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
         given(domainMapper.mapToSimpleProductList(eq(Collections.emptyList())))
             .willReturn(Collections.emptyList());
 
@@ -147,14 +149,14 @@ class ProductControllerTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$").isEmpty());
 
-        verify(productRepository, times(1)).findAll();
+        verify(productRepository, times(1)).findAll(ArgumentMatchers.any(Sort.class));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(Collections.emptyList()));
     }
 
     @Test
     @DisplayName("GET /api/products?pag=0-1 -> 200 OK")
     void when_GET_getAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
-        final Pageable pageableInUse = PageRequest.of(0, 1);
+        final Pageable pageableInUse = PageRequest.of(0, 1, Sort.by("description").ascending());
         final List<Product> subList = Resources.products.subList(0, 1);
 
         given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
@@ -187,7 +189,7 @@ class ProductControllerTest {
     @Test
     @DisplayName("GET /api/products?pag=1-1 -> 200 OK")
     void when_GET_getAll_should_response_the_middle_page_of_products_with_200() throws Exception  {
-        final Pageable pageableInUse = PageRequest.of(1, 1);
+        final Pageable pageableInUse = PageRequest.of(1, 1, Sort.by("description").ascending());
         final List<Product> subList = Resources.products.subList(1, 2);
 
         given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
@@ -220,7 +222,7 @@ class ProductControllerTest {
     @Test
     @DisplayName("GET /api/products?pag=2-1 -> 200 OK")
     void when_GET_getAll_should_response_the_last_page_of_products_with_200() throws Exception  {
-        final Pageable pageableInUse = PageRequest.of(2, 1);
+        final Pageable pageableInUse = PageRequest.of(2, 1, Sort.by("description").ascending());
         final List<Product> subList = Resources.products.subList(2, 3);
 
         given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
@@ -253,7 +255,7 @@ class ProductControllerTest {
     @Test
     @DisplayName("GET /api/products?pag=3-1 -> 200 OK")
     void when_GET_getAll_should_not_response_any_products_with_200() throws Exception  {
-        final Pageable pageableInUse = PageRequest.of(3, 1);
+        final Pageable pageableInUse = PageRequest.of(3, 1, Sort.by("description").ascending());
 
         given(productRepository.findAll(eq(pageableInUse)))
             .willReturn(new PageImpl<>(Collections.emptyList(), pageableInUse, 0));
