@@ -2,25 +2,27 @@ package com.api.controller;
 
 import com.api.entity.Product;
 import com.api.projection.Projection;
-import com.api.projection.ProjectionFactory;
 import com.api.repository.ProductRepository;
 import com.api.service.DomainMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -29,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-@WebMvcTest(ProductController.class)
+@WebMvcTest(value = {ProductController.class, GlobalErrorHandlingController.class})
 class ProductControllerTest {
 
     @MockBean
@@ -87,7 +89,10 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = standaloneSetup(new ProductController(productRepository, domainMapper)).alwaysDo(print()).build();
+        this.mockMvc = standaloneSetup(
+            new ProductController(productRepository, domainMapper),
+            new GlobalErrorHandlingController()
+        ).alwaysDo(print()).build();
     }
 
     @Test
