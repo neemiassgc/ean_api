@@ -3,6 +3,7 @@ package com.api.controller;
 import com.api.error.ErrorTemplate;
 import com.api.error.Violation;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,6 +46,7 @@ public class GlobalErrorHandlingController {
     public ResponseEntity<String> handleResponseStatusException(final ResponseStatusException rse) {
         return ResponseEntity
             .status(rse.getStatus())
+            .contentType(MediaType.TEXT_PLAIN)
             .body(Objects.requireNonNullElseGet(rse.getReason(), () -> "No reasons"));
     }
 }
