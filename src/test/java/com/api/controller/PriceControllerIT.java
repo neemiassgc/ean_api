@@ -11,6 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -45,5 +47,20 @@ public class PriceControllerIT {
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.TEXT_PLAIN))
         .andExpect(content().string("Price not found"));
+    }
+
+    @Test
+    @DisplayName("GET /api/prices?barcode=7897534852624 - 200 OK")
+    void should_return_all_prices_for_a_barcode() throws Exception {
+        final String barcode = "7897534852624";
+
+        mockMvc.perform(get("/api/prices").param("barcode", barcode)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(4)))
+        .andExpect(jsonPath("$[*].value", contains(5.65, 9.90, 10.75, 7.50)));
     }
 }
