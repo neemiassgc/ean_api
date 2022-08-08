@@ -2,7 +2,6 @@ package com.api.controller;
 
 import com.api.entity.Price;
 import com.api.repository.PriceRepository;
-import com.api.repository.ProductRepository;
 import com.api.service.DomainMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -156,5 +156,26 @@ public class PriceControllerTest {
 
         verify(priceRepository, times(1)).findByProductBarcode(eq(barcode), eq(defaultPageable));
         verify(priceRepository, only()).findByProductBarcode(eq(barcode), eq(defaultPageable));
+    }
+
+    @Test
+    @DisplayName("GET /api/prices?barcode=7896656811118 - 404 NOT FOUND")
+    void when_there_are_no_prices_for_a_barcode_then_should_return_a_error_massage() throws Exception {
+        final String barcode = "7896656811120";
+        final Sort defaultSort = Sort.by("instant").descending();
+
+        given(priceRepository.findByProductBarcode(eq(barcode), eq(defaultSort)))
+            .willReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/prices?barcode="+barcode)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.TEXT_PLAIN))
+        .andExpect(content().string("Product not found"));
+
+        verify(priceRepository, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
+        verify(priceRepository, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
     }
 }
