@@ -98,4 +98,20 @@ public class PriceControllerIT {
         .andExpect(jsonPath("$", hasSize(3)))
         .andExpect(jsonPath("$[*].value", contains(5.65, 9.90, 10.75)));
     }
+
+    @Test
+    @DisplayName("GET /api/prices?barcode=7897534852836?limit=3 - 404 NOT FOUND")
+    void if_there_are_no_prices_for_a_barcode_then_return_not_found() throws Exception {
+        final String barcode = "7897534852836";
+
+        mockMvc.perform(get("/api/prices")
+            .param("barcode", barcode)
+            .param("limit", "3")
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.TEXT_PLAIN))
+        .andExpect(content().string("Product not found"));
+    }
 }
