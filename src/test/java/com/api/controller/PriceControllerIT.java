@@ -34,4 +34,16 @@ public class PriceControllerIT {
         .andExpect(jsonPath("$.value").value(18.40))
         .andExpect(jsonPath("$.instant").value("2021-09-09T16:50:10.554Z"));
     }
+
+    @Test
+    @DisplayName("GET /api/prices/5ad12c1a-2103-407c-adcc-832e3f99fa9a - 404 NOT FOUND")
+    void when_a_price_does_not_exist_then_should_return_404_not_found() throws Exception {
+        mockMvc.perform(get("/api/prices/5ad12c1a-2103-407c-adcc-832e3f99fa9a")
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.TEXT_PLAIN))
+        .andExpect(content().string("Price not found"));
+    }
 }
