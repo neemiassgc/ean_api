@@ -9,8 +9,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -82,6 +84,26 @@ public class PriceControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.value").value("16.75"));
+
+        verify(priceRepository, times(1)).findById(eq(uuid));
+        verify(priceRepository, only()).findById(eq(uuid));
+    }
+
+    @Test
+    @DisplayName("GET /api/prices/b92b558b-b851-46cc-a2a3-b566e7e37d34 - 404 NOT FOUND")
+    void when_a_price_is_not_found_then_should_return_a_error_message() throws Exception {
+        final UUID uuid = UUID.fromString("b92b558b-b851-46cc-a2a3-b566e7e37d34");
+
+        given(priceRepository.findById(eq(uuid)))
+            .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Price not found"));
+
+        mockMvc.perform(get("/api/prices/"+uuid)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.TEXT_PLAIN))
+        .andExpect(content().string("Price not found"));
 
         verify(priceRepository, times(1)).findById(eq(uuid));
         verify(priceRepository, only()).findById(eq(uuid));
