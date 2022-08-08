@@ -81,4 +81,21 @@ public class PriceControllerIT {
             containsInAnyOrder("barcode must contain only numbers", "barcode must has 13 characters")
         ));
     }
+
+    @Test
+    @DisplayName("GET /api/prices?barcode=7897534852624?limit=3 - 200 OK")
+    void should_return_only_three_prices_for_a_barcode() throws Exception {
+        final String barcode = "7897534852624";
+
+        mockMvc.perform(get("/api/prices")
+            .param("barcode", barcode)
+            .param("limit", "3")
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(3)))
+        .andExpect(jsonPath("$[*].value", contains(5.65, 9.90, 10.75)));
+    }
 }
