@@ -11,8 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -62,5 +61,24 @@ public class PriceControllerIT {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(4)))
         .andExpect(jsonPath("$[*].value", contains(5.65, 9.90, 10.75, 7.50)));
+    }
+
+    @Test
+    @DisplayName("GET /api/prices?barcode=78975348526 - 400 BAD REQUEST")
+    void should_return_constraint_violations_for_barcode_field() throws Exception {
+        final String problematicBarcode = "78975348526";
+
+        mockMvc.perform(get("/api/prices").param("barcode", problematicBarcode)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.violations", hasSize(2)))
+        .andExpect(jsonPath("$.violations[*].field", everyItem(is(problematicBarcode))))
+        .andExpect(jsonPath(
+            "$.violations[*].violationMessage",
+            containsInAnyOrder("barcode must contain only numbers", "barcode must has 13 characters")
+        ));
     }
 }
