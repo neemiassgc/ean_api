@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -131,5 +133,28 @@ public class PriceControllerTest {
 
         verify(priceRepository, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
         verify(priceRepository, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
+    }
+
+    @Test
+    @DisplayName("GET /api/prices?barcode=7896656800018&limit=3 - 200 OK")
+    void should_return_three_prices_for_a_barcode() throws Exception {
+        final String barcode = "7896656800018";
+        final Pageable defaultPageable = PageRequest.ofSize(3).withSort(Sort.by("instant").descending());
+
+        given(priceRepository.findByProductBarcode(eq(barcode), eq(defaultPageable)))
+            .willReturn(usefulPrices.subList(0, 3));
+
+        mockMvc.perform(get("/api/prices?barcode="+barcode+"&limit=3")
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$", hasSize(3)))
+        .andExpect(jsonPath("$[*].value", contains(34.5, 4.52, 16.75)));
+
+        verify(priceRepository, times(1)).findByProductBarcode(eq(barcode), eq(defaultPageable));
+        verify(priceRepository, only()).findByProductBarcode(eq(barcode), eq(defaultPageable));
     }
 }
