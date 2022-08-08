@@ -114,4 +114,23 @@ public class PriceControllerIT {
         .andExpect(content().contentType(MediaType.TEXT_PLAIN))
         .andExpect(content().string("Product not found"));
     }
+
+    @Test
+    @DisplayName("GET /api/prices?barcode=7897534852624?limit=-3 - 400 BAD REQUEST")
+    void should_return_constraint_violations_for_limit_param() throws Exception {
+        final String barcode = "7897534852624";
+        final String problematicLimit = "-3";
+
+        mockMvc.perform(get("/api/prices")
+            .param("barcode", barcode)
+            .param("limit", "-3")
+            .characterEncoding(StandardCharsets.UTF_8)
+            .accept(MediaType.ALL)
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.violations", hasSize(1)))
+        .andExpect(jsonPath("$.violations[0].field").value(problematicLimit))
+        .andExpect(jsonPath("$.violations[0].violationMessage").value("must be greater than or equal to 0"));
+    }
 }
