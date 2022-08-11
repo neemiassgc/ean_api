@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BarcodeSearchApplication {
+public class ProductSearchApiApplication {
 
 	public static void main(String[] args) {
 
-		SpringApplication.run(BarcodeSearchApplication.class, args);
+		SpringApplication.run(ProductSearchApiApplication.class, args);
 	}
 }

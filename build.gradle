@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.api'
-version = '1.0.0-saveg-barcode-querier'
+version = 'SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
