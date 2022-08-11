@@ -4,6 +4,7 @@ import com.api.entity.Product;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
 import com.api.repository.ProductRepositoryCustomImpl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,6 +59,7 @@ public class ProductRepositoryCustomImplIT {
     }
 
     @Test
+    @DisplayName("When a product does not exist then throws an exception")
     public void should_return_throw_an_exception() {
         final String targetBarcode = "1391840815511";
         final Runnable exceptional = () ->
