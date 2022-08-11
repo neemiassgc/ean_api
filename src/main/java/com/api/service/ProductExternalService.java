@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -22,6 +21,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -64,8 +64,11 @@ public class ProductExternalService {
         this.sessionStorageRepository = sessionStorageRepository;
         this.cookieStore = new BasicCookieStore();
 
+
+        final Sort.Order orderByCreationDateDesc = Sort.Order.desc("creationDate");
+        final Sort.Order orderByIdAsc = Sort.Order.asc("id");
         final Optional<SessionStorage> sessionOptional =
-            sessionStorageRepository.findTopByOrderByCreationDateDesc();
+            sessionStorageRepository.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
 
         sessionOptional.ifPresentOrElse((session) -> {
             log.info("Using an existing session");
@@ -182,6 +185,7 @@ public class ProductExternalService {
 
     public SessionInstance newSessionInstance() {
         // Cleaning the cookies
+        log.info("Creating a new instance session");
         cookieStore.clear();
 
         final Map<String, String> resourcesMap = this.initialScrapingRequest();

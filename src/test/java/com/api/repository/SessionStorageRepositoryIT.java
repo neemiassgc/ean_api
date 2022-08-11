@@ -6,21 +6,27 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Optional;
 
 @SpringBootTest
+@Transactional(readOnly = true)
 public class SessionStorageRepositoryIT {
 
     @Autowired
     private SessionStorageRepository sessionStorageRepository;
 
     @Test
-    @DisplayName("Testing findTopByOrderByCreationDateDesc method")
+    @DisplayName("Testing findTopBy method")
     void should_return_a_session() {
-        final Optional<SessionStorage> actualOptional = sessionStorageRepository.findTopByOrderByCreationDateDesc();
+        final Sort.Order orderByCreationDateDesc = Sort.Order.desc("creationDate");
+        final Sort.Order orderByIdAsc = Sort.Order.asc("id");
+        final Optional<SessionStorage> actualOptional =
+            sessionStorageRepository.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
 
         Assertions.assertThat(actualOptional).isNotNull();
         Assertions.assertThat(actualOptional).isPresent();
