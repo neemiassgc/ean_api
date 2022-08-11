@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -51,6 +52,8 @@ public class ProductExternalService {
     @Setter(AccessLevel.PRIVATE)
     private SessionInstance sessionInstance;
 
+    private final CookieStore cookieStore;
+
     @Autowired
     public ProductExternalService(
         final RestTemplateBuilder restTemplateBuilder,
@@ -59,22 +62,22 @@ public class ProductExternalService {
     ) {
         this.objectMapper = objectMapper;
         this.sessionStorageRepository = sessionStorageRepository;
-
-        final CookieStore basicCookieStore = new BasicCookieStore();
+        this.cookieStore = new BasicCookieStore();
 
         final SessionStorage actualSession =
             sessionStorageRepository.findTopByOrderByCreationDateDesc().orElseThrow();
 
         if (actualSession.getCreationDate().isEqual(LocalDate.now())) {
-            log.info("Reusing session from DB");
+            log.info("Using an existing session");
             this.sessionInstance = new SessionInstance(actualSession.getInstance() + "", actualSession.getAjaxId());
 
+            log.info("Using a cookie session got from DB");
             final BasicClientCookie cookie = new BasicClientCookie(actualSession.getCookieKey(), actualSession.getCookieValue());
             cookie.setPath("/");
             cookie.setSecure(true);
             cookie.setDomain("apex.savegnago.com.br");
             cookie.setExpiryDate(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)));
-            basicCookieStore.addCookie(cookie);
+            cookieStore.addCookie(cookie);
         }
         else this.sessionInstance = SessionInstance.EMPTY_SESSION;
 
@@ -83,13 +86,12 @@ public class ProductExternalService {
             .custom()
             .setConnectionRequestTimeout(twoSeconds)
             .setConnectTimeout(twoSeconds)
-            .setConnectTimeout(twoSeconds)
             .build();
 
         final CloseableHttpClient httpClient = HttpClientBuilder.create()
             .setDefaultRequestConfig(requestConfig)
             .setRedirectStrategy(DefaultRedirectStrategy.INSTANCE)
-            .setDefaultCookieStore(basicCookieStore)
+            .setDefaultCookieStore(cookieStore)
             .build();
 
         this.restTemplate = restTemplateBuilder
@@ -178,6 +180,9 @@ public class ProductExternalService {
     }
 
     public SessionInstance newSessionInstance() {
+        // Cleaning the cookies
+        cookieStore.clear();
+
         final Map<String, String> resourcesMap = this.initialScrapingRequest();
         final Pair<String, String> pairOfResources = this.loginRequest(resourcesMap);
 
