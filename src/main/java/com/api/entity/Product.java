@@ -23,6 +23,7 @@ public class Product {
 
     @Id
     @GeneratedValue
+    @Setter(AccessLevel.NONE)
     private UUID id;
 
     @Column(nullable = false)
@@ -35,6 +36,7 @@ public class Product {
     private Integer sequenceCode;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter(AccessLevel.NONE)
     private List<Price> prices = new ArrayList<>();
 
     @Builder
