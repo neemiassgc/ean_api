@@ -18,6 +18,7 @@ public class Price {
 
     @Id
     @GeneratedValue
+    @Setter(AccessLevel.NONE)
     private UUID id;
 
     private BigDecimal value;
