@@ -64,22 +64,23 @@ public class ProductExternalService {
         this.sessionStorageRepository = sessionStorageRepository;
         this.cookieStore = new BasicCookieStore();
 
-        final SessionStorage actualSession =
-            sessionStorageRepository.findTopByOrderByCreationDateDesc().orElseThrow();
+        final Optional<SessionStorage> sessionOptional =
+            sessionStorageRepository.findTopByOrderByCreationDateDesc();
 
-        if (actualSession.getCreationDate().isEqual(LocalDate.now())) {
+        sessionOptional.ifPresentOrElse((session) -> {
             log.info("Using an existing session");
-            this.sessionInstance = new SessionInstance(actualSession.getInstance() + "", actualSession.getAjaxId());
+            this.sessionInstance = new SessionInstance(session.getInstance() + "", session.getAjaxId());
 
             log.info("Using a cookie session got from DB");
-            final BasicClientCookie cookie = new BasicClientCookie(actualSession.getCookieKey(), actualSession.getCookieValue());
+            final BasicClientCookie cookie = new BasicClientCookie(session.getCookieKey(), session.getCookieValue());
             cookie.setPath("/");
             cookie.setSecure(true);
             cookie.setDomain("apex.savegnago.com.br");
             cookie.setExpiryDate(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)));
             cookieStore.addCookie(cookie);
-        }
-        else this.sessionInstance = SessionInstance.EMPTY_SESSION;
+        },
+            () -> this.sessionInstance = SessionInstance.EMPTY_SESSION
+        );
 
         final int twoSeconds = (int) Duration.ofSeconds(2).toMillis();
         final RequestConfig requestConfig = RequestConfig
