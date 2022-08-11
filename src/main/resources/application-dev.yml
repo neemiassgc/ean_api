@@ -15,3 +15,7 @@ spring:
 
       # Load data only for development environment
       platform: dev
+
+
+server:
+  port: ${PORT:8080}
