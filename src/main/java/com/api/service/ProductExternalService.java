@@ -2,6 +2,7 @@ package com.api.service;
 
 import com.api.entity.Product;
 import com.api.entity.SessionStorage;
+import com.api.pojo.Constants;
 import com.api.pojo.DomainUtils;
 import com.api.pojo.SessionInstance;
 import com.api.repository.SessionStorageRepository;
@@ -36,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -64,26 +66,7 @@ public class ProductExternalService {
         this.sessionStorageRepository = sessionStorageRepository;
         this.cookieStore = new BasicCookieStore();
 
-
-        final Sort.Order orderByCreationDateDesc = Sort.Order.desc("creationDate");
-        final Sort.Order orderByIdAsc = Sort.Order.asc("id");
-        final Optional<SessionStorage> sessionOptional =
-            sessionStorageRepository.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
-
-        sessionOptional.ifPresentOrElse((session) -> {
-            log.info("Using an existing session");
-            this.sessionInstance = new SessionInstance(session.getInstance() + "", session.getAjaxId());
-
-            log.info("Using a cookie session got from DB");
-            final BasicClientCookie cookie = new BasicClientCookie(session.getCookieKey(), session.getCookieValue());
-            cookie.setPath("/");
-            cookie.setSecure(true);
-            cookie.setDomain("apex.savegnago.com.br");
-            cookie.setExpiryDate(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)));
-            cookieStore.addCookie(cookie);
-        },
-            () -> this.sessionInstance = SessionInstance.EMPTY_SESSION
-        );
+        startCachedInstanceSession();
 
         final int twoSeconds = (int) Duration.ofSeconds(2).toMillis();
         final RequestConfig requestConfig = RequestConfig
@@ -102,6 +85,33 @@ public class ProductExternalService {
             .rootUri("https://apex.savegnago.com.br/apexmobile")
             .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
             .build();
+    }
+
+    private void startCachedInstanceSession() {
+        final Sort.Order orderByCreationDateDesc = Sort.Order.desc("creationDate");
+        final Sort.Order orderByIdAsc = Sort.Order.asc("id");
+        final Optional<SessionStorage> sessionOptional =
+            sessionStorageRepository.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
+
+        sessionOptional.ifPresentOrElse((session) -> {
+            if (!session.getCreationDate().equals(LocalDate.now(ZoneId.of(Constants.TIMEZONE)))) {
+                this.sessionInstance = SessionInstance.EMPTY_SESSION;
+                return;
+            }
+
+            log.info("Using an existing session");
+            this.sessionInstance = new SessionInstance(session.getInstance() + "", session.getAjaxId());
+
+            log.info("Using a cookie session got from DB");
+            final BasicClientCookie cookie = new BasicClientCookie(session.getCookieKey(), session.getCookieValue());
+            cookie.setPath("/");
+            cookie.setSecure(true);
+            cookie.setDomain("apex.savegnago.com.br");
+            cookie.setExpiryDate(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)));
+            cookieStore.addCookie(cookie);
+        },
+            () -> this.sessionInstance = SessionInstance.EMPTY_SESSION
+        );
     }
 
     private Map<String, String> initialScrapingRequest() {
@@ -197,7 +207,7 @@ public class ProductExternalService {
         sessionStorage.setAjaxId(pairOfResources.getFirst());
         sessionStorage.setCookieKey(pairOfCookies[0]);
         sessionStorage.setCookieValue(pairOfCookies[1]);
-        sessionStorage.setCreationDate(LocalDate.now());
+        sessionStorage.setCreationDate(LocalDate.now(ZoneId.of(Constants.TIMEZONE)));
 
         log.info("Saving a new session in the DB");
         sessionStorageRepository.save(sessionStorage);
