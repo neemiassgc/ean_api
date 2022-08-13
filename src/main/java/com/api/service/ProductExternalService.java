@@ -246,7 +246,7 @@ public class ProductExternalService {
 
                     return Optional.of(newProductToPersist);
                 }
-                catch (InvalidDefinitionException | IllegalStateException exception) {
+                catch (InvalidDefinitionException | IllegalStateException | NullPointerException exception) {
                     if (exception instanceof IllegalStateException)
                         if (exception.getMessage().equals("Item name is empty"))
                             return Optional.empty();
