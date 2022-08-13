@@ -84,7 +84,7 @@ public class ProductExternalServiceTest {
     void should_return_a_valid_session_instance() {
         // given
         setup(it -> {
-            given(it.findTopBy(eq(Sort.by("creationDate")))).willReturn(
+            given(it.findTopBy(any(Sort.class))).willReturn(
                 Optional.of(newSessionStorage(LocalDate.now().minusDays(3)))
             );
             given(it.save(any(SessionStorage.class))).willAnswer(invocation -> invocation.getArgument(0));
@@ -102,7 +102,7 @@ public class ProductExternalServiceTest {
 
         verify(this.restTemplateMock, times(2)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(anyString(), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(eq(Sort.by("creationDate")));
+        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
         verify(this.sessionStorageRepository, times(1)).save(any(SessionStorage.class));
     }
 
@@ -111,7 +111,7 @@ public class ProductExternalServiceTest {
     void if_unable_possible_to_parse_the_login_page_then_should_throw_an_exception() {
         // given
         setup(it -> {
-            given(it.findTopBy(eq(Sort.by("creationDate")))).willReturn(
+            given(it.findTopBy(any(Sort.class))).willReturn(
                 Optional.of(newSessionStorage(LocalDate.now().minusDays(3)))
             );
         });
@@ -130,7 +130,7 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, only()).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, never()).postForEntity(anyString(), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(eq(Sort.by("creationDate")));
+        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
         verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
     }
 
@@ -139,7 +139,7 @@ public class ProductExternalServiceTest {
     void when_some_of_the_required_fields_are_missing_then_should_throw_an_exception(){
         // given
         setup(it -> {
-            given(it.findTopBy(eq(Sort.by("creationDate")))).willReturn(
+            given(it.findTopBy(any(Sort.class))).willReturn(
                 Optional.of(newSessionStorage(LocalDate.now().minusDays(3)))
             );
         });
@@ -158,7 +158,7 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, only()).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, never()).postForEntity(anyString(), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(eq(Sort.by("creationDate")));
+        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
         verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
     }
 
@@ -167,7 +167,7 @@ public class ProductExternalServiceTest {
     void when_ajaxIdentifier_is_not_found_then_should_throw_an_exception_loginRequest() {
         // given
         setup(it -> {
-            given(it.findTopBy(eq(Sort.by("creationDate")))).willReturn(
+            given(it.findTopBy(any(Sort.class))).willReturn(
                 Optional.of(newSessionStorage(LocalDate.now().minusDays(3)))
             );
         });
@@ -205,7 +205,7 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(eq(Sort.by("creationDate")));
+        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
         verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
     }
 
@@ -214,7 +214,7 @@ public class ProductExternalServiceTest {
     void given_a_valid_barcode_then_should_return_a_product_fetchByBarcode() throws JsonProcessingException {
         // given
         setup(it -> {
-            given(it.findTopBy(eq(Sort.by("creationDate"))))
+            given(it.findTopBy(any(Sort.class)))
                 .willReturn(Optional.of(newSessionStorage(LocalDate.now())));
         });
 
@@ -253,7 +253,7 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
         verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Product.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(eq(Sort.by("creationDate")));
+        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
         verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
     }
 
@@ -262,7 +262,7 @@ public class ProductExternalServiceTest {
     void given_a_non_existing_barcode_then_should_return_an_optional_empty_fetchByBarcode() throws JsonProcessingException {
         // given
         setup(it -> {
-            given(it.findTopBy(eq(Sort.by("creationDate"))))
+            given(it.findTopBy(any(Sort.class)))
                 .willReturn(Optional.of(newSessionStorage(LocalDate.now())));
         });
 
@@ -291,7 +291,7 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
         verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Product.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(eq(Sort.by("creationDate")));
+        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
         verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
 
 
@@ -302,7 +302,7 @@ public class ProductExternalServiceTest {
     void when_a_session_instance_is_not_valid_then_should_recreate_it() throws JsonProcessingException {
        //given
         setup(it -> {
-            given(it.findTopBy(eq(Sort.by("creationDate"))))
+            given(it.findTopBy(any(Sort.class)))
                 .willReturn(Optional.of(newSessionStorage(LocalDate.now().minusMonths(1))));
         });
 
@@ -351,7 +351,7 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(eq(Sort.by("creationDate")));
+        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
         verify(this.sessionStorageRepository, times(1)).save(any(SessionStorage.class));
     }
 }
