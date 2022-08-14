@@ -4,10 +4,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import java.util.Locale;
 import java.util.Properties;
 
 @Configuration
@@ -38,5 +41,10 @@ public class BeansConfiguration {
         javaMailSender.setSession(session);
 
         return javaMailSender;
+    }
+
+    @Bean
+    public LocaleResolver localeResolver() {
+        return new FixedLocaleResolver(Locale.US);
     }
 }
