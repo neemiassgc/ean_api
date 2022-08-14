@@ -24,6 +24,7 @@ import static com.api.projection.Projection.PriceWithInstant;
 @RestController
 @RequestMapping(path = "/api")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@CrossOrigin
 public class PriceController {
 
     private final PriceRepository priceRepository;
