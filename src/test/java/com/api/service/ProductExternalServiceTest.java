@@ -3,7 +3,7 @@ package com.api.service;
 import com.api.entity.Product;
 import com.api.entity.SessionStorage;
 import com.api.pojo.SessionInstance;
-import com.api.repository.SessionStorageRepository;
+import com.api.service.interfaces.SessionStorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
@@ -38,10 +38,10 @@ public class ProductExternalServiceTest {
 
     private RestTemplate restTemplateMock;
     private ObjectMapper objectMapperMock;
-    private SessionStorageRepository sessionStorageRepository;
+    private SessionStorageService sessionStorageService;
     private ProductExternalService productExternalServiceUnderTest;
 
-    void setup(@Nullable final Consumer<SessionStorageRepository> consumer) {
+    void setup(@Nullable final Consumer<SessionStorageService> consumer) {
         this.restTemplateMock = mock(RestTemplate.class);
 
         final RestTemplateBuilder restTemplateBuilderMock = mock(RestTemplateBuilder.class);
@@ -50,12 +50,12 @@ public class ProductExternalServiceTest {
         given(restTemplateBuilderMock.build()).willReturn(this.restTemplateMock);
 
         this.objectMapperMock = mock(ObjectMapper.class);
-        this.sessionStorageRepository = mock(SessionStorageRepository.class);
+        this.sessionStorageService = mock(SessionStorageService.class);
 
-        if (Objects.nonNull(consumer)) consumer.accept(this.sessionStorageRepository);
+        if (Objects.nonNull(consumer)) consumer.accept(this.sessionStorageService);
 
         this.productExternalServiceUnderTest =
-            new ProductExternalService(restTemplateBuilderMock, this.objectMapperMock, sessionStorageRepository);
+            new ProductExternalService(restTemplateBuilderMock, this.objectMapperMock, sessionStorageService);
     }
 
     private void reusableSessionInstance() {
@@ -87,7 +87,7 @@ public class ProductExternalServiceTest {
             given(it.findTopBy(any(Sort.class))).willReturn(
                 Optional.of(newSessionStorage(LocalDate.now().minusDays(3)))
             );
-            given(it.save(any(SessionStorage.class))).willAnswer(invocation -> invocation.getArgument(0));
+            willDoNothing().given(it).save(any(SessionStorage.class));
         });
 
         this.reusableSessionInstance();
@@ -102,8 +102,8 @@ public class ProductExternalServiceTest {
 
         verify(this.restTemplateMock, times(2)).execute(anyString(), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(anyString(), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
-        verify(this.sessionStorageRepository, times(1)).save(any(SessionStorage.class));
+        verify(this.sessionStorageService, times(1)).findTopBy(any(Sort.class));
+        verify(this.sessionStorageService, times(1)).save(any(SessionStorage.class));
     }
 
     @Test
@@ -130,8 +130,8 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, only()).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, never()).postForEntity(anyString(), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
-        verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
+        verify(this.sessionStorageService, times(1)).findTopBy(any(Sort.class));
+        verify(this.sessionStorageService, never()).save(any(SessionStorage.class));
     }
 
     @Test
@@ -158,8 +158,8 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, only()).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, never()).postForEntity(anyString(), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
-        verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
+        verify(this.sessionStorageService, times(1)).findTopBy(any(Sort.class));
+        verify(this.sessionStorageService, never()).save(any(SessionStorage.class));
     }
 
     @Test
@@ -205,8 +205,8 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
-        verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
+        verify(this.sessionStorageService, times(1)).findTopBy(any(Sort.class));
+        verify(this.sessionStorageService, never()).save(any(SessionStorage.class));
     }
 
     @Test
@@ -253,8 +253,8 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
         verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Product.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
-        verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
+        verify(this.sessionStorageService, times(1)).findTopBy(any(Sort.class));
+        verify(this.sessionStorageService, never()).save(any(SessionStorage.class));
     }
 
     @Test
@@ -291,8 +291,8 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/wwv_flow.show"), eq(HttpMethod.POST), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).httpEntityCallback(any(HttpEntity.class), eq(String.class));
         verify(this.objectMapperMock, times(1)).readValue(anyString(), eq(Product.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
-        verify(this.sessionStorageRepository, never()).save(any(SessionStorage.class));
+        verify(this.sessionStorageService, times(1)).findTopBy(any(Sort.class));
+        verify(this.sessionStorageService, never()).save(any(SessionStorage.class));
 
 
     }
@@ -351,7 +351,7 @@ public class ProductExternalServiceTest {
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).execute(eq("/f?p=171:2:54321:NEXT:NO:2:P2_CURSOR:B"), eq(HttpMethod.GET), isNull(), any(ResponseExtractor.class));
         verify(this.restTemplateMock, times(1)).postForEntity(eq("/wwv_flow.accept"), anyMap(), eq(String.class));
-        verify(this.sessionStorageRepository, times(1)).findTopBy(any(Sort.class));
-        verify(this.sessionStorageRepository, times(1)).save(any(SessionStorage.class));
+        verify(this.sessionStorageService, times(1)).findTopBy(any(Sort.class));
+        verify(this.sessionStorageService, times(1)).save(any(SessionStorage.class));
     }
 }
