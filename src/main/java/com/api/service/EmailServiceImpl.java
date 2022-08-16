@@ -1,6 +1,7 @@
 package com.api.service;
 
 import com.api.pojo.Constants;
+import com.api.service.interfaces.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;

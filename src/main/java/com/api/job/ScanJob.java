@@ -3,7 +3,7 @@ package com.api.job;
 import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.repository.ProductRepository;
-import com.api.service.EmailService;
+import com.api.service.interfaces.EmailService;
 import com.api.service.ProductExternalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
