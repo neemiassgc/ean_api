@@ -5,7 +5,7 @@ import com.api.entity.SessionStorage;
 import com.api.pojo.Constants;
 import com.api.pojo.DomainUtils;
 import com.api.pojo.SessionInstance;
-import com.api.repository.SessionStorageRepository;
+import com.api.service.interfaces.SessionStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import lombok.AccessLevel;
@@ -49,7 +49,7 @@ public class ProductExternalService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final SessionStorageRepository sessionStorageRepository;
+    private final SessionStorageService sessionStorageService;
 
     @Setter(AccessLevel.PRIVATE)
     private SessionInstance sessionInstance;
@@ -60,10 +60,10 @@ public class ProductExternalService {
     public ProductExternalService(
         final RestTemplateBuilder restTemplateBuilder,
         final ObjectMapper objectMapper,
-        final SessionStorageRepository sessionStorageRepository
+        final SessionStorageService sessionStorageService
     ) {
         this.objectMapper = objectMapper;
-        this.sessionStorageRepository = sessionStorageRepository;
+        this.sessionStorageService = sessionStorageService;
         this.cookieStore = new BasicCookieStore();
 
         startCachedInstanceSession();
@@ -91,7 +91,7 @@ public class ProductExternalService {
         final Sort.Order orderByCreationDateDesc = Sort.Order.desc("creationDate");
         final Sort.Order orderByIdAsc = Sort.Order.asc("id");
         final Optional<SessionStorage> sessionOptional =
-            sessionStorageRepository.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
+            sessionStorageService.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
 
         sessionOptional.ifPresentOrElse((session) -> {
             if (!session.getCreationDate().equals(LocalDate.now(ZoneId.of(Constants.TIMEZONE)))) {
@@ -210,7 +210,7 @@ public class ProductExternalService {
         sessionStorage.setCreationDate(LocalDate.now(ZoneId.of(Constants.TIMEZONE)));
 
         log.info("Saving a new session in the DB");
-        sessionStorageRepository.save(sessionStorage);
+        sessionStorageService.save(sessionStorage);
 
         return new SessionInstance(sessionStorage.getInstance()+"", pairOfResources.getFirst());
     }
