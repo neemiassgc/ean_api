@@ -27,14 +27,14 @@ public class ProductServiceImpl implements ProductService {
     private final ProductExternalService productExternalService;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Product processByBarcode(@NonNull final String barcode) {
+    public Product getByBarcode(@NonNull final String barcode) {
         final Optional<Product> productOptional = productRepository.findByBarcode(barcode);
 
         if (productOptional.isPresent()) return productOptional.get();
 
         // Save a new product
         final Product newProduct = productExternalService.fetchByBarcode(barcode)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         return this.productRepository.save(newProduct);
     }

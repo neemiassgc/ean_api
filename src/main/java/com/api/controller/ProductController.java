@@ -4,7 +4,6 @@ import com.api.annotation.Barcode;
 import com.api.entity.Product;
 import com.api.pojo.DomainUtils;
 import com.api.projection.ProjectionFactory;
-import com.api.repository.ProductRepository;
 import com.api.service.DomainMapper;
 import com.api.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +66,7 @@ public class ProductController {
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getByBarcode(@PathVariable("barcode") @Barcode String barcode) {
-        final Product productToProcess = productService.processByBarcode(barcode);
+        final Product productToProcess = productService.getByBarcode(barcode);
 
         final Link linkToPrices = linkTo(methodOn(PriceController.class).searchByProductBarcode(barcode))
             .withRel("prices");

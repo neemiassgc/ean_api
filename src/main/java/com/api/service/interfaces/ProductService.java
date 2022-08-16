@@ -15,7 +15,7 @@ public interface ProductService {
 
     Optional<Product> findByBarcode(@NonNull String barcode);
 
-    Product processByBarcode(@NonNull final String barcode);
+    Product getByBarcode(@NonNull final String barcode);
 
     List<Product> findAll(Sort sort);
 

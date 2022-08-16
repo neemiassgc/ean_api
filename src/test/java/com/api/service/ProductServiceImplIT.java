@@ -33,7 +33,7 @@ public class ProductServiceImplIT {
     public void should_return_a_product_from_db() {
         final String targetBarcode = "7897534852624";
         final Product product =
-            productServiceImplUnderTest.processByBarcode(targetBarcode);
+            productServiceImplUnderTest.getByBarcode(targetBarcode);
 
         assertThat(product).isNotNull();
         assertThat(product.getPrices()).hasSize(4);
@@ -47,7 +47,7 @@ public class ProductServiceImplIT {
     public void should_return_a_product_from_the_external_service() {
         final String targetBarcode = "7892840819507";
         final Product product =
-            productServiceImplUnderTest.processByBarcode(targetBarcode);
+            productServiceImplUnderTest.getByBarcode(targetBarcode);
 
         assertThat(product).isNotNull();
         assertThat(product.getDescription()).isEqualTo("ACHOC PO TODDY 370G");
@@ -62,7 +62,7 @@ public class ProductServiceImplIT {
     public void should_return_throw_an_exception() {
         final String targetBarcode = "1391840815511";
         final Runnable exceptional = () ->
-            productServiceImplUnderTest.processByBarcode(targetBarcode);
+            productServiceImplUnderTest.getByBarcode(targetBarcode);
 
         final Throwable actualThrowable = catchThrowable(exceptional::run);
 

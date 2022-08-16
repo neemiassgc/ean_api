@@ -51,7 +51,7 @@ public class ProductServiceImplTest {
             .willReturn(Optional.of(defaultProduct));
 
         // when
-        final Product actualProduct = productServiceImplUnderTest.processByBarcode(targetBarcode);
+        final Product actualProduct = productServiceImplUnderTest.getByBarcode(targetBarcode);
 
         // then
        assertThat(actualProduct).isEqualTo(defaultProduct);
@@ -72,7 +72,7 @@ public class ProductServiceImplTest {
             .willAnswer(invocation ->  invocation.getArgument(0, Product.class));
 
         // when
-        final Product actualProduct = productServiceImplUnderTest.processByBarcode(targetBarcode);
+        final Product actualProduct = productServiceImplUnderTest.getByBarcode(targetBarcode);
 
         // then
         assertThat(actualProduct).isEqualTo(defaultProduct);
@@ -92,7 +92,7 @@ public class ProductServiceImplTest {
 
         // when
         final Throwable actualException =
-            catchThrowable(() -> productServiceImplUnderTest.processByBarcode(targetBarcode));
+            catchThrowable(() -> productServiceImplUnderTest.getByBarcode(targetBarcode));
 
         // then
         assertThat(actualException).isNotNull();

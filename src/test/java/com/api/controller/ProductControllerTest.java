@@ -279,7 +279,7 @@ class ProductControllerTest {
     void when_GET_getByBarcode_should_return_a_message_error_with_404() throws Exception  {
         final String barcode = "7891000051230";
 
-        given(productService.processByBarcode(eq(barcode)))
+        given(productService.getByBarcode(eq(barcode)))
             .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         mockMvc.perform(get("/api/products/"+barcode)
@@ -291,8 +291,8 @@ class ProductControllerTest {
         .andExpect(content().contentType(MediaType.TEXT_PLAIN))
         .andExpect(content().string("Product not found"));
 
-        verify(productService, times(1)).processByBarcode(eq(barcode));
-        verify(productService, only()).processByBarcode(eq(barcode));
+        verify(productService, times(1)).getByBarcode(eq(barcode));
+        verify(productService, only()).getByBarcode(eq(barcode));
     }
 
     @Test
@@ -300,7 +300,7 @@ class ProductControllerTest {
     void when_GET_getByBarcode_should_return_a_product_with_200() throws Exception  {
         final String barcode = "7891000055120";
 
-        given(productService.processByBarcode(eq(barcode))).willReturn(Resources.products.get(0));
+        given(productService.getByBarcode(eq(barcode))).willReturn(Resources.products.get(0));
         given(domainMapper.mapToSimpleProduct(Resources.products.get(0)))
             .willReturn(Resources.simpleProducts.get(0));
 
@@ -318,7 +318,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.links[1].rel").value("self"))
         .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
 
-        verify(productService, times(1)).processByBarcode(eq(barcode));
+        verify(productService, times(1)).getByBarcode(eq(barcode));
         verify(domainMapper, times(1)).mapToSimpleProduct(Resources.products.get(0));
     }
 }
