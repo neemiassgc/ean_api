@@ -17,9 +17,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProductRepositoryCustomImplTest {
+public class ProductServiceImplTest {
 
-    private ProductRepositoryCustomImpl productRepositoryCustomImplUnderTest;
+    private ProductServiceImpl productServiceImplUnderTest;
     private ProductRepository productRepository;
     private ProductExternalService productExternalService;
 
@@ -39,9 +39,7 @@ public class ProductRepositoryCustomImplTest {
     void preset() {
         this.productRepository = mock(ProductRepository.class);
         this.productExternalService = mock(ProductExternalService.class);
-        this.productRepositoryCustomImplUnderTest =
-            new ProductRepositoryCustomImpl(this.productExternalService);
-        this.productRepositoryCustomImplUnderTest.setProductRepository(productRepository);
+        this.productServiceImplUnderTest = new ProductServiceImpl(this.productRepository, this.productExternalService);
     }
 
     @DisplayName("When a product already exists in DB then returns it - processByBarcode")
@@ -53,7 +51,7 @@ public class ProductRepositoryCustomImplTest {
             .willReturn(Optional.of(defaultProduct));
 
         // when
-        final Product actualProduct = productRepositoryCustomImplUnderTest.processByBarcode(targetBarcode);
+        final Product actualProduct = productServiceImplUnderTest.processByBarcode(targetBarcode);
 
         // then
        assertThat(actualProduct).isEqualTo(defaultProduct);
@@ -74,7 +72,7 @@ public class ProductRepositoryCustomImplTest {
             .willAnswer(invocation ->  invocation.getArgument(0, Product.class));
 
         // when
-        final Product actualProduct = productRepositoryCustomImplUnderTest.processByBarcode(targetBarcode);
+        final Product actualProduct = productServiceImplUnderTest.processByBarcode(targetBarcode);
 
         // then
         assertThat(actualProduct).isEqualTo(defaultProduct);
@@ -94,7 +92,7 @@ public class ProductRepositoryCustomImplTest {
 
         // when
         final Throwable actualException =
-            catchThrowable(() -> productRepositoryCustomImplUnderTest.processByBarcode(targetBarcode));
+            catchThrowable(() -> productServiceImplUnderTest.processByBarcode(targetBarcode));
 
         // then
         assertThat(actualException).isNotNull();

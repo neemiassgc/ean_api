@@ -5,6 +5,7 @@ import com.api.entity.Product;
 import com.api.repository.ProductRepository;
 import com.api.service.interfaces.EmailService;
 import com.api.service.ProductExternalService;
+import com.api.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -26,12 +27,12 @@ import java.util.Map;
 public class ScanJob implements Job {
 
     private final ProductExternalService productExternalService;
-    private final ProductRepository productRepository;
+    private final ProductService productService;
     private final EmailService emailService;
 
     @Transactional(propagation = Propagation.REQUIRED)
     private Map<String, Integer> delegateTask() {
-        final List<Product> products = productRepository.findAllWithLastPrice();
+        final List<Product> products = productService.findAllWithLastPrice();
         final int totalOfProducts = products.size();
         int countOfChangedProducts = 0;
 
@@ -47,7 +48,7 @@ public class ScanJob implements Job {
             if (product.getPrices().get(0).getValue().equals(newPrice.getValue()))
                 continue;
 
-            productRepository.save(product.addPrice(newPrice));
+            productService.save(product.addPrice(newPrice));
             countOfChangedProducts++;
         }
 

@@ -2,8 +2,8 @@ package com.api.controller;
 
 import com.api.entity.Product;
 import com.api.projection.Projection;
-import com.api.repository.ProductRepository;
 import com.api.service.DomainMapper;
+import com.api.service.interfaces.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 class ProductControllerTest {
 
     @MockBean
-    private ProductRepository productRepository;
+    private ProductService productService;
 
     @MockBean
     private DomainMapper domainMapper;
@@ -91,7 +92,7 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         this.mockMvc = standaloneSetup(
-            new ProductController(productRepository, domainMapper),
+            new ProductController(productService, domainMapper),
             new GlobalErrorHandlingController()
         ).alwaysDo(print()).build();
     }
@@ -102,7 +103,7 @@ class ProductControllerTest {
         final String urlBaseToPrices = "http://localhost/api/prices?barcode=";
         final String urlBaseToSelf = "http://localhost/api/products/";
 
-        given(productRepository.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Resources.products);
+        given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Resources.products);
         given(domainMapper.mapToSimpleProductList(eq(Resources.products))).willReturn(Resources.simpleProducts);
 
         mockMvc.perform(get("/api/products")
@@ -129,14 +130,14 @@ class ProductControllerTest {
             )
         );
 
-        verify(productRepository, times(1)).findAll((ArgumentMatchers.any(Sort.class)));
+        verify(productService, times(1)).findAll((ArgumentMatchers.any(Sort.class)));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(Resources.products));
     }
 
     @Test
     @DisplayName("GET /api/products -> 200 OK")
     void when_GET_getAll_should_response_a_empty_json_with_200() throws Exception  {
-        given(productRepository.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
+        given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
         given(domainMapper.mapToSimpleProductList(eq(Collections.emptyList())))
             .willReturn(Collections.emptyList());
 
@@ -149,7 +150,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$").isEmpty());
 
-        verify(productRepository, times(1)).findAll(ArgumentMatchers.any(Sort.class));
+        verify(productService, times(1)).findAll(ArgumentMatchers.any(Sort.class));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(Collections.emptyList()));
     }
 
@@ -159,7 +160,7 @@ class ProductControllerTest {
         final Pageable pageableInUse = PageRequest.of(0, 1, Sort.by("description").ascending());
         final List<Product> subList = Resources.products.subList(0, 1);
 
-        given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
+        given(productService.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
         given(domainMapper.mapToSimpleProductList(eq(subList))).willReturn(Resources.simpleProducts.subList(0, 1));
 
         mockMvc.perform(get("/api/products?pag=0-1")
@@ -182,7 +183,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.links[0].rel").value("next page"))
         .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-1"));
 
-        verify(productRepository, times(1)).findAll(eq(pageableInUse));
+        verify(productService, times(1)).findAll(eq(pageableInUse));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(subList));
     }
 
@@ -192,7 +193,7 @@ class ProductControllerTest {
         final Pageable pageableInUse = PageRequest.of(1, 1, Sort.by("description").ascending());
         final List<Product> subList = Resources.products.subList(1, 2);
 
-        given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
+        given(productService.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
         given(domainMapper.mapToSimpleProductList(eq(subList))).willReturn(Resources.simpleProducts.subList(1, 2));
 
         mockMvc.perform(get("/api/products?pag=1-1")
@@ -215,7 +216,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.links[0].rel").value("next page"))
         .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-1"));
 
-        verify(productRepository, times(1)).findAll(eq(pageableInUse));
+        verify(productService, times(1)).findAll(eq(pageableInUse));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(subList));
     }
 
@@ -225,7 +226,7 @@ class ProductControllerTest {
         final Pageable pageableInUse = PageRequest.of(2, 1, Sort.by("description").ascending());
         final List<Product> subList = Resources.products.subList(2, 3);
 
-        given(productRepository.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
+        given(productService.findAll(eq(pageableInUse))).willReturn(new PageImpl<>(subList, pageableInUse, 3));
         given(domainMapper.mapToSimpleProductList(eq(subList))).willReturn(Resources.simpleProducts.subList(2, 3));
 
         mockMvc.perform(get("/api/products?pag=2-1")
@@ -248,7 +249,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.links").isArray())
         .andExpect(jsonPath("$.links").isEmpty());
 
-        verify(productRepository, times(1)).findAll(eq(pageableInUse));
+        verify(productService, times(1)).findAll(eq(pageableInUse));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(subList));
     }
 
@@ -257,7 +258,7 @@ class ProductControllerTest {
     void when_GET_getAll_should_not_response_any_products_with_200() throws Exception  {
         final Pageable pageableInUse = PageRequest.of(3, 1, Sort.by("description").ascending());
 
-        given(productRepository.findAll(eq(pageableInUse)))
+        given(productService.findAll(eq(pageableInUse)))
             .willReturn(new PageImpl<>(Collections.emptyList(), pageableInUse, 0));
 
         mockMvc.perform(get("/api/products?pag=3-1")
@@ -269,8 +270,8 @@ class ProductControllerTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$").isEmpty());
 
-        verify(productRepository, times(1)).findAll(eq(pageableInUse));
-        verify(productRepository, only()).findAll(eq(pageableInUse));
+        verify(productService, times(1)).findAll(eq(pageableInUse));
+        verify(productService, only()).findAll(eq(pageableInUse));
     }
 
     @Test
@@ -278,7 +279,7 @@ class ProductControllerTest {
     void when_GET_getByBarcode_should_return_a_message_error_with_404() throws Exception  {
         final String barcode = "7891000051230";
 
-        given(productRepository.processByBarcode(eq(barcode)))
+        given(productService.processByBarcode(eq(barcode)))
             .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         mockMvc.perform(get("/api/products/"+barcode)
@@ -290,8 +291,8 @@ class ProductControllerTest {
         .andExpect(content().contentType(MediaType.TEXT_PLAIN))
         .andExpect(content().string("Product not found"));
 
-        verify(productRepository, times(1)).processByBarcode(eq(barcode));
-        verify(productRepository, only()).processByBarcode(eq(barcode));
+        verify(productService, times(1)).processByBarcode(eq(barcode));
+        verify(productService, only()).processByBarcode(eq(barcode));
     }
 
     @Test
@@ -299,7 +300,7 @@ class ProductControllerTest {
     void when_GET_getByBarcode_should_return_a_product_with_200() throws Exception  {
         final String barcode = "7891000055120";
 
-        given(productRepository.processByBarcode(eq(barcode))).willReturn(Resources.products.get(0));
+        given(productService.processByBarcode(eq(barcode))).willReturn(Resources.products.get(0));
         given(domainMapper.mapToSimpleProduct(Resources.products.get(0)))
             .willReturn(Resources.simpleProducts.get(0));
 
@@ -317,7 +318,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.links[1].rel").value("self"))
         .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
 
-        verify(productRepository, times(1)).processByBarcode(eq(barcode));
+        verify(productService, times(1)).processByBarcode(eq(barcode));
         verify(domainMapper, times(1)).mapToSimpleProduct(Resources.products.get(0));
     }
 }

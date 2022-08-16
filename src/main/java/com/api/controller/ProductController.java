@@ -6,6 +6,7 @@ import com.api.pojo.DomainUtils;
 import com.api.projection.ProjectionFactory;
 import com.api.repository.ProductRepository;
 import com.api.service.DomainMapper;
+import com.api.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,13 +34,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @CrossOrigin
 public class ProductController {
 
-    private final ProductRepository productRepository;
+    private final ProductService productService;
     private final DomainMapper domainMapper;
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         final List<EntityModel<SimpleProduct>> responseBody =
-            makeMapping(productRepository.findAll(Sort.by("description").ascending()));
+            makeMapping(productService.findAll(Sort.by("description").ascending()));
 
         return ResponseEntity.ok(responseBody);
     }
@@ -47,7 +48,7 @@ public class ProductController {
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll(@RequestParam(name = "pag") String pag) {
         final Page<Product> productPage =
-            productRepository.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
+            productService.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
 
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
@@ -66,7 +67,7 @@ public class ProductController {
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getByBarcode(@PathVariable("barcode") @Barcode String barcode) {
-        final Product productToProcess = productRepository.processByBarcode(barcode);
+        final Product productToProcess = productService.processByBarcode(barcode);
 
         final Link linkToPrices = linkTo(methodOn(PriceController.class).searchByProductBarcode(barcode))
             .withRel("prices");
