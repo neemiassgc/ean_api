@@ -5,9 +5,10 @@ import com.api.repository.ProductRepository;
 import com.api.service.interfaces.ProductService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,5 +47,15 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Optional<Product> findByBarcode(@NonNull String barcode) {
         return productRepository.findByBarcode(barcode);
+    }
+
+    @Override
+    public List<Product> findAll(@NonNull Sort sort) {
+        return productRepository.findAll(sort);
+    }
+
+    @Override
+    public Page<Product> findAll(@NonNull Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 }
