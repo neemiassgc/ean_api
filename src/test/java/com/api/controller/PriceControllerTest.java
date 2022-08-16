@@ -1,8 +1,8 @@
 package com.api.controller;
 
 import com.api.entity.Price;
-import com.api.repository.PriceRepository;
 import com.api.service.DomainMapper;
+import com.api.service.interfaces.PriceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -37,7 +38,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 public class PriceControllerTest {
 
     @MockBean
-    private PriceRepository priceRepository;
+    private PriceService priceService;
 
     @MockBean
     private DomainMapper domainMapper;
@@ -69,7 +70,7 @@ public class PriceControllerTest {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = standaloneSetup(new PriceController(priceRepository), new GlobalErrorHandlingController())
+        this.mockMvc = standaloneSetup(new PriceController(priceService), new GlobalErrorHandlingController())
         .alwaysDo(print()).build();
     }
 
@@ -78,7 +79,7 @@ public class PriceControllerTest {
     void should_return_one_only_price_by_id() throws Exception {
         final UUID uuid = UUID.fromString("b92b558b-b851-46cc-a2a3-b566e7e44966");
 
-        given(priceRepository.findById(eq(uuid))).willReturn(Optional.of(usefulPrices.get(2)));
+        given(priceService.findById(eq(uuid))).willReturn(usefulPrices.get(2));
 
         mockMvc.perform(get("/api/prices/"+uuid)
             .characterEncoding(StandardCharsets.UTF_8)
@@ -88,8 +89,8 @@ public class PriceControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.value").value("16.75"));
 
-        verify(priceRepository, times(1)).findById(eq(uuid));
-        verify(priceRepository, only()).findById(eq(uuid));
+        verify(priceService, times(1)).findById(eq(uuid));
+        verify(priceService, only()).findById(eq(uuid));
     }
 
     @Test
@@ -97,7 +98,7 @@ public class PriceControllerTest {
     void when_a_price_is_not_found_then_should_return_a_error_message() throws Exception {
         final UUID uuid = UUID.fromString("b92b558b-b851-46cc-a2a3-b566e7e37d34");
 
-        given(priceRepository.findById(eq(uuid)))
+        given(priceService.findById(eq(uuid)))
             .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Price not found"));
 
         mockMvc.perform(get("/api/prices/"+uuid)
@@ -108,8 +109,8 @@ public class PriceControllerTest {
         .andExpect(content().contentType(MediaType.TEXT_PLAIN))
         .andExpect(content().string("Price not found"));
 
-        verify(priceRepository, times(1)).findById(eq(uuid));
-        verify(priceRepository, only()).findById(eq(uuid));
+        verify(priceService, times(1)).findById(eq(uuid));
+        verify(priceService, only()).findById(eq(uuid));
     }
 
     @Test
@@ -118,7 +119,7 @@ public class PriceControllerTest {
         final String barcode = "7896656800018";
         final Sort defaultSort = Sort.by("instant").descending();
 
-        given(priceRepository.findByProductBarcode(eq(barcode), eq(defaultSort)))
+        given(priceService.findByProductBarcode(eq(barcode), eq(defaultSort)))
             .willReturn(usefulPrices);
 
         mockMvc.perform(get("/api/prices?barcode="+barcode)
@@ -131,8 +132,8 @@ public class PriceControllerTest {
         .andExpect(jsonPath("$", hasSize(5)))
         .andExpect(jsonPath("$[*].value", contains(34.5, 4.52, 16.75, 12.12, 6.39)));
 
-        verify(priceRepository, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
-        verify(priceRepository, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
+        verify(priceService, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
+        verify(priceService, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
     }
 
     @Test
@@ -141,7 +142,7 @@ public class PriceControllerTest {
         final String barcode = "7896656800018";
         final Pageable defaultPageable = PageRequest.ofSize(3).withSort(Sort.by("instant").descending());
 
-        given(priceRepository.findByProductBarcode(eq(barcode), eq(defaultPageable)))
+        given(priceService.findByProductBarcode(eq(barcode), eq(defaultPageable)))
             .willReturn(usefulPrices.subList(0, 3));
 
         mockMvc.perform(get("/api/prices?barcode="+barcode+"&limit=3")
@@ -154,8 +155,8 @@ public class PriceControllerTest {
         .andExpect(jsonPath("$", hasSize(3)))
         .andExpect(jsonPath("$[*].value", contains(34.5, 4.52, 16.75)));
 
-        verify(priceRepository, times(1)).findByProductBarcode(eq(barcode), eq(defaultPageable));
-        verify(priceRepository, only()).findByProductBarcode(eq(barcode), eq(defaultPageable));
+        verify(priceService, times(1)).findByProductBarcode(eq(barcode), eq(defaultPageable));
+        verify(priceService, only()).findByProductBarcode(eq(barcode), eq(defaultPageable));
     }
 
     @Test
@@ -164,7 +165,7 @@ public class PriceControllerTest {
         final String barcode = "7896656811120";
         final Sort defaultSort = Sort.by("instant").descending();
 
-        given(priceRepository.findByProductBarcode(eq(barcode), eq(defaultSort)))
+        given(priceService.findByProductBarcode(eq(barcode), eq(defaultSort)))
             .willReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/prices?barcode="+barcode)
@@ -175,7 +176,7 @@ public class PriceControllerTest {
         .andExpect(content().contentType(MediaType.TEXT_PLAIN))
         .andExpect(content().string("Product not found"));
 
-        verify(priceRepository, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
-        verify(priceRepository, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
+        verify(priceService, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
+        verify(priceService, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
     }
 }
