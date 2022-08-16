@@ -2,7 +2,6 @@ package com.api.controller;
 
 import com.api.annotation.Barcode;
 import com.api.entity.Product;
-import com.api.job.ScanJob;
 import com.api.pojo.DomainUtils;
 import com.api.projection.ProjectionFactory;
 import com.api.repository.ProductRepository;
@@ -37,15 +36,10 @@ public class ProductController {
     private final ProductRepository productRepository;
     private final DomainMapper domainMapper;
 
-    @Autowired
-    private ScanJob scanJob;
-
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         final List<EntityModel<SimpleProduct>> responseBody =
             makeMapping(productRepository.findAll(Sort.by("description").ascending()));
-
-        scanJob.execute(null);
 
         return ResponseEntity.ok(responseBody);
     }
