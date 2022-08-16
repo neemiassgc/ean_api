@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface SessionStorageService {
 
     Optional<SessionStorage> findTopBy(Sort sort);
+
+    void save(SessionStorage sessionStorage);
 }

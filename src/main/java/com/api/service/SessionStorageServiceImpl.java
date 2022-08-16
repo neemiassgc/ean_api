@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -22,5 +23,11 @@ public class SessionStorageServiceImpl implements SessionStorageService {
     @Override
     public Optional<SessionStorage> findTopBy(@NonNull Sort sort) {
         return sessionStorageRepository.findTopBy(sort);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void save(@NonNull SessionStorage sessionStorage) {
+        sessionStorageRepository.save(sessionStorage);
     }
 }
