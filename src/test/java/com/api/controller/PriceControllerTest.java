@@ -19,9 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.contains;
@@ -162,11 +160,11 @@ public class PriceControllerTest {
     @Test
     @DisplayName("GET /api/prices?barcode=7896656811118 - 404 NOT FOUND")
     void when_there_are_no_prices_for_a_barcode_then_should_return_a_error_massage() throws Exception {
-        final String barcode = "7896656811120";
+        final String barcode = "7896656811118";
         final Sort defaultSort = Sort.by("instant").descending();
 
         given(priceService.findByProductBarcode(eq(barcode), eq(defaultSort)))
-            .willReturn(Collections.emptyList());
+            .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         mockMvc.perform(get("/api/prices?barcode="+barcode)
             .characterEncoding(StandardCharsets.UTF_8)
