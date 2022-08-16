@@ -58,4 +58,10 @@ public class ProductServiceImpl implements ProductService {
     public Page<Product> findAll(@NonNull Pageable pageable) {
         return productRepository.findAll(pageable);
     }
+
+    @Override
+    @Transactional
+    public void save(@NonNull Product product) {
+        productRepository.save(product);
+    }
 }
