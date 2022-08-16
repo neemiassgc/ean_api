@@ -1,7 +1,8 @@
-package com.api.repository;
+package com.api.service;
 
 import com.api.entity.Product;
-import com.api.service.ProductExternalService;
+import com.api.repository.ProductRepository;
+import com.api.repository.ProductRepositoryCustom;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

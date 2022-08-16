@@ -2,7 +2,7 @@ package com.api.service;
 
 import com.api.entity.Product;
 import com.api.repository.ProductRepository;
-import com.api.repository.ProductRepositoryCustomImpl;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.*;

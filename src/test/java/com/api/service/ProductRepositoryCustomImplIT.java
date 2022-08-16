@@ -3,7 +3,6 @@ package com.api.service;
 import com.api.entity.Product;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
-import com.api.repository.ProductRepositoryCustomImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
