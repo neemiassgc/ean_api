@@ -1,5 +1,7 @@
 package com.api.configuration;
 
+import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -46,5 +48,10 @@ public class BeansConfiguration {
     @Bean
     public LocaleResolver localeResolver() {
         return new FixedLocaleResolver(Locale.US);
+    }
+
+    @Bean
+    public CookieStore cookieStore() {
+        return new BasicCookieStore();
     }
 }
