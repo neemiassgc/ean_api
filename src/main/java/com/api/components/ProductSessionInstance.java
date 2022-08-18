@@ -64,7 +64,7 @@ public class ProductSessionInstance {
         return sessionStorageService.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
     }
 
-    private void addSessionCookieToCookieStore(final BasicClientCookie cookie) {
+    private void addCookieSessionToCookiesContext(final BasicClientCookie cookie) {
         final Date tenDaysInTheFuture = Date.from(Instant.now().plus(10, ChronoUnit.DAYS));
         final String targetDomain = "apex.savegnago.com.br";
 
@@ -82,7 +82,7 @@ public class ProductSessionInstance {
 
         log.info("Using a cookie session");
         final BasicClientCookie cookie = new BasicClientCookie(session.getCookieKey(), session.getCookieValue());
-        addSessionCookieToCookieStore(cookie);
+        addCookieSessionToCookiesContext(cookie);
     }
 
     private void useEmptySession() {
@@ -91,10 +91,11 @@ public class ProductSessionInstance {
     }
 
     private SessionStorage buildSessionStorageAndSave() throws IOException {
+        log.info("Building a SessionStorage instance to save after");
         final Map<String, String> formFields = crawlFormFields();
         final String instanceId = formFields.get("instance_id");
-        final String ajaxIdentifier = requestAjaxIdentifier(instanceId);
         final Cookie cookie = buildSessionCookie(formFields);
+        final String ajaxIdentifier = requestAjaxIdentifier(instanceId);
 
         final SessionStorage sessionStorage = new SessionStorage();
         final LocalDate todaySDate = LocalDate.now(ZoneId.of(Constants.TIMEZONE));
@@ -192,7 +193,7 @@ public class ProductSessionInstance {
     }
 
     private MultiValueMap<String, String> buildRequestBodyWithCredentials(final Map<String, String> formFields) {
-        log.info("Creating a request body for a POST request");
+        log.info("Creating a request body to login");
 
         assert formFields.containsKey("instance_id");
         assert formFields.containsKey("submission_id");
@@ -232,12 +233,14 @@ public class ProductSessionInstance {
     }
 
     private Cookie buildSessionCookie(final Map<String, String> formFields) {
+        log.info("Building a session cookie");
         final MultiValueMap<String, String> bodyWithCredentials = buildRequestBodyWithCredentials(formFields);
         final ResponseEntity<String> responseEntity = loginIntoTheSystem(bodyWithCredentials);
         return extractSessionCookie(responseEntity);
     }
 
     public void reloadSessionInstance() throws IOException {
+        log.info("Reloading session instance");
         setSessionInstance(newSessionInstance());
     }
 }
