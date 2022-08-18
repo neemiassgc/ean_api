@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 @Service
 @Log4j2
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ProductExternalService {
+public class ProductExternalServiceImpl {
 
     private final RestTemplate restTemplate;
     private final ProductSessionInstance productSessionInstance;

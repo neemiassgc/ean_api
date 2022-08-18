@@ -12,17 +12,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ProductExternalServiceIT {
+class ProductExternalServiceImplIT {
 
     @Autowired
-    private ProductExternalService productExternalServiceUnderTest;
+    private ProductExternalServiceImpl productExternalServiceImplUnderTest;
 
     @Test
     void should_return_a_product() {
         final String existingBarcode = "7896336014230";
 
         final Optional<Product> optionalProduct =
-            productExternalServiceUnderTest.fetchByBarcode(existingBarcode);
+            productExternalServiceImplUnderTest.fetchByBarcode(existingBarcode);
 
         assertThat(optionalProduct).isNotNull();
         assertThat(optionalProduct.isPresent()).isTrue();
@@ -37,7 +37,7 @@ class ProductExternalServiceIT {
         final String nonExistingBarcode = "7896336014765";
 
         final Optional<Product> optionalProduct =
-            productExternalServiceUnderTest.fetchByBarcode(nonExistingBarcode);
+            productExternalServiceImplUnderTest.fetchByBarcode(nonExistingBarcode);
 
         assertThat(optionalProduct).isNotNull();
         assertThat(optionalProduct.isPresent()).isFalse();

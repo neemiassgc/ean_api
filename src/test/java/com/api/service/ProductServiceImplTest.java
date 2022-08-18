@@ -21,7 +21,7 @@ public class ProductServiceImplTest {
 
     private ProductServiceImpl productServiceImplUnderTest;
     private ProductRepository productRepository;
-    private ProductExternalService productExternalService;
+    private ProductExternalServiceImpl productExternalServiceImpl;
 
     // resources for testing
     private Product defaultProduct;
@@ -38,8 +38,8 @@ public class ProductServiceImplTest {
     @BeforeEach
     void preset() {
         this.productRepository = mock(ProductRepository.class);
-        this.productExternalService = mock(ProductExternalService.class);
-        this.productServiceImplUnderTest = new ProductServiceImpl(this.productRepository, this.productExternalService);
+        this.productExternalServiceImpl = mock(ProductExternalServiceImpl.class);
+        this.productServiceImplUnderTest = new ProductServiceImpl(this.productRepository, this.productExternalServiceImpl);
     }
 
     @DisplayName("When a product already exists in DB then returns it - processByBarcode")
@@ -66,7 +66,7 @@ public class ProductServiceImplTest {
         // given
         final String targetBarcode = defaultProduct.getBarcode();
         given(productRepository.findByBarcode(eq(targetBarcode))).willReturn(Optional.empty());
-        given(productExternalService.fetchByBarcode(eq(targetBarcode)))
+        given(productExternalServiceImpl.fetchByBarcode(eq(targetBarcode)))
             .willReturn(Optional.of(defaultProduct));
         given(productRepository.save(eq(defaultProduct)))
             .willAnswer(invocation ->  invocation.getArgument(0, Product.class));
@@ -78,7 +78,7 @@ public class ProductServiceImplTest {
         assertThat(actualProduct).isEqualTo(defaultProduct);
 
         verify(productRepository, times(1)).findByBarcode(eq(targetBarcode));
-        verify(productExternalService, times(1)).fetchByBarcode(eq(targetBarcode));
+        verify(productExternalServiceImpl, times(1)).fetchByBarcode(eq(targetBarcode));
         verify(productRepository, times(1)).save(eq(defaultProduct));
     }
 
@@ -88,7 +88,7 @@ public class ProductServiceImplTest {
         // given
         final String targetBarcode = defaultProduct.getBarcode();
         given(productRepository.findByBarcode(eq(targetBarcode))).willReturn(Optional.empty());
-        given(productExternalService.fetchByBarcode(eq(targetBarcode))).willReturn(Optional.empty());
+        given(productExternalServiceImpl.fetchByBarcode(eq(targetBarcode))).willReturn(Optional.empty());
 
         // when
         final Throwable actualException =
@@ -101,7 +101,7 @@ public class ProductServiceImplTest {
         assertThat(((ResponseStatusException)actualException).getReason()).isEqualTo("Product not found");
 
         verify(productRepository, times(1)).findByBarcode(eq(targetBarcode));
-        verify(productExternalService, times(1)).fetchByBarcode(eq(targetBarcode));
+        verify(productExternalServiceImpl, times(1)).fetchByBarcode(eq(targetBarcode));
         verify(productRepository, never()).save(eq(defaultProduct));
     }
 }

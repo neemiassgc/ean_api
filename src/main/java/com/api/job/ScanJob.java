@@ -2,9 +2,8 @@ package com.api.job;
 
 import com.api.entity.Price;
 import com.api.entity.Product;
-import com.api.repository.ProductRepository;
 import com.api.service.interfaces.EmailService;
-import com.api.service.ProductExternalService;
+import com.api.service.ProductExternalServiceImpl;
 import com.api.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,7 @@ import java.util.Map;
 @Slf4j
 public class ScanJob implements Job {
 
-    private final ProductExternalService productExternalService;
+    private final ProductExternalServiceImpl productExternalServiceImpl;
     private final ProductService productService;
     private final EmailService emailService;
 
@@ -37,7 +36,7 @@ public class ScanJob implements Job {
         int countOfChangedProducts = 0;
 
         for (Product product : products) {
-            final Price newPrice = productExternalService.fetchByBarcode(product.getBarcode())
+            final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
                 .map(it -> {
                     final Price priceToReturn = it.getPrices().get(0);
                     it.removePrice(priceToReturn);

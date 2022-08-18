@@ -24,7 +24,7 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductExternalService productExternalService;
+    private final ProductExternalServiceImpl productExternalServiceImpl;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Product getByBarcode(@NonNull final String barcode) {
@@ -33,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
         if (productOptional.isPresent()) return productOptional.get();
 
         // Save a new product
-        final Product newProduct = productExternalService.fetchByBarcode(barcode)
+        final Product newProduct = productExternalServiceImpl.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         return this.productRepository.save(newProduct);

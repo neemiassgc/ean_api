@@ -34,12 +34,12 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.*;
 
 @SuppressWarnings("unchecked")
-public class ProductExternalServiceTest {
+public class ProductExternalServiceImplTest {
 
     private RestTemplate restTemplateMock;
     private ObjectMapper objectMapperMock;
     private SessionStorageService sessionStorageService;
-    private ProductExternalService productExternalServiceUnderTest;
+    private ProductExternalServiceImpl productExternalServiceImplUnderTest;
 
     void setup(@Nullable final Consumer<SessionStorageService> consumer) {
         this.restTemplateMock = mock(RestTemplate.class);
@@ -54,8 +54,8 @@ public class ProductExternalServiceTest {
 
         if (Objects.nonNull(consumer)) consumer.accept(this.sessionStorageService);
 
-        this.productExternalServiceUnderTest =
-            new ProductExternalService(restTemplateBuilderMock, this.objectMapperMock, sessionStorageService);
+        this.productExternalServiceImplUnderTest =
+            new ProductExternalServiceImpl(restTemplateBuilderMock, this.objectMapperMock, sessionStorageService);
     }
 
     private void reusableSessionInstance() {
@@ -93,7 +93,7 @@ public class ProductExternalServiceTest {
         this.reusableSessionInstance();
 
         // when
-        final SessionInstance actualSessionInstance = this.productExternalServiceUnderTest.newSessionInstance();
+        final SessionInstance actualSessionInstance = this.productExternalServiceImplUnderTest.newSessionInstance();
 
         // then
         assertThat(actualSessionInstance).isNotNull();
@@ -121,7 +121,7 @@ public class ProductExternalServiceTest {
         )).willReturn(null);
 
         // when
-        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceUnderTest.newSessionInstance());
+        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceImplUnderTest.newSessionInstance());
 
         // then
         assertThat(actualThrowable).isInstanceOf(IllegalStateException.class);
@@ -149,7 +149,7 @@ public class ProductExternalServiceTest {
         )).willReturn(Jsoup.parse("<input id=\"pInstance\" value=\"54321\"/><input id=\"pPageSubmissionId\" value=\"898900\"/>"));
 
         // when
-        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceUnderTest.newSessionInstance());
+        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceImplUnderTest.newSessionInstance());
 
         // then
         assertThat(actualThrowable).isNotNull();
@@ -195,7 +195,7 @@ public class ProductExternalServiceTest {
         ).willThrow(new IllegalStateException("Ajax identifier not found"));
 
         // when
-        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceUnderTest.newSessionInstance());
+        final Throwable actualThrowable = catchThrowable(() -> this.productExternalServiceImplUnderTest.newSessionInstance());
 
         // then
         assertThat(actualThrowable).isNotNull();
@@ -240,7 +240,7 @@ public class ProductExternalServiceTest {
 
         // when
         final Optional<Product> actualProjection =
-            this.productExternalServiceUnderTest.fetchByBarcode(existingBarcode);
+            this.productExternalServiceImplUnderTest.fetchByBarcode(existingBarcode);
 
         // then
         assertThat(actualProjection).isNotNull();
@@ -283,7 +283,7 @@ public class ProductExternalServiceTest {
         );
 
         // when
-        final Optional<Product> emptyOptional = productExternalServiceUnderTest.fetchByBarcode(nonExistingBarcode);
+        final Optional<Product> emptyOptional = productExternalServiceImplUnderTest.fetchByBarcode(nonExistingBarcode);
 
         // then
         assertThat(emptyOptional).isNotPresent();
@@ -333,7 +333,7 @@ public class ProductExternalServiceTest {
 
         //when
         final Optional<Product> actualProduct =
-            this.productExternalServiceUnderTest.fetchByBarcode("it is not a barcode");
+            this.productExternalServiceImplUnderTest.fetchByBarcode("it is not a barcode");
 
         //then
         assertThat(actualProduct).isNotNull();
