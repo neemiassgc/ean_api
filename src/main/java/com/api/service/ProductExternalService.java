@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -29,12 +30,15 @@ public class ProductExternalService {
     private final ObjectMapper objectMapper;
     private final ProductSessionInstance productSessionInstance;
 
+    private HttpHeaders buildHttpHeaders() {
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+        httpHeaders.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+        return httpHeaders;
+    }
+
     public Optional<Product> fetchByBarcode(final String barcode) {
         Objects.requireNonNull(barcode);
-
-        final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-        headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
 
         final MultiValueMap<String, String> body = new LinkedMultiValueMap<>(6);
         body.add("p_request", productSessionInstance.getSessionInstance().getAjaxIdentifier());
