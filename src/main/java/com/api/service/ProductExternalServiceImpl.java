@@ -2,6 +2,7 @@ package com.api.service;
 
 import com.api.components.ProductSessionInstance;
 import com.api.entity.Product;
+import com.api.service.interfaces.ProductExternalService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,7 +22,7 @@ import java.util.function.Supplier;
 @Service
 @Log4j2
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ProductExternalServiceImpl {
+public class ProductExternalServiceImpl implements ProductExternalService {
 
     private final RestTemplate restTemplate;
     private final ProductSessionInstance productSessionInstance;
@@ -45,6 +46,7 @@ public class ProductExternalServiceImpl {
         return multipartBody;
     }
 
+    @Override
     public Optional<Product> fetchByBarcode(@NonNull final String barcode) {
         final HttpEntity<MultiValueMap<String, String>> httpEntity =
             new HttpEntity<>(buildMultipartBodyWithBarcode(barcode), buildHttpHeaders());
