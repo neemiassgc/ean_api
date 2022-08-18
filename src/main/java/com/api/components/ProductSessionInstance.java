@@ -26,7 +26,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -90,7 +89,7 @@ public class ProductSessionInstance {
         setSessionInstance(SessionInstance.EMPTY_SESSION);
     }
 
-    private SessionStorage buildSessionStorageAndSave() throws IOException {
+    private SessionStorage buildSessionStorageAndSave() {
         log.info("Building a SessionStorage instance to save after");
         final Map<String, String> formFields = crawlFormFields();
         final String instanceId = formFields.get("instance_id");
@@ -112,7 +111,7 @@ public class ProductSessionInstance {
         return sessionStorage;
     }
 
-    private SessionInstance newSessionInstance() throws IOException {
+    private SessionInstance newSessionInstance() {
         log.info("Creating a new instance session");
         cookieStore.clear();
 
@@ -120,11 +119,11 @@ public class ProductSessionInstance {
         return new SessionInstance(sessionStorage.getInstance()+"", sessionStorage.getAjaxId());
     }
 
-    private Document crawlLoginPage() throws IOException {
+    private Document crawlLoginPage() {
         log.info("Crawling login page to get form fields");
 
         final HttpEntity<String> response = restTemplate.getForEntity("/f?p=171", String.class);
-        final String html = DomainUtils.requireNonNull(response.getBody(), new IllegalStateException("Login page parsing failed"));
+        final String html = DomainUtils.requireIntegrity(response.getBody(), "Login page parsing failed");
         return Jsoup.parse(html);
     }
 
@@ -144,17 +143,14 @@ public class ProductSessionInstance {
     private String extractAjaxIdentifier(final HttpEntity<String> page) {
         log.info("Extracting Ajax-Identifier");
 
-        final String html = DomainUtils.requireNonNull(
-            page.getBody(),
-            new IllegalStateException("Extracting Ajax-Identifier page failed")
-        );
+        final String html = DomainUtils.requireIntegrity(page.getBody(), "Extracting Ajax-Identifier page failed");
 
         final Matcher mtc = Pattern.compile("\"ajaxIdentifier\":\"([A-Z0-9]+?)\"").matcher(html);
         if (!mtc.find()) throw new IllegalStateException("Ajax identifier not found");
         return mtc.group(1);
     }
 
-    private Map<String, String> crawlFormFields() throws IOException {
+    private Map<String, String> crawlFormFields() {
         log.info("Crawl form fields");
 
         final Map<String, String> formFields = new HashMap<>(3);
@@ -166,27 +162,21 @@ public class ProductSessionInstance {
 
         formFields.put(
             "instance_id",
-            DomainUtils.requireNonNull(
-                instanceId,
-                new IllegalStateException("Element with id 'pInstance' not found")
-            )
-            .attr("value")
+            DomainUtils
+                .requireIntegrity(instanceId, "Element with id 'pInstance' not found")
+                .attr("value")
         );
         formFields.put(
             "submission_id",
-            DomainUtils.requireNonNull(
-                submissionId,
-                new IllegalStateException("Element with id 'pPageSubmissionId' not found")
-            )
-            .attr("value")
+            DomainUtils
+                .requireIntegrity(submissionId, "Element with id 'pPageSubmissionId' not found")
+                .attr("value")
         );
         formFields.put(
             "checksum",
-            DomainUtils.requireNonNull(
-                checksum,
-                new IllegalStateException("Element with id 'pPageChecksum' not found")
-            )
-            .attr("value")
+            DomainUtils
+                .requireIntegrity(checksum, "Element with id 'pPageChecksum' not found")
+                .attr("value")
         );
 
         return formFields;
@@ -217,10 +207,8 @@ public class ProductSessionInstance {
 
     private Cookie extractSessionCookie(final ResponseEntity<String> responseEntity) {
         log.info("Extracting a session cookie");
-        final List<String> header = DomainUtils.requireNonNull(
-            responseEntity.getHeaders().get("Set-Cookie"),
-            new IllegalStateException("Cookie not found")
-        );
+        final List<String> header = DomainUtils
+            .requireIntegrity(responseEntity.getHeaders().get("Set-Cookie"), "Cookie not found");
 
         final String[] slicedCookie = header.get(0).split("=");
 
@@ -239,7 +227,7 @@ public class ProductSessionInstance {
         return extractSessionCookie(responseEntity);
     }
 
-    public void reloadSessionInstance() throws IOException {
+    public void reloadSessionInstance() {
         log.info("Reloading session instance");
         setSessionInstance(newSessionInstance());
     }
