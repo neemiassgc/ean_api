@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,17 +38,20 @@ public class ProductExternalService {
         return httpHeaders;
     }
 
+    private MultiValueMap<String, String> buildMultipartBodyWithBarcode(final String barcode) {
+        final MultiValueMap<String, String> multipartBody = new LinkedMultiValueMap<>(6);
+        multipartBody.add("p_request", productSessionInstance.getSessionInstance().getAjaxIdentifier());
+        multipartBody.add("p_flow_id", "171");
+        multipartBody.add("p_flow_step_id", "2");
+        multipartBody.add("p_instance", productSessionInstance.getSessionInstance().getSessionId());
+        multipartBody.add("p_debug", "");
+        multipartBody.addAll("p_arg_names", List.of("P2_CURSOR", "P2_LOJA_ID", "P2_COD1"));
+        multipartBody.addAll("p_arg_values", List.of("B", "221", barcode));
+        return multipartBody;
+    }
+
     public Optional<Product> fetchByBarcode(final String barcode) {
         Objects.requireNonNull(barcode);
-
-        final MultiValueMap<String, String> body = new LinkedMultiValueMap<>(6);
-        body.add("p_request", productSessionInstance.getSessionInstance().getAjaxIdentifier());
-        body.add("p_flow_id", "171");
-        body.add("p_flow_step_id", "2");
-        body.add("p_instance", productSessionInstance.getSessionInstance().getSessionId());
-        body.add("p_debug", "");
-        body.addAll("p_arg_names", List.of("P2_CURSOR", "P2_LOJA_ID", "P2_COD1"));
-        body.addAll("p_arg_values", List.of("B", "221", barcode));
 
         final HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(body, headers);
 
