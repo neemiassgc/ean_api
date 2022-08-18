@@ -24,6 +24,10 @@ public final class DomainUtils {
         return new BigDecimal((priceInput.replace(",", ".")));
     }
 
+    public static <T> T requireIntegrity(final T object, final String errorMessage) {
+        return requireNonNull(object, new IllegalStateException(errorMessage));
+    }
+
     public static <O> O requireNonNull(final O object, final RuntimeException runtimeException) {
         if (object == null) {
             throw runtimeException;
