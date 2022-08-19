@@ -1,24 +1,22 @@
 package com.api.repository;
 
 import com.api.entity.SessionStorage;
+import com.api.service.interfaces.SessionStorageService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Optional;
 
 @SpringBootTest
-@Transactional(readOnly = true)
 public class SessionStorageRepositoryIT {
 
     @Autowired
-    private SessionStorageRepository sessionStorageRepository;
+    private SessionStorageService sessionStorageService;
 
     @Test
     @DisplayName("Testing findTopBy method")
@@ -26,7 +24,7 @@ public class SessionStorageRepositoryIT {
         final Sort.Order orderByCreationDateDesc = Sort.Order.desc("creationDate");
         final Sort.Order orderByIdAsc = Sort.Order.asc("id");
         final Optional<SessionStorage> actualOptional =
-            sessionStorageRepository.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
+            sessionStorageService.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
 
         Assertions.assertThat(actualOptional).isNotNull();
         Assertions.assertThat(actualOptional).isPresent();
