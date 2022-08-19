@@ -32,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
         final Optional<Product> productOptional = productRepository.findByBarcode(barcode);
 
         if (productOptional.isPresent()) return productOptional.get();
-        
+
         final Product newProduct = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
