@@ -2,6 +2,7 @@ package com.api.service;
 
 import com.api.entity.Product;
 import com.api.repository.ProductRepository;
+import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,16 +25,15 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductExternalServiceImpl productExternalServiceImpl;
+    private final ProductExternalService productExternalService;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Product getByBarcode(@NonNull final String barcode) {
         final Optional<Product> productOptional = productRepository.findByBarcode(barcode);
 
         if (productOptional.isPresent()) return productOptional.get();
-
-        // Save a new product
-        final Product newProduct = productExternalServiceImpl.fetchByBarcode(barcode)
+        
+        final Product newProduct = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         return this.productRepository.save(newProduct);
