@@ -65,6 +65,15 @@ public class ProductSessionInstance {
         return sessionStorageService.findTopBy(Sort.by(orderByCreationDateDesc, orderByIdAsc));
     }
 
+    private void useExistingSession(final SessionStorage session) {
+        log.info("Using an existing session");
+        setSessionInstance(new SessionInstance(session.getInstance() + "", session.getAjaxId()));
+
+        log.info("Using a cookie session");
+        final BasicClientCookie cookie = new BasicClientCookie(session.getCookieKey(), session.getCookieValue());
+        addCookieSessionToCookiesContext(cookie);
+    }
+
     private void addCookieSessionToCookiesContext(final BasicClientCookie cookie) {
         final Date tenDaysInTheFuture = Date.from(Instant.now().plus(10, ChronoUnit.DAYS));
         final String targetDomain = "apex.savegnago.com.br";
@@ -77,18 +86,22 @@ public class ProductSessionInstance {
         cookieStore.addCookie(cookie);
     }
 
-    private void useExistingSession(final SessionStorage session) {
-        log.info("Using an existing session");
-        setSessionInstance(new SessionInstance(session.getInstance() + "", session.getAjaxId()));
-
-        log.info("Using a cookie session");
-        final BasicClientCookie cookie = new BasicClientCookie(session.getCookieKey(), session.getCookieValue());
-        addCookieSessionToCookiesContext(cookie);
-    }
-
     private void useEmptySession() {
         log.info("Using an empty session");
         setSessionInstance(SessionInstance.EMPTY_SESSION);
+    }
+
+    public void reloadSessionInstance() {
+        log.info("Reloading session instance");
+        setSessionInstance(newSessionInstance());
+    }
+
+    private SessionInstance newSessionInstance() {
+        log.info("Creating a new instance session");
+        cookieStore.clear();
+
+        final SessionStorage sessionStorage = buildSessionStorageAndSave();
+        return new SessionInstance(sessionStorage.getInstance()+"", sessionStorage.getAjaxId());
     }
 
     private SessionStorage buildSessionStorageAndSave() {
@@ -111,45 +124,6 @@ public class ProductSessionInstance {
         sessionStorageService.save(sessionStorage);
 
         return sessionStorage;
-    }
-
-    private SessionInstance newSessionInstance() {
-        log.info("Creating a new instance session");
-        cookieStore.clear();
-
-        final SessionStorage sessionStorage = buildSessionStorageAndSave();
-        return new SessionInstance(sessionStorage.getInstance()+"", sessionStorage.getAjaxId());
-    }
-
-    private Document crawlLoginPage() {
-        log.info("Crawling login page to get form fields");
-
-        final HttpEntity<String> response = restTemplate.getForEntity("/f?p=171", String.class);
-        final String html = DomainUtils.requireIntegrity(response.getBody(), "Login page parsing failed");
-        return Jsoup.parse(html);
-    }
-
-    private ResponseEntity<String> loginIntoTheSystem(final MultiValueMap<String, String> bodyWithCredentials) {
-        log.info("Logging into the system");
-        return restTemplate.postForEntity("/wwv_flow.accept", bodyWithCredentials, String.class);
-    }
-
-    private String requestAjaxIdentifier(final String instanceId) {
-        log.info("Requesting Ajax-Identifier page");
-
-        final String url = "/f?p=171:2:"+instanceId+":NEXT:NO:2:P2_CURSOR:B";
-        final HttpEntity<String> targetPageToExtract = restTemplate.getForEntity(url, String.class);
-        return extractAjaxIdentifier(targetPageToExtract);
-    }
-
-    private String extractAjaxIdentifier(final HttpEntity<String> page) {
-        log.info("Extracting Ajax-Identifier");
-
-        final String html = DomainUtils.requireIntegrity(page.getBody(), "Extracting Ajax-Identifier page failed");
-
-        final Matcher mtc = Pattern.compile("\"ajaxIdentifier\":\"([A-Z0-9]+?)\"").matcher(html);
-        if (!mtc.find()) throw new IllegalStateException("Ajax identifier not found");
-        return mtc.group(1);
     }
 
     private Map<String, String> crawlFormFields() {
@@ -184,6 +158,21 @@ public class ProductSessionInstance {
         return formFields;
     }
 
+    private Document crawlLoginPage() {
+        log.info("Crawling login page to get form fields");
+
+        final HttpEntity<String> response = restTemplate.getForEntity("/f?p=171", String.class);
+        final String html = DomainUtils.requireIntegrity(response.getBody(), "Login page parsing failed");
+        return Jsoup.parse(html);
+    }
+
+    private Cookie buildSessionCookie(final Map<String, String> formFields) {
+        log.info("Building a session cookie");
+        final MultiValueMap<String, String> bodyWithCredentials = buildRequestBodyWithCredentials(formFields);
+        final ResponseEntity<String> responseEntity = loginIntoTheSystem(bodyWithCredentials);
+        return extractSessionCookie(responseEntity);
+    }
+
     private MultiValueMap<String, String> buildRequestBodyWithCredentials(final Map<String, String> formFields) {
         log.info("Creating a request body to login");
 
@@ -207,6 +196,11 @@ public class ProductSessionInstance {
         return requestBody;
     }
 
+    private ResponseEntity<String> loginIntoTheSystem(final MultiValueMap<String, String> bodyWithCredentials) {
+        log.info("Logging into the system");
+        return restTemplate.postForEntity("/wwv_flow.accept", bodyWithCredentials, String.class);
+    }
+
     private Cookie extractSessionCookie(final ResponseEntity<String> responseEntity) {
         log.info("Extracting a session cookie");
         final List<String> header = DomainUtils
@@ -222,15 +216,21 @@ public class ProductSessionInstance {
         return new BasicClientCookie(cookieKey, cookieValue);
     }
 
-    private Cookie buildSessionCookie(final Map<String, String> formFields) {
-        log.info("Building a session cookie");
-        final MultiValueMap<String, String> bodyWithCredentials = buildRequestBodyWithCredentials(formFields);
-        final ResponseEntity<String> responseEntity = loginIntoTheSystem(bodyWithCredentials);
-        return extractSessionCookie(responseEntity);
+    private String requestAjaxIdentifier(final String instanceId) {
+        log.info("Requesting Ajax-Identifier page");
+
+        final String url = "/f?p=171:2:"+instanceId+":NEXT:NO:2:P2_CURSOR:B";
+        final HttpEntity<String> targetPageToExtract = restTemplate.getForEntity(url, String.class);
+        return extractAjaxIdentifier(targetPageToExtract);
     }
 
-    public void reloadSessionInstance() {
-        log.info("Reloading session instance");
-        setSessionInstance(newSessionInstance());
+    private String extractAjaxIdentifier(final HttpEntity<String> page) {
+        log.info("Extracting Ajax-Identifier");
+
+        final String html = DomainUtils.requireIntegrity(page.getBody(), "Extracting Ajax-Identifier page failed");
+
+        final Matcher mtc = Pattern.compile("\"ajaxIdentifier\":\"([A-Z0-9]+?)\"").matcher(html);
+        if (!mtc.find()) throw new IllegalStateException("Ajax identifier not found");
+        return mtc.group(1);
     }
 }
