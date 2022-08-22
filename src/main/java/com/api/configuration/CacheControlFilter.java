@@ -1,6 +1,6 @@
 package com.api.configuration;
 
-import com.api.pojo.Constants;
+import com.api.component.Constants;
 import org.springframework.http.CacheControl;
 import org.springframework.stereotype.Component;
 

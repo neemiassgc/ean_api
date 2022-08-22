@@ -1,9 +1,9 @@
 package com.api.service;
 
 import com.api.entity.SessionStorage;
-import com.api.pojo.Constants;
-import com.api.pojo.DomainUtils;
-import com.api.pojo.SessionInstance;
+import com.api.component.Constants;
+import com.api.component.DomainUtils;
+import com.api.component.SessionInstance;
 import com.api.service.interfaces.SessionStorageService;
 import lombok.AccessLevel;
 import lombok.Getter;

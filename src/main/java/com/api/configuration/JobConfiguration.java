@@ -1,7 +1,7 @@
 package com.api.configuration;
 
 import com.api.job.ScanJob;
-import com.api.pojo.Constants;
+import com.api.component.Constants;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

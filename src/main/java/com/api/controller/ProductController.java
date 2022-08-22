@@ -2,7 +2,7 @@ package com.api.controller;
 
 import com.api.annotation.Barcode;
 import com.api.entity.Product;
-import com.api.pojo.DomainUtils;
+import com.api.component.DomainUtils;
 import com.api.projection.ProjectionFactory;
 import com.api.service.DomainMapper;
 import com.api.service.interfaces.ProductService;

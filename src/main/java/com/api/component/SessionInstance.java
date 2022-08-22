@@ -1,4 +1,4 @@
-package com.api.pojo;
+package com.api.component;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

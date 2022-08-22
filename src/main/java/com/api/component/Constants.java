@@ -1,4 +1,4 @@
-package com.api.pojo;
+package com.api.component;
 
 public final class Constants {
 

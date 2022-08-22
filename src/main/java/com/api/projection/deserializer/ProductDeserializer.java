@@ -2,7 +2,7 @@ package com.api.projection.deserializer;
 
 import com.api.entity.Price;
 import com.api.entity.Product;
-import com.api.pojo.DomainUtils;
+import com.api.component.DomainUtils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
