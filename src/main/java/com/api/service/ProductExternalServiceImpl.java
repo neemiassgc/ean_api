@@ -1,6 +1,5 @@
 package com.api.service;
 
-import com.api.components.ProductSessionInstance;
 import com.api.entity.Product;
 import com.api.service.interfaces.ProductExternalService;
 import lombok.NonNull;
