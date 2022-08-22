@@ -18,14 +18,6 @@ public final class Projection {
         Integer getSequenceCode();
     }
 
-    public interface Paged<T> {
-        int getCurrentPage();
-        int getTotalPages();
-        int getNumberOfItems();
-        boolean getHasNext();
-        List<T> getContent();
-    }
-
     @Getter
     @RequiredArgsConstructor
     @ToString
