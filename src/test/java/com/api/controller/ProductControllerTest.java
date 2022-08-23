@@ -112,20 +112,20 @@ class ProductControllerTest {
         )
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(3)))
-        .andExpect(jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018")))
-        .andExpect(jsonPath("$[*].links[0].rel", everyItem(equalTo("prices"))))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content", hasSize(3)))
+        .andExpect(jsonPath("$.content[*].barcode", contains("7891000055120", "7896336010058", "7896656800018")))
+        .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
         .andExpect(
             jsonPath(
-                "$[*].links[0].href",
+                "$.content[*].links[0].href",
                 contains(urlBaseToPrices+"7891000055120", urlBaseToPrices+"7896336010058", urlBaseToPrices+"7896656800018")
             )
         )
-        .andExpect(jsonPath("$[*].links[1].rel", everyItem(equalTo("self"))))
+        .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
         .andExpect(
             jsonPath(
-                "$[*].links[1].href",
+                "$.content[*].links[1].href",
                 contains(urlBaseToSelf+"7891000055120", urlBaseToSelf+"7896336010058", urlBaseToSelf+"7896656800018")
             )
         );
@@ -147,8 +147,10 @@ class ProductControllerTest {
         )
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$").isEmpty());
+        .andExpect(jsonPath("$.links").isArray())
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.links").isEmpty())
+        .andExpect(jsonPath("$.content").isEmpty());
 
         verify(productService, times(1)).findAll(ArgumentMatchers.any(Sort.class));
         verify(domainMapper, times(1)).mapToSimpleProductList(eq(Collections.emptyList()));
@@ -179,7 +181,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7891000055120"))
         .andExpect(jsonPath("$.numberOfItems").value(1))
         .andExpect(jsonPath("$.hasNext").value(true))
-        .andExpect(jsonPath("$.totalPages").value(3))
+        .andExpect(jsonPath("$.totalOfPages").value(3))
         .andExpect(jsonPath("$.links[0].rel").value("next page"))
         .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-1"));
 
@@ -212,7 +214,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896336010058"))
         .andExpect(jsonPath("$.numberOfItems").value(1))
         .andExpect(jsonPath("$.hasNext").value(true))
-        .andExpect(jsonPath("$.totalPages").value(3))
+        .andExpect(jsonPath("$.totalOfPages").value(3))
         .andExpect(jsonPath("$.links[0].rel").value("next page"))
         .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-1"));
 
@@ -245,7 +247,7 @@ class ProductControllerTest {
         .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
         .andExpect(jsonPath("$.numberOfItems").value(1))
         .andExpect(jsonPath("$.hasNext").value(false))
-        .andExpect(jsonPath("$.totalPages").value(3))
+        .andExpect(jsonPath("$.totalOfPages").value(3))
         .andExpect(jsonPath("$.links").isArray())
         .andExpect(jsonPath("$.links").isEmpty());
 
