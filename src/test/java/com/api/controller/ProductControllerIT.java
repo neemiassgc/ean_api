@@ -38,27 +38,23 @@ public class ProductControllerIT {
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$", hasSize(11)))
+            .andExpect(jsonPath("$._embedded.List").isArray())
+            .andExpect(jsonPath("$._embedded.List", hasSize(11)))
             // Verifying the first product
-            .andExpect(jsonPath("$[0].description").value("ACHOC PO NESCAU 800G"))
-            .andExpect(jsonPath("$[0].sequenceCode").value(is(29250)))
-            .andExpect(jsonPath("$[0].barcode").value("7891000055120"))
-            .andExpect(jsonPath("$[0].links[0].rel").value("prices"))
-            .andExpect(jsonPath("$[0].links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
-            .andExpect(jsonPath("$[0].links[1].rel").value("self"))
-            .andExpect(jsonPath("$[0].links[1].href").value("http://localhost/api/products/7891000055120"))
+            .andExpect(jsonPath("$._embedded.List[0].description").value("ACHOC PO NESCAU 800G"))
+            .andExpect(jsonPath("$._embedded.List[0].sequenceCode").value(is(29250)))
+            .andExpect(jsonPath("$._embedded.List[0].barcode").value("7891000055120"))
+            .andExpect(jsonPath("$._embedded.List[0]._links.prices.href").value("http://localhost/api/prices?barcode=7891000055120"))
+            .andExpect(jsonPath("$._embedded.List[0]._links.self.href").value("http://localhost/api/products/7891000055120"))
             // Verifying the last product
-            .andExpect(jsonPath("$[10].description").value("PAO BAUDUC 400G INTE"))
-            .andExpect(jsonPath("$[10].sequenceCode").value(is(134262)))
-            .andExpect(jsonPath("$[10].barcode").value("7891962057620"))
-            .andExpect(jsonPath("$[10].links[0].rel").value("prices"))
-            .andExpect(jsonPath("$[10].links[0].href").value("http://localhost/api/prices?barcode=7891962057620"))
-            .andExpect(jsonPath("$[10].links[1].rel").value("self"))
-            .andExpect(jsonPath("$[10].links[1].href").value("http://localhost/api/products/7891962057620"))
+            .andExpect(jsonPath("$._embedded.List[10].description").value("PAO BAUDUC 400G INTE"))
+            .andExpect(jsonPath("$._embedded.List[10].sequenceCode").value(is(134262)))
+            .andExpect(jsonPath("$._embedded.List[10].barcode").value("7891962057620"))
+            .andExpect(jsonPath("$._embedded.List[10]._links.prices.href").value("http://localhost/api/prices?barcode=7891962057620"))
+            .andExpect(jsonPath("$._embedded.List[10]._links.self.href").value("http://localhost/api/products/7891962057620"))
             // Verifying the order
             .andExpect(jsonPath(
-                "$[*].sequenceCode",
+                "$._embedded.List[*].sequenceCode",
                 contains(29250, 137513, 120983, 93556, 142862, 113249, 2909, 105711, 9785, 1184, 134262)
             ));
         }
@@ -76,34 +72,31 @@ public class ProductControllerIT {
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.content").isArray())
-            .andExpect(jsonPath("$.content", hasSize(5)))
+            .andExpect(jsonPath("$._embedded.List").isArray())
+            .andExpect(jsonPath("$._embedded.List", hasSize(5)))
             .andExpect(jsonPath("$.currentPage").value(0))
-            .andExpect(jsonPath("$.totalPages").value(3))
+            .andExpect(jsonPath("$.totalOfPages").value(3))
             .andExpect(jsonPath("$.numberOfItems").value(5))
             .andExpect(jsonPath("$.hasNext").value(true))
             .andExpect(
-                jsonPath("$.content[*].barcode",
+                jsonPath("$._embedded.List[*].barcode",
                 contains("7891000055120", "7897534852624", "7896336010058", "7898279792299", "7896045104482"))
             )
-            .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(is("prices"))))
-            .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(is("self"))))
             .andExpect(jsonPath(
-                "$.content[*].links[0].href",
+                "$._embedded.List[*]._links.prices.href",
                 contains(
                     urlBasePrices+"7891000055120", urlBasePrices+"7897534852624",
                     urlBasePrices+"7896336010058", urlBasePrices+"7898279792299", urlBasePrices+"7896045104482"
                 )
             ))
             .andExpect(jsonPath(
-                "$.content[*].links[1].href",
+                "$._embedded.List[*]._links.self.href",
                 contains(
                     urlBaseSelf+"7891000055120", urlBaseSelf+"7897534852624",
                     urlBaseSelf+"7896336010058", urlBaseSelf+"7898279792299", urlBaseSelf+"7896045104482"
                 )
             ))
-            .andExpect(jsonPath("$.links[0].rel").value("next page"))
-            .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-5"));
+            .andExpect(jsonPath("$._links.['next page'].href").value("http://localhost/api/products?pag=1-5"));
         }
 
         @Test
@@ -119,34 +112,31 @@ public class ProductControllerIT {
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.content").isArray())
-            .andExpect(jsonPath("$.content", hasSize(5)))
+            .andExpect(jsonPath("$._embedded.List").isArray())
+            .andExpect(jsonPath("$._embedded.List", hasSize(5)))
             .andExpect(jsonPath("$.currentPage").value(1))
-            .andExpect(jsonPath("$.totalPages").value(3))
+            .andExpect(jsonPath("$.totalOfPages").value(3))
             .andExpect(jsonPath("$.numberOfItems").value(5))
             .andExpect(jsonPath("$.hasNext").value(true))
             .andExpect(
-                jsonPath("$.content[*].barcode",
+                jsonPath("$._embedded.List[*].barcode",
                 contains("7891962047560", "7896656800018", "7896004004501", "7891098010575", "7896036093085"))
             )
-            .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(is("prices"))))
-            .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(is("self"))))
             .andExpect(jsonPath(
-                "$.content[*].links[0].href",
+                "$._embedded.List[*]._links.prices.href",
                 contains(
                     urlBasePrices+"7891962047560", urlBasePrices+"7896656800018",
                     urlBasePrices+"7896004004501", urlBasePrices+"7891098010575", urlBasePrices+"7896036093085"
                 )
             ))
             .andExpect(jsonPath(
-                "$.content[*].links[1].href",
+                "$._embedded.List[*]._links.self.href",
                 contains(
                     urlBaseSelf+"7891962047560", urlBaseSelf+"7896656800018",
                     urlBaseSelf+"7896004004501", urlBaseSelf+"7891098010575", urlBaseSelf+"7896036093085"
                 )
             ))
-            .andExpect(jsonPath("$.links[0].rel").value("next page"))
-            .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-5"));
+            .andExpect(jsonPath("$._links['next page'].href").value("http://localhost/api/products?pag=2-5"));
         }
 
         @Test
@@ -160,25 +150,22 @@ public class ProductControllerIT {
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.content").isArray())
-            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$._embedded.List").isArray())
+            .andExpect(jsonPath("$._embedded.List", hasSize(1)))
             .andExpect(jsonPath("$.currentPage").value(2))
-            .andExpect(jsonPath("$.totalPages").value(3))
+            .andExpect(jsonPath("$.totalOfPages").value(3))
             .andExpect(jsonPath("$.numberOfItems").value(1))
             .andExpect(jsonPath("$.hasNext").value(false))
-            .andExpect(jsonPath("$.content[*].barcode", contains("7891962057620")))
-            .andExpect(jsonPath("$.content[*].links[0].rel").value("prices"))
-            .andExpect(jsonPath("$.content[*].links[1].rel").value("self"))
+            .andExpect(jsonPath("$._embedded.List[*].barcode", contains("7891962057620")))
             .andExpect(jsonPath(
-                "$.content[*].links[0].href",
+                "$._embedded.List[*]._links.prices.href",
                 contains("http://localhost/api/prices?barcode=7891962057620")
             ))
             .andExpect(jsonPath(
-                "$.content[*].links[1].href",
+                "$._embedded.List[*]._links.self.href",
                 contains("http://localhost/api/products/7891962057620")
             ))
-            .andExpect(jsonPath("$.links").isArray())
-            .andExpect(jsonPath("$.links").isEmpty());
+            .andExpect(jsonPath("$._links").doesNotExist());
         }
 
         @Test
@@ -213,10 +200,8 @@ public class ProductControllerIT {
             .andExpect(jsonPath("$.description").value("ACHOC PO NESCAU 800G"))
             .andExpect(jsonPath("$.sequenceCode").value(29250))
             .andExpect(jsonPath("$.barcode").value(barcode))
-            .andExpect(jsonPath("$.links[0].rel").value("prices"))
-            .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
-            .andExpect(jsonPath("$.links[1].rel").value("self"))
-            .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
+            .andExpect(jsonPath("$._links.prices.href").value("http://localhost/api/prices?barcode=7891000055120"))
+            .andExpect(jsonPath("$._links.self.href").value("http://localhost/api/products/7891000055120"));
         }
 
         @Test
