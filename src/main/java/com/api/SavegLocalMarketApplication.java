@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ProductSearchApiApplication {
+public class SavegLocalMarketApplication {
 
 	public static void main(String[] args) {
 
-		SpringApplication.run(ProductSearchApiApplication.class, args);
+		SpringApplication.run(SavegLocalMarketApplication.class, args);
 	}
 }
