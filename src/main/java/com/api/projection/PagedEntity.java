@@ -13,6 +13,7 @@ public final class PagedEntity<T> extends CollectionModel<T> {
     private final int currentPage;
     private final int totalOfPages;
     private final int numberOfItems;
+    private final long totalOfItems;
     private final boolean hasNext;
 
     public PagedEntity(@NonNull final Page<?> page, @NonNull List<T> content) {
@@ -21,5 +22,6 @@ public final class PagedEntity<T> extends CollectionModel<T> {
         this.totalOfPages = page.getTotalPages();
         this.numberOfItems = page.getNumberOfElements();
         this.hasNext = page.hasNext();
+        this.totalOfItems = page.getTotalElements();
     }
 }
