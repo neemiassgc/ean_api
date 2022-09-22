@@ -22,19 +22,25 @@ public final class ProductDeserializer extends StdDeserializer<Product> {
         super(vc);
     }
 
+    private void verifyIfTheSessionIsValid(final JsonNode item) {
+        if (!Objects.nonNull(item))
+            // Possibly, the session is not valid, and it's necessary to create a new one
+            throw new IllegalStateException("Item node does not exist");
+    }
+
+    private void verifyIfTheProductExist(final JsonNode item) {
+        if (item.get(5).get("value").asText().isEmpty())
+            throw new IllegalStateException("Item name is empty"); // When a product doesn't exist
+    }
+
     @Override
     @Nullable
     public Product deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         final JsonNode jsonNode = p.getCodec().readTree(p);
-
         final JsonNode item = jsonNode.get("item");
 
-        if (!Objects.nonNull(item))
-            // Possibly, the session is not valid, and it's necessary to create a new one
-            throw new IllegalStateException("Item node does not exist");
-
-        if (item.get(5).get("value").asText().isEmpty())
-            throw new IllegalStateException("Item name is empty"); // When a product doesn't exist
+        verifyIfTheSessionIsValid(item);
+        verifyIfTheProductExist(item);
 
         final Price latestPrice =
             new Price(DomainUtils.parsePrice(item.get(4).get("value").asText()));
