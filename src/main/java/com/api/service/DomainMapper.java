@@ -1,6 +1,5 @@
 package com.api.service;
 
-import com.api.entity.Price;
 import com.api.entity.Product;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -8,7 +7,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.projection.Projection.PriceWithInstant;
 import static com.api.projection.Projection.SimpleProduct;
 
 @Service
@@ -38,9 +36,5 @@ public class DomainMapper {
             .stream()
             .map(this::mapToSimpleProduct)
             .collect(Collectors.toList());
-    }
-
-    public PriceWithInstant mapToPriceWithInstant(@NonNull final Price price) {
-        return new PriceWithInstant(price.getValue(), price.getInstant());
     }
 }
