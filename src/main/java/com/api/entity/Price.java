@@ -1,5 +1,6 @@
 package com.api.entity;
 
+import com.api.projection.PriceWithInstant;
 import lombok.*;
 
 import javax.persistence.*;
@@ -64,5 +65,9 @@ public class Price {
     @Override
     public String toString() {
         return String.format("Price{id=%s, value=%s, created=%s, product=%s}", id, value, instant, product);
+    }
+
+    public PriceWithInstant toPriceWithInstant() {
+        return new PriceWithInstant(value, instant);
     }
 }
