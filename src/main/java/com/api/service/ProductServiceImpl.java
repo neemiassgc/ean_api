@@ -1,6 +1,7 @@
 package com.api.service;
 
 import com.api.entity.Product;
+import com.api.projection.SimpleProductWithStatus;
 import com.api.repository.ProductRepository;
 import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
@@ -28,25 +29,23 @@ public class ProductServiceImpl implements ProductService {
     private final ProductExternalService productExternalService;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Product getByBarcode(@NonNull final String barcode) {
+    public SimpleProductWithStatus getByBarcodeAndSaveIfNecessary(@NonNull final String barcode) {
         final Optional<Product> productOptional = productRepository.findByBarcode(barcode);
 
-        if (productOptional.isPresent()) return productOptional.get();
+        if (productOptional.isPresent())
+            return productOptional.get().toSimpleProductWithStatus(HttpStatus.OK);
 
         final Product newProduct = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        return this.productRepository.save(newProduct);
+        productRepository.save(newProduct);
+
+        return newProduct.toSimpleProductWithStatus(HttpStatus.CREATED);
     }
 
     @Override
     public List<Product> findAllWithLastPrice() {
         return productRepository.findAllWithLastPrice();
-    }
-
-    @Override
-    public Optional<Product> findByBarcode(@NonNull String barcode) {
-        return productRepository.findByBarcode(barcode);
     }
 
     @Override
@@ -57,11 +56,5 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<Product> findAll(@NonNull Pageable pageable) {
         return productRepository.findAll(pageable);
-    }
-
-    @Override
-    @Transactional
-    public void save(@NonNull Product product) {
-        productRepository.save(product);
     }
 }
