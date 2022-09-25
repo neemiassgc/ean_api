@@ -1,5 +1,6 @@
 package com.api.entity;
 
+import com.api.projection.SimpleProduct;
 import com.api.projection.deserializer.ProductDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
@@ -91,4 +92,12 @@ public class Product {
     public List<Price> getPrices() {
         return Collections.unmodifiableList(prices);
     }
-}
+
+    public SimpleProduct toSimpleProduct() {
+        return SimpleProduct
+            .builder()
+            .barcode(barcode)
+            .description(description)
+            .sequenceCode(sequenceCode)
+            .build();
+    }
