@@ -1,9 +1,11 @@
 package com.api.entity;
 
 import com.api.projection.SimpleProduct;
+import com.api.projection.SimpleProductWithStatus;
 import com.api.projection.deserializer.ProductDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import javax.persistence.*;
 import java.util.*;
@@ -101,3 +103,8 @@ public class Product {
             .sequenceCode(sequenceCode)
             .build();
     }
+
+    public SimpleProductWithStatus toSimpleProductWithStatus(@NonNull final HttpStatus httpStatus) {
+        return new SimpleProductWithStatus(toSimpleProduct(), httpStatus);
+    }
+}
