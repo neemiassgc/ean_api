@@ -1,7 +1,6 @@
 package com.api.controller;
 
 import com.api.entity.Product;
-import com.api.projection.Projection;
 import com.api.service.DomainMapper;
 import com.api.service.interfaces.ProductService;
 import org.junit.jupiter.api.BeforeEach;
