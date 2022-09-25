@@ -74,7 +74,7 @@ public class Product {
     }
 
     public Product addPrice(@NonNull final Price price) {
-        if (!Objects.isNull(price.getProduct()))
+        if (Objects.nonNull(price.getProduct()))
             throw new IllegalStateException("Product is already assigned to a Price");
 
         price.setProduct(this);
