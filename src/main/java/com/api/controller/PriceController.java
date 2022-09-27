@@ -2,6 +2,7 @@ package com.api.controller;
 
 import com.api.annotation.Barcode;
 import com.api.entity.Price;
+import com.api.projection.PriceWithInstant;
 import com.api.service.interfaces.PriceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.api.projection.Projection.PriceWithInstant;
-
 @Validated
 @RestController
 @RequestMapping(path = "/api")
@@ -29,9 +28,7 @@ public class PriceController {
 
     @GetMapping(path = "/prices/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public PriceWithInstant searchById(@PathVariable("id") final UUID id) {
-        final Price fetchedPrice = priceService.findById(id);
-
-        return new PriceWithInstant(fetchedPrice.getValue(), fetchedPrice.getInstant());
+        return priceService.findById(id).toPriceWithInstant();
     }
 
     @GetMapping(path = "/prices", params = {"barcode", "limit"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,17 +36,14 @@ public class PriceController {
         @RequestParam("barcode") @Barcode final String barcode,
         @PositiveOrZero @RequestParam(value = "limit", defaultValue = "0") final int limit
     ) {
-        List<Price> priceList = null;
-
-        if (limit > 0)
-            priceList = priceService.findByProductBarcode(
-                barcode, PageRequest.of(0, limit, Sort.by("instant").descending())
-            );
-        else priceList = priceService.findByProductBarcode(barcode, Sort.by("instant").descending());
-
-        return priceList.stream()
-            .map(price -> new PriceWithInstant(price.getValue(), price.getInstant()))
-            .collect(Collectors.toList());
+        return (
+            limit > 0
+            ? priceService.findByProductBarcode(barcode, PageRequest.of(0, limit, Sort.by("instant").descending()))
+            : priceService.findByProductBarcode(barcode, Sort.by("instant").descending())
+        )
+        .stream()
+        .map(Price::toPriceWithInstant)
+        .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/prices", params = "barcode", produces = MediaType.APPLICATION_JSON_VALUE)
