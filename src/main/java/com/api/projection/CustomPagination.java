@@ -13,7 +13,7 @@ public final class CustomPagination<T> extends RepresentationModel<EntityModel<T
 
     private final int currentPage;
     private final int totalOfPages;
-    private final int numberOfItems;
+    private final int currentCountOfItems;
     private final long totalOfItems;
     private final boolean hasNext;
     private final List<EntityModel<T>> content;
@@ -22,7 +22,7 @@ public final class CustomPagination<T> extends RepresentationModel<EntityModel<T
         this.content = content;
         this.currentPage = page.getNumber();
         this.totalOfPages = page.getTotalPages();
-        this.numberOfItems = page.getNumberOfElements();
+        this.currentCountOfItems = page.getNumberOfElements();
         this.hasNext = page.hasNext();
         this.totalOfItems = page.getTotalElements();
     }
