@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -75,13 +76,10 @@ public class PriceControllerTest {
 
         given(priceService.findById(eq(uuid))).willReturn(usefulPrices.get(2));
 
-        mockMvc.perform(get("/api/prices/"+uuid)
-            .characterEncoding(StandardCharsets.UTF_8)
-            .accept(MediaType.ALL)
-        )
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.value").value("16.75"));
+        makeRequestByUuid(uuid)
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.value").value("16.75"));
 
         verify(priceService, times(1)).findById(eq(uuid));
         verify(priceService, only()).findById(eq(uuid));
@@ -95,13 +93,10 @@ public class PriceControllerTest {
         given(priceService.findById(eq(uuid)))
             .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Price not found"));
 
-        mockMvc.perform(get("/api/prices/"+uuid)
-            .characterEncoding(StandardCharsets.UTF_8)
-            .accept(MediaType.ALL)
-        )
-        .andExpect(status().isNotFound())
-        .andExpect(content().contentType(MediaType.TEXT_PLAIN))
-        .andExpect(content().string("Price not found"));
+        makeRequestByUuid(uuid)
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentType(MediaType.TEXT_PLAIN))
+            .andExpect(content().string("Price not found"));
 
         verify(priceService, times(1)).findById(eq(uuid));
         verify(priceService, only()).findById(eq(uuid));
@@ -110,67 +105,79 @@ public class PriceControllerTest {
     @Test
     @DisplayName("GET /api/prices?barcode=7896656800018 - 200 OK")
     void should_return_all_prices_for_a_barcode() throws Exception {
-        final String barcode = "7896656800018";
-        final Sort defaultSort = Sort.by("instant").descending();
+        final String targetBarcode = "7896656800018";
+        final Sort orderByInstantDesc = Sort.by("instant").descending();
 
-        given(priceService.findByProductBarcode(eq(barcode), eq(defaultSort)))
+        given(priceService.findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc)))
             .willReturn(usefulPrices);
 
-        mockMvc.perform(get("/api/prices?barcode="+barcode)
-            .characterEncoding(StandardCharsets.UTF_8)
-            .accept(MediaType.ALL)
-        )
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(5)))
-        .andExpect(jsonPath("$[*].value", contains(34.5, 4.52, 16.75, 12.12, 6.39)));
+        makeRequestWithBarcode(targetBarcode)
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$", hasSize(5)))
+            .andExpect(jsonPath("$[*].value", contains(34.5, 4.52, 16.75, 12.12, 6.39)));
 
-        verify(priceService, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
-        verify(priceService, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
+        verify(priceService, times(1)).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
+        verify(priceService, only()).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
     }
 
     @Test
     @DisplayName("GET /api/prices?barcode=7896656800018&limit=3 - 200 OK")
     void should_return_three_prices_for_a_barcode() throws Exception {
-        final String barcode = "7896656800018";
-        final Pageable defaultPageable = PageRequest.ofSize(3).withSort(Sort.by("instant").descending());
+        final String targetBarcode = "7896656800018";
+        final Pageable pageWith3ItemsOrderedByInstantDesc = PageRequest.ofSize(3).withSort(Sort.by("instant").descending());
+        final List<Price> pricesToBeVerified = usefulPrices.subList(0, 3);
+        
+        given(priceService.findByProductBarcode(eq(targetBarcode), eq(pageWith3ItemsOrderedByInstantDesc)))
+            .willReturn(pricesToBeVerified);
 
-        given(priceService.findByProductBarcode(eq(barcode), eq(defaultPageable)))
-            .willReturn(usefulPrices.subList(0, 3));
+        makeRequestWithBarcodeAndLimit(targetBarcode, 3)
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[*].value", contains(34.5, 4.52, 16.75)));
 
-        mockMvc.perform(get("/api/prices?barcode="+barcode+"&limit=3")
-            .characterEncoding(StandardCharsets.UTF_8)
-            .accept(MediaType.ALL)
-        )
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(3)))
-        .andExpect(jsonPath("$[*].value", contains(34.5, 4.52, 16.75)));
-
-        verify(priceService, times(1)).findByProductBarcode(eq(barcode), eq(defaultPageable));
-        verify(priceService, only()).findByProductBarcode(eq(barcode), eq(defaultPageable));
+        verify(priceService, times(1)).findByProductBarcode(eq(targetBarcode), eq(pageWith3ItemsOrderedByInstantDesc));
+        verify(priceService, only()).findByProductBarcode(eq(targetBarcode), eq(pageWith3ItemsOrderedByInstantDesc));
     }
 
     @Test
     @DisplayName("GET /api/prices?barcode=7896656811118 - 404 NOT FOUND")
     void when_there_are_no_prices_for_a_barcode_then_should_return_a_error_massage() throws Exception {
-        final String barcode = "7896656811118";
-        final Sort defaultSort = Sort.by("instant").descending();
+        final String targetBarcode = "7896656811118";
+        final Sort orderByInstantDesc = Sort.by("instant").descending();
 
-        given(priceService.findByProductBarcode(eq(barcode), eq(defaultSort)))
+        given(priceService.findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc)))
             .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        mockMvc.perform(get("/api/prices?barcode="+barcode)
-            .characterEncoding(StandardCharsets.UTF_8)
-            .accept(MediaType.ALL)
-        )
-        .andExpect(status().isNotFound())
-        .andExpect(content().contentType(MediaType.TEXT_PLAIN))
-        .andExpect(content().string("Product not found"));
+        makeRequestWithBarcode(targetBarcode)
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentType(MediaType.TEXT_PLAIN))
+            .andExpect(content().string("Product not found"));
 
-        verify(priceService, times(1)).findByProductBarcode(eq(barcode), eq(defaultSort));
-        verify(priceService, only()).findByProductBarcode(eq(barcode), eq(defaultSort));
+        verify(priceService, times(1)).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
+        verify(priceService, only()).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
+    }
+
+    private ResultActions makeRequestWithBarcode(final String barcode) throws Exception {
+        return makeRequestWithBarcodeAndLimit(barcode, 0);
+    }
+
+    private ResultActions makeRequestWithBarcodeAndLimit(final String barcode, final int limit) throws Exception {
+        return mockMvc.perform(
+            get("/api/prices?barcode="+barcode+"&limit="+limit)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .accept(MediaType.ALL)
+        );
+    }
+
+    private ResultActions makeRequestByUuid(final UUID uuid) throws Exception {
+        return mockMvc.perform(
+            get("/api/prices/"+uuid)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .accept(MediaType.ALL)
+        );
     }
 }
