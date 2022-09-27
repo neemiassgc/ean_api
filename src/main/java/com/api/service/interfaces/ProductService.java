@@ -18,4 +18,6 @@ public interface ProductService {
     List<Product> findAll(Sort sort);
 
     Page<Product> findAll(Pageable pageable);
+
+    void save(Product product);
 }
