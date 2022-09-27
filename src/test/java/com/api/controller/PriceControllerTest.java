@@ -1,7 +1,6 @@
 package com.api.controller;
 
 import com.api.entity.Price;
-import com.api.service.DomainMapper;
 import com.api.service.interfaces.PriceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,12 +37,9 @@ public class PriceControllerTest {
     @MockBean
     private PriceService priceService;
 
-    @MockBean
-    private DomainMapper domainMapper;
-
     private MockMvc mockMvc;
 
-    private List<Price> usefulPrices = List.of(
+    private final List<Price> usefulPrices = List.of(
         new Price(
             UUID.fromString("5b3e4ff1-99de-4d82-927e-3b26d868925c"),
             new BigDecimal("34.5"), Instant.now(), null
