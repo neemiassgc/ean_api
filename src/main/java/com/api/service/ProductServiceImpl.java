@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -38,9 +39,14 @@ public class ProductServiceImpl implements ProductService {
         final Product newProduct = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        productRepository.save(newProduct);
+       save(newProduct);
 
         return newProduct.toSimpleProductWithStatus(HttpStatus.CREATED);
+    }
+
+    private void save(final Product product) {
+        assert Objects.nonNull(product);
+        productRepository.save(product);
     }
 
     @Override
