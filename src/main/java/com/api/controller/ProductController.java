@@ -3,7 +3,7 @@ package com.api.controller;
 import com.api.annotation.Barcode;
 import com.api.component.DomainUtils;
 import com.api.entity.Product;
-import com.api.projection.PagedEntity;
+import com.api.projection.CustomPagination;
 import com.api.projection.SimpleProduct;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
@@ -40,7 +40,7 @@ public class ProductController {
         List<EntityModel<SimpleProduct>> responseBody =
             makeMappingAndLinks(productService.findAll(Sort.by("description").ascending()));
 
-        return ResponseEntity.ok(CollectionModel.of(responseBody));
+        return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -50,8 +50,8 @@ public class ProductController {
 
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
-        PagedEntity<EntityModel<SimpleProduct>> pagedModel =
-            new PagedEntity<>(productPage, makeMappingAndLinks(productPage.getContent()));
+        CustomPagination<SimpleProduct> pagedModel =
+            new CustomPagination<>(productPage, makeMappingAndLinks(productPage.getContent()));
 
         pagedModel.addIf(productPage.hasNext(), () ->
             linkTo(methodOn(this.getClass()).getPagedAll((productPage.getNumber() + 1)+"-"+productPage.getSize()))
