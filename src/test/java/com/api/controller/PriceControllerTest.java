@@ -2,9 +2,7 @@ package com.api.controller;
 
 import com.api.entity.Price;
 import com.api.service.interfaces.PriceService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
@@ -13,11 +11,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -27,10 +23,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+import static com.api.controller.PriceControllerTestHelper.*;
 
 @WebMvcTest(value = {PriceController.class, GlobalErrorHandlingController.class})
 public class PriceControllerTest {
@@ -67,6 +63,7 @@ public class PriceControllerTest {
     void setUp() {
         this.mockMvc = standaloneSetup(new PriceController(priceService), new GlobalErrorHandlingController())
         .alwaysDo(print()).build();
+        PriceControllerTestHelper.mockMvc = mockMvc;
     }
 
     @Test
@@ -76,7 +73,7 @@ public class PriceControllerTest {
 
         given(priceService.findById(eq(uuid))).willReturn(usefulPrices.get(2));
 
-        makeRequestByUuid(uuid)
+        makeRequestByUuid(uuid+"")
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.value").value("16.75"));
@@ -93,7 +90,7 @@ public class PriceControllerTest {
         given(priceService.findById(eq(uuid)))
             .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Price not found"));
 
-        makeRequestByUuid(uuid)
+        makeRequestByUuid(uuid+"")
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.TEXT_PLAIN))
             .andExpect(content().string("Price not found"));
@@ -159,25 +156,5 @@ public class PriceControllerTest {
 
         verify(priceService, times(1)).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
         verify(priceService, only()).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
-    }
-
-    private ResultActions makeRequestWithBarcode(final String barcode) throws Exception {
-        return makeRequestWithBarcodeAndLimit(barcode, 0);
-    }
-
-    private ResultActions makeRequestWithBarcodeAndLimit(final String barcode, final int limit) throws Exception {
-        return mockMvc.perform(
-            get("/api/prices?barcode="+barcode+"&limit="+limit)
-                .characterEncoding(StandardCharsets.UTF_8)
-                .accept(MediaType.ALL)
-        );
-    }
-
-    private ResultActions makeRequestByUuid(final UUID uuid) throws Exception {
-        return mockMvc.perform(
-            get("/api/prices/"+uuid)
-                .characterEncoding(StandardCharsets.UTF_8)
-                .accept(MediaType.ALL)
-        );
     }
 }
