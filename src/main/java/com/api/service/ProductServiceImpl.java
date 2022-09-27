@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findAllWithLastPrice() {
+    public List<Product> findAllWithLatestPrice() {
         return productRepository.findAllWithLastPrice();
     }
 

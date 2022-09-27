@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ProductService {
 
-    List<Product> findAllWithLastPrice();
+    List<Product> findAllWithLatestPrice();
 
     SimpleProductWithStatus getByBarcodeAndSaveIfNecessary(@NonNull final String barcode);
 
