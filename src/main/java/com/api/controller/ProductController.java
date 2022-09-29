@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
@@ -38,7 +37,7 @@ public class ProductController {
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         List<EntityModel<SimpleProduct>> responseBody =
-            makeMappingAndLinks(productService.findAll(Sort.by("description").ascending()));
+            mapAndAddLinks(productService.findAll(Sort.by("description").ascending()));
 
         return ResponseEntity.ok(responseBody);
     }
@@ -50,8 +49,8 @@ public class ProductController {
 
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
-        CustomPagination<SimpleProduct> pagedModel =
-            new CustomPagination<>(productPage, makeMappingAndLinks(productPage.getContent()));
+        CustomPagination<EntityModel<SimpleProduct>> pagedModel =
+            new CustomPagination<>(productPage, mapAndAddLinks(productPage.getContent()));
 
         pagedModel.addIf(productPage.hasNext(), () ->
             linkTo(methodOn(this.getClass()).getPagedAll((productPage.getNumber() + 1)+"-"+productPage.getSize()))
@@ -69,26 +68,26 @@ public class ProductController {
             .withRel("prices");
         final Link linkToSelf = linkTo(methodOn(this.getClass()).getByBarcode(barcode)).withSelfRel();
 
-        final EntityModel<SimpleProduct> responseBody =
-            EntityModel.of(simpleProductWithStatus.getSimpleProduct(), linkToPrices, linkToSelf);
+        final EntityModel<SimpleProduct> simpleProductModel =
+            EntityModel.of(simpleProductWithStatus.getSimpleProduct()).add(linkToPrices, linkToSelf);
 
-        return ResponseEntity.status(simpleProductWithStatus.getHttpStatus()).body(responseBody);
+        return ResponseEntity.status(simpleProductWithStatus.getHttpStatus()).body(simpleProductModel);
     }
 
-    private List<EntityModel<SimpleProduct>> makeMappingAndLinks(List<Product> inputList) {
+    private List<EntityModel<SimpleProduct>> mapAndAddLinks(List<Product> inputList) {
          return inputList
             .stream()
             .map(Product::toSimpleProduct)
-            .map(it -> {
+            .map(simpleProduct -> {
                 final Link linkToPrices = linkTo(methodOn(PriceController.class)
-                    .searchByProductBarcode(it.getBarcode()))
+                    .searchByProductBarcode(simpleProduct.getBarcode()))
                     .withRel("prices");
 
                 final Link linkToSelf = linkTo(methodOn(this.getClass())
-                    .getByBarcode(it.getBarcode()))
+                    .getByBarcode(simpleProduct.getBarcode()))
                     .withSelfRel();
 
-                return EntityModel.of(it).add(linkToPrices, linkToSelf);
+                return EntityModel.of(simpleProduct).add(linkToPrices, linkToSelf);
             })
             .collect(Collectors.toList());
     }
