@@ -1,6 +1,7 @@
-package com.api.repository;
+package com.api.service;
 
 import com.api.entity.Product;
+import com.api.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

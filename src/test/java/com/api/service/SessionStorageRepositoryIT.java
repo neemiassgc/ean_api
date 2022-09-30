@@ -1,4 +1,4 @@
-package com.api.repository;
+package com.api.service;
 
 import com.api.entity.SessionStorage;
 import com.api.service.interfaces.SessionStorageService;
