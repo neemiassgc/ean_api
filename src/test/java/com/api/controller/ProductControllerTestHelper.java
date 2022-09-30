@@ -28,10 +28,6 @@ final class ProductControllerTestHelper {
         return mockMvc.perform(setupRequestHeaders(get(URL_BASE+barcode)));
     }
 
-    static ResultActions makeRequestByBarcodeWithPage(final String barcode, final String page) throws Exception {
-        return mockMvc.perform(setupRequestHeaders(get(URL_BASE+barcode+"?pag="+page)));
-    }
-
     static ResultActions makeRequestWithPage(final String page) throws Exception {
         return mockMvc.perform(setupRequestHeaders(get(URL_BASE+"?pag="+page)));
     }
