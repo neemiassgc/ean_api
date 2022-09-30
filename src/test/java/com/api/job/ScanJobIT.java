@@ -13,14 +13,13 @@ public class ScanJobIT {
     @Autowired private ScanJob scanJob;
     @Autowired private PriceRepository priceRepository;
 
-    private final int AMOUNT_OF_PRICES = 67;
-
     @Test
     void should_save_different_unequal_prices() {
         scanJob.execute(null);
 
         final long actualAmountOfPrices = priceRepository.count();
 
-        assertThat(actualAmountOfPrices).isGreaterThan(AMOUNT_OF_PRICES);
+        final int amountOfPrices = 66;
+        assertThat(actualAmountOfPrices).isGreaterThanOrEqualTo(amountOfPrices);
     }
 }
