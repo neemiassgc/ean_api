@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -86,4 +87,18 @@ final class PriceServiceImplTest {
         }
     }
 
+    @Nested
+    class FindByProductBarcodeTest {
+
+        @Test
+        @DisplayName("Should throw NullPointerException")
+        void when_barcode_is_null_then_throw_an_exception() {
+            final Sort orderByCreationDateDesc = Sort.by("creationDate").descending();
+            final Throwable actualThrowable =
+                catchThrowable(() -> priceServiceUnderTest.findByProductBarcode(null, orderByCreationDateDesc));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
+        }
+    }
 }
