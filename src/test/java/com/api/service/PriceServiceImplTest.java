@@ -18,7 +18,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.mockito.BDDMockito.*;
 
 final class PriceServiceImplTest {
@@ -96,6 +95,17 @@ final class PriceServiceImplTest {
             final Sort orderByCreationDateDesc = Sort.by("creationDate").descending();
             final Throwable actualThrowable =
                 catchThrowable(() -> priceServiceUnderTest.findByProductBarcode(null, orderByCreationDateDesc));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException")
+        void when_sort_is_null_then_throw_an_exception() {
+            final String targetProductBarcode = "7891000055120";
+            final Throwable actualThrowable =
+                catchThrowable(() -> priceServiceUnderTest.findByProductBarcode(targetProductBarcode, (Sort) null));
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
