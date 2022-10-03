@@ -129,6 +129,28 @@ final class PriceServiceImplTest {
             verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc));
             verify(priceRepositoryMock, only()).findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc));
         }
+
+        @Test
+        @DisplayName("Should throw ResponseStatusException")
+        void when_product_barcode_does_not_exist_then_should_throw_an_exception() {
+            final String nonExistentBarcode = "3817304916283";
+            final Sort orderByInstantDesc = Sort.by("instant").descending();
+            given(priceRepositoryMock.findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc)))
+                    .willReturn(Collections.emptyList());
+
+            final Throwable actualThrowable = catchThrowable(() ->
+                    priceServiceUnderTest.findByProductBarcode(nonExistentBarcode, orderByInstantDesc));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
+                assertThat(exception.getReason()).isEqualTo("Product not found");
+                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            });
+
+            verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc));
+            verify(priceRepositoryMock, only()).findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc));
+        }
     }
 
     private static class Resources {
