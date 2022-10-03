@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,6 +118,9 @@ final class PriceServiceImplTest {
             new Price(UUID.fromString("4b8bce95-aa20-4917-bfda-2f7ad89b7a91"), new BigDecimal("7.5"), null, null),
             new Price(UUID.fromString("9229c9be-8af1-4e82-a0db-5e7f16388171"), new BigDecimal("2.47"), null, null)
         );
+
+        private final static Comparator<Price> orderByInstantDesc =
+            Comparator.comparing(Price::getInstant).reversed();
 
         private final static Product product = Product.builder()
             .description("ACHOC PO NESCAU 800G")
