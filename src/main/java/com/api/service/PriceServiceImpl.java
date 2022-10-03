@@ -33,14 +33,18 @@ public class PriceServiceImpl implements PriceService {
     @Override
     public List<Price> findByProductBarcode(@NonNull String barcode, @NonNull Sort sort) {
         final List<Price> prices = priceRepository.findByProductBarcode(barcode, sort);
-        if (prices.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        throwProductNotFoundIfEmpty(prices);
         return prices;
     }
 
     @Override
     public List<Price> findByProductBarcode(@NonNull String barcode, @NonNull Pageable pageable) {
         final List<Price> prices = priceRepository.findByProductBarcode(barcode, pageable);
-        if (prices.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        throwProductNotFoundIfEmpty(prices);
         return prices;
+    }
+
+    private void throwProductNotFoundIfEmpty(final List<Price> prices) {
+        if (prices.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
     }
 }
