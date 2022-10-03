@@ -105,6 +105,30 @@ final class PriceServiceImplTest {
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
         }
+
+        @Test
+        @DisplayName("Should return prices ordered by instant desc")
+        void if_the_product_barcode_exist_then_should_return_its_price_ordered_by_instant_desc() {
+            final String existentBarcode = "7891000055120";
+            final Sort orderByInstantDesc = Sort.by("instant").descending();
+            final List<Price> orderedPrices = new ArrayList<>(Resources.LIST_OF_PRICES);
+            orderedPrices.sort(Resources.ORDER_BY_INSTANT_DESC);
+            given(priceRepositoryMock.findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc)))
+                .willReturn(orderedPrices);
+
+            final List<Price> actualPrices = priceServiceUnderTest.findByProductBarcode(existentBarcode, orderByInstantDesc);
+
+            assertThat(actualPrices).isNotNull();
+            assertThat(actualPrices).hasSize(5);
+            // Checking ordering
+            assertThat(actualPrices)
+                .extracting(Price::getInstant)
+                .map(Resources::extractMonthFromInstant)
+                .containsExactly(MAY, APRIL, MARCH, FEBRUARY, JANUARY);
+
+            verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc));
+            verify(priceRepositoryMock, only()).findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc));
+        }
     }
 
     private static class Resources {
