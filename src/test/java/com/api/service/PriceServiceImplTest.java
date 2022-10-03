@@ -1,6 +1,7 @@
 package com.api.service;
 
 import com.api.entity.Price;
+import com.api.entity.Product;
 import com.api.repository.PriceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,14 +28,6 @@ final class PriceServiceImplTest {
 
     private PriceRepository priceRepositoryMock;
     private PriceServiceImpl priceServiceUnderTest;
-
-    private List<Price> listOfPrices = List.of(
-        new Price(UUID.fromString("5b17f3d7-5fd7-4564-a994-23613d993a57"), new BigDecimal("13.35"), Instant.now(), null),
-        new Price(UUID.fromString("4d2bd6d8-7cf0-4e4e-b439-4582e63f4526"), new BigDecimal("5.5"), Instant.now(), null),
-        new Price(UUID.fromString("8fc79bdd-f587-4894-9596-7c9298c4d7df"), new BigDecimal("10.09"), Instant.now(), null),
-        new Price(UUID.fromString("4b8bce95-aa20-4917-bfda-2f7ad89b7a91"), new BigDecimal("7.5"), Instant.now(), null),
-        new Price(UUID.fromString("9229c9be-8af1-4e82-a0db-5e7f16388171"), new BigDecimal("2.47"), Instant.now(), null)
-    );
 
     @BeforeEach
     void setup() {
@@ -73,7 +69,7 @@ final class PriceServiceImplTest {
         @DisplayName("Should return a price successfully")
         void when_id_exists_then_should_return_a_price_successfully() {
             final UUID existingId = UUID.fromString("5b17f3d7-5fd7-4564-a994-23613d993a57");
-            final Price expectedPrice = listOfPrices.get(0);
+            final Price expectedPrice = Resources.listOfPrices.get(0);
             given(priceRepositoryMock.findById(eq(existingId))).willReturn(Optional.of(expectedPrice));
 
             final Price actualPrice = priceServiceUnderTest.findById(existingId);
@@ -109,6 +105,39 @@ final class PriceServiceImplTest {
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
+        }
+    }
+
+    private static class Resources {
+
+        private final static List<Price> listOfPrices = List.of(
+            new Price(UUID.fromString("5b17f3d7-5fd7-4564-a994-23613d993a57"), new BigDecimal("13.35"), null, null),
+            new Price(UUID.fromString("4d2bd6d8-7cf0-4e4e-b439-4582e63f4526"), new BigDecimal("5.5"), null, null),
+            new Price(UUID.fromString("8fc79bdd-f587-4894-9596-7c9298c4d7df"), new BigDecimal("10.09"), null, null),
+            new Price(UUID.fromString("4b8bce95-aa20-4917-bfda-2f7ad89b7a91"), new BigDecimal("7.5"), null, null),
+            new Price(UUID.fromString("9229c9be-8af1-4e82-a0db-5e7f16388171"), new BigDecimal("2.47"), null, null)
+        );
+
+        private final static Product product = Product.builder()
+            .description("ACHOC PO NESCAU 800G")
+            .barcode("7891000055120")
+            .sequenceCode(29250)
+            .build();
+
+        static {
+            listOfPrices.forEach(product::addPrice);
+
+            final Instant january = LocalDateTime.of(2022, Month.JANUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant february = LocalDateTime.of(2022, Month.FEBRUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant march = LocalDateTime.of(2022, Month.MARCH, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant april = LocalDateTime.of(2022, Month.APRIL, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant may = LocalDateTime.of(2022, Month.MAY, 1, 12, 0).toInstant(ZoneOffset.UTC);
+
+            listOfPrices.get(0).setInstant(january);
+            listOfPrices.get(1).setInstant(february);
+            listOfPrices.get(2).setInstant(march);
+            listOfPrices.get(3).setInstant(april);
+            listOfPrices.get(4).setInstant(may);
         }
     }
 }
