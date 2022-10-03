@@ -70,7 +70,7 @@ final class PriceServiceImplTest {
         @DisplayName("Should return a price successfully")
         void when_id_exists_then_should_return_a_price_successfully() {
             final UUID existingId = UUID.fromString("5b17f3d7-5fd7-4564-a994-23613d993a57");
-            final Price expectedPrice = Resources.listOfPrices.get(0);
+            final Price expectedPrice = Resources.LIST_OF_PRICES.get(0);
             given(priceRepositoryMock.findById(eq(existingId))).willReturn(Optional.of(expectedPrice));
 
             final Price actualPrice = priceServiceUnderTest.findById(existingId);
@@ -111,7 +111,7 @@ final class PriceServiceImplTest {
 
     private static class Resources {
 
-        private final static List<Price> listOfPrices = List.of(
+        private final static List<Price> LIST_OF_PRICES = List.of(
             new Price(UUID.fromString("5b17f3d7-5fd7-4564-a994-23613d993a57"), new BigDecimal("13.35"), null, null),
             new Price(UUID.fromString("4d2bd6d8-7cf0-4e4e-b439-4582e63f4526"), new BigDecimal("5.5"), null, null),
             new Price(UUID.fromString("8fc79bdd-f587-4894-9596-7c9298c4d7df"), new BigDecimal("10.09"), null, null),
@@ -119,17 +119,17 @@ final class PriceServiceImplTest {
             new Price(UUID.fromString("9229c9be-8af1-4e82-a0db-5e7f16388171"), new BigDecimal("2.47"), null, null)
         );
 
-        private final static Comparator<Price> orderByInstantDesc =
+        private final static Comparator<Price> ORDER_BY_INSTANT_DESC =
             Comparator.comparing(Price::getInstant).reversed();
 
-        private final static Product product = Product.builder()
+        private final static Product PRODUCT = Product.builder()
             .description("ACHOC PO NESCAU 800G")
             .barcode("7891000055120")
             .sequenceCode(29250)
             .build();
 
         static {
-            listOfPrices.forEach(product::addPrice);
+            LIST_OF_PRICES.forEach(PRODUCT::addPrice);
 
             final Instant january = LocalDateTime.of(2022, Month.JANUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
             final Instant february = LocalDateTime.of(2022, Month.FEBRUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
@@ -137,11 +137,11 @@ final class PriceServiceImplTest {
             final Instant april = LocalDateTime.of(2022, Month.APRIL, 1, 12, 0).toInstant(ZoneOffset.UTC);
             final Instant may = LocalDateTime.of(2022, Month.MAY, 1, 12, 0).toInstant(ZoneOffset.UTC);
 
-            listOfPrices.get(0).setInstant(january);
-            listOfPrices.get(1).setInstant(february);
-            listOfPrices.get(2).setInstant(march);
-            listOfPrices.get(3).setInstant(april);
-            listOfPrices.get(4).setInstant(may);
+            LIST_OF_PRICES.get(0).setInstant(january);
+            LIST_OF_PRICES.get(1).setInstant(february);
+            LIST_OF_PRICES.get(2).setInstant(march);
+            LIST_OF_PRICES.get(3).setInstant(april);
+            LIST_OF_PRICES.get(4).setInstant(may);
         }
     }
 }
