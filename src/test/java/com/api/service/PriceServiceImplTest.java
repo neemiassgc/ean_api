@@ -133,17 +133,17 @@ final class PriceServiceImplTest {
         static {
             LIST_OF_PRICES.forEach(PRODUCT::addPrice);
 
-            final Instant january = LocalDateTime.of(2022, Month.JANUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
-            final Instant february = LocalDateTime.of(2022, Month.FEBRUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
-            final Instant march = LocalDateTime.of(2022, Month.MARCH, 1, 12, 0).toInstant(ZoneOffset.UTC);
-            final Instant april = LocalDateTime.of(2022, Month.APRIL, 1, 12, 0).toInstant(ZoneOffset.UTC);
-            final Instant may = LocalDateTime.of(2022, Month.MAY, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant january = LocalDateTime.of(2022, JANUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant february = LocalDateTime.of(2022, FEBRUARY, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant march = LocalDateTime.of(2022, MARCH, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant april = LocalDateTime.of(2022, APRIL, 1, 12, 0).toInstant(ZoneOffset.UTC);
+            final Instant may = LocalDateTime.of(2022, MAY, 1, 12, 0).toInstant(ZoneOffset.UTC);
 
-            LIST_OF_PRICES.get(0).setInstant(january);
-            LIST_OF_PRICES.get(1).setInstant(february);
-            LIST_OF_PRICES.get(2).setInstant(march);
-            LIST_OF_PRICES.get(3).setInstant(april);
-            LIST_OF_PRICES.get(4).setInstant(may);
+            LIST_OF_PRICES.get(1).setInstant(january);
+            LIST_OF_PRICES.get(0).setInstant(february);
+            LIST_OF_PRICES.get(4).setInstant(march);
+            LIST_OF_PRICES.get(2).setInstant(april);
+            LIST_OF_PRICES.get(3).setInstant(may);
         }
     }
 }
