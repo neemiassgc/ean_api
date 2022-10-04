@@ -139,6 +139,11 @@ public class ProductServiceTest {
         verify(productRepositoryMock, only()).findAllWithLastPrice();
     }
 
+    @Nested
+    class FindAllTest {
+
+    }
+
     private static final class Resources {
 
         private static final List<Product> PRODUCT_LIST = List.of(
