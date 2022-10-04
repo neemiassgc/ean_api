@@ -2,17 +2,20 @@ package com.api.service;
 
 import com.api.entity.Price;
 import com.api.entity.Product;
+import com.api.projection.SimpleProductWithStatus;
 import com.api.repository.ProductRepository;
 import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
 import org.hibernate.validator.constraints.time.DurationMax;
 import org.junit.jupiter.api.*;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 public class ProductServiceTest {
@@ -41,6 +44,29 @@ public class ProductServiceTest {
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
 
             verifyNoInteractions(productRepositoryMock);
+        }
+
+        @Test
+        @DisplayName("Should return a product from db")
+        void when_a_product_exist_in_db_then_should_return_it() {
+            final String targetBarcode = "7891000055120";
+            final Product expectedProduct = Resources.PRODUCT_LIST.get(0);
+            given(productRepositoryMock.findByBarcode(eq(targetBarcode)))
+                .willReturn(Optional.of(expectedProduct));
+
+            final SimpleProductWithStatus actualSimpleProductWithStatus =
+                productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(targetBarcode);
+
+            assertThat(actualSimpleProductWithStatus).isNotNull();
+            assertThat(actualSimpleProductWithStatus.getHttpStatus()).isEqualTo(HttpStatus.OK);
+            assertThat(actualSimpleProductWithStatus.getSimpleProduct()).satisfies(simpleProduct -> {
+                assertThat(simpleProduct.getDescription()).isEqualTo("ACHOC PO NESCAU 800G");
+                assertThat(simpleProduct.getBarcode()).isEqualTo("7891000055120");
+                assertThat(simpleProduct.getSequenceCode()).isEqualTo(29250);
+            });
+
+            verify(productRepositoryMock, times(1)).findByBarcode(eq(targetBarcode));
+            verify(productRepositoryMock, only()).findByBarcode(eq(targetBarcode));
         }
     }
 
