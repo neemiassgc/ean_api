@@ -53,4 +53,9 @@ public class PriceServiceIT {
             });
         }
     }
+
+    @Nested
+    final class FindByProductBarcodeTest {
+
+    }
 }
