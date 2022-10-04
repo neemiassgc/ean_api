@@ -8,6 +8,7 @@ import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
 import org.hibernate.validator.constraints.time.DurationMax;
 import org.junit.jupiter.api.*;
+import org.mockito.BDDMockito;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
 public class ProductServiceTest {
@@ -67,6 +68,34 @@ public class ProductServiceTest {
 
             verify(productRepositoryMock, times(1)).findByBarcode(eq(targetBarcode));
             verify(productRepositoryMock, only()).findByBarcode(eq(targetBarcode));
+        }
+
+        @Test
+        @DisplayName("Should return a product from an external api")
+        void when_a_product_does_not_exist_in_db_then_should_return_from_an_external_api() {
+            final String targetBarcode = "7891000055120";
+            final Product expectedProduct = Resources.PRODUCT_LIST.get(0);
+            given(productRepositoryMock.findByBarcode(eq(targetBarcode)))
+                .willReturn(Optional.empty());
+            given(productExternalServiceMock.fetchByBarcode(eq(targetBarcode)))
+                .willReturn(Optional.of(expectedProduct));
+            given(productRepositoryMock.save(eq(expectedProduct)))
+                .willAnswer(answer -> answer.getArgument(0, Product.class));
+
+            final SimpleProductWithStatus actualSimpleProductWithStatus =
+                productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(targetBarcode);
+
+            assertThat(actualSimpleProductWithStatus).isNotNull();
+            assertThat(actualSimpleProductWithStatus.getHttpStatus()).isEqualTo(HttpStatus.CREATED);
+            assertThat(actualSimpleProductWithStatus.getSimpleProduct()).satisfies(simpleProduct -> {
+                assertThat(simpleProduct.getDescription()).isEqualTo("ACHOC PO NESCAU 800G");
+                assertThat(simpleProduct.getBarcode()).isEqualTo("7891000055120");
+                assertThat(simpleProduct.getSequenceCode()).isEqualTo(29250);
+            });
+
+            verify(productRepositoryMock, times(1)).findByBarcode(eq(targetBarcode));
+            verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(targetBarcode));
+            verify(productRepositoryMock, times(1)).save(eq(expectedProduct));
         }
     }
 
