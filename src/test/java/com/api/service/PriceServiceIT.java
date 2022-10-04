@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,12 +49,7 @@ public class PriceServiceIT {
 
             final Throwable actualThrowable = catchThrowable(() -> priceService.findById(nonExisting));
 
-            assertThat(actualThrowable).isNotNull();
-            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
-            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
-                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-                assertThat(exception.getReason()).isEqualTo("Price not found");
-            });
+            checkResponseStatusExceptionWithMessage(actualThrowable, "Price not found");
         }
     }
 
@@ -73,12 +67,7 @@ public class PriceServiceIT {
             final Throwable actualThrowable =
                     catchThrowable(() -> priceService.findByProductBarcode(nonExistingBarcode, ORDER_BY_INSTANT_DESC));
 
-            assertThat(actualThrowable).isNotNull();
-            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
-            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
-                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-                assertThat(exception.getReason()).isEqualTo("Product not found");
-            });
+            checkResponseStatusExceptionWithMessage(actualThrowable, "Product not found");
         }
 
         @Test
@@ -86,11 +75,7 @@ public class PriceServiceIT {
             final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, ORDER_BY_INSTANT_DESC);
 
             assertThat(actualPrices).hasSize(10);
-            // Checking ordering
-            assertThat(actualPrices)
-                    .extracting(Price::getValue)
-                    .map(BigDecimal::toPlainString)
-                    .containsExactly("12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
+            checkOrderingWithAllPrices(actualPrices);
         }
 
         @Test
@@ -100,11 +85,7 @@ public class PriceServiceIT {
             final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, theFirstThreePrices);
 
             assertThat(actualPrices).hasSize(3);
-            // Checking ordering
-            assertThat(actualPrices)
-                    .extracting(Price::getValue)
-                    .map(BigDecimal::toPlainString)
-                    .containsExactly("12.70", "19.00", "16.50");
+            checkOrderingWithPrices(actualPrices, "12.70", "19.00", "16.50");
         }
 
         @Test
@@ -115,11 +96,7 @@ public class PriceServiceIT {
             final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, overMaxPageSize);
 
             assertThat(actualPrices).hasSize(10);
-            // Checking ordering
-            assertThat(actualPrices)
-                .extracting(Price::getValue)
-                .map(BigDecimal::toPlainString)
-                .containsExactly("12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
+            checkOrderingWithAllPrices(actualPrices);
         }
 
         @Test
@@ -130,12 +107,27 @@ public class PriceServiceIT {
             final Throwable actualThrowable =
                 catchThrowable(() -> priceService.findByProductBarcode(BARCODE, overMaxPageSize));
 
-            assertThat(actualThrowable).isNotNull();
-            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
-            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
-                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-                assertThat(exception.getReason()).isEqualTo("Product not found");
-            });
+            checkResponseStatusExceptionWithMessage(actualThrowable, "Product not found");
         }
+    }
+
+    private void checkResponseStatusExceptionWithMessage(final Throwable actualThrowable, final String message) {
+        assertThat(actualThrowable).isNotNull();
+        assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+        assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
+            assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(exception.getReason()).isEqualTo(message);
+        });
+    }
+
+    private void checkOrderingWithPrices(final List<Price> actualPrices, final String... expectedPricesInString) {
+        assertThat(actualPrices)
+            .extracting(Price::getValue)
+            .map(BigDecimal::toPlainString)
+            .containsExactly(expectedPricesInString);
+    }
+
+    private void checkOrderingWithAllPrices(final List<Price> actualPrices) {
+        checkOrderingWithPrices(actualPrices, "12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
     }
 }
