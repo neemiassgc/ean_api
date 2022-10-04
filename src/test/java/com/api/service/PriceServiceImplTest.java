@@ -102,9 +102,8 @@ final class PriceServiceImplTest {
         @Test
         @DisplayName("Should throw NullPointerException")
         void when_sort_is_null_then_throw_an_exception() {
-            final String targetProductBarcode = "7891000055120";
             final Throwable actualThrowable =
-                catchThrowable(() -> priceServiceUnderTest.findByProductBarcode(targetProductBarcode, (Sort) null));
+                catchThrowable(() -> priceServiceUnderTest.findByProductBarcode(BARCODE, (Sort) null));
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
@@ -113,14 +112,13 @@ final class PriceServiceImplTest {
         @Test
         @DisplayName("Should return prices ordered by instant desc")
         void if_the_product_barcode_exist_then_should_return_its_price_ordered_by_instant_desc() {
-            final String existentBarcode = "7891000055120";
             final Sort orderByInstantDesc = Sort.by("instant").descending();
             final List<Price> orderedPrices = new ArrayList<>(Resources.LIST_OF_PRICES);
             orderedPrices.sort(Resources.ORDER_BY_INSTANT_DESC);
-            given(priceRepositoryMock.findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc)))
+            given(priceRepositoryMock.findByProductBarcode(eq(BARCODE), eq(orderByInstantDesc)))
                 .willReturn(orderedPrices);
 
-            final List<Price> actualPrices = priceServiceUnderTest.findByProductBarcode(existentBarcode, orderByInstantDesc);
+            final List<Price> actualPrices = priceServiceUnderTest.findByProductBarcode(BARCODE, orderByInstantDesc);
 
             assertThat(actualPrices).isNotNull();
             assertThat(actualPrices).hasSize(5);
@@ -130,8 +128,8 @@ final class PriceServiceImplTest {
                 .map(Resources::extractMonthFromInstant)
                 .containsExactly(MAY, APRIL, MARCH, FEBRUARY, JANUARY);
 
-            verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc));
-            verify(priceRepositoryMock, only()).findByProductBarcode(eq(existentBarcode), eq(orderByInstantDesc));
+            verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(BARCODE), eq(orderByInstantDesc));
+            verify(priceRepositoryMock, only()).findByProductBarcode(eq(BARCODE), eq(orderByInstantDesc));
         }
 
         @Test
