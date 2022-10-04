@@ -124,6 +124,21 @@ public class ProductServiceTest {
         }
     }
 
+    @Test
+    @DisplayName("Should return all products available")
+    void should_return_all_products_available() {
+        given(productRepositoryMock.findAllWithLastPrice())
+            .willReturn(Resources.PRODUCT_LIST);
+
+        final List<Product> actualProducts = productServiceImplUnderTest.findAllWithLatestPrice();
+
+        assertThat(actualProducts).hasSize(3);
+        assertThat(actualProducts).extracting(Product::getPrices).hasSize(3);
+
+        verify(productRepositoryMock, times(1)).findAllWithLastPrice();
+        verify(productRepositoryMock, only()).findAllWithLastPrice();
+    }
+
     private static final class Resources {
 
         private static final List<Product> PRODUCT_LIST = List.of(
