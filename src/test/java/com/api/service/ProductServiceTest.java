@@ -10,7 +10,7 @@ import org.junit.jupiter.api.TestInstance;
 import static org.mockito.Mockito.mock;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProductServiceImplTest {
+public class ProductServiceTest {
 
     private ProductService productServiceImplUnderTest;
     private ProductRepository productRepositoryMock;
