@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +91,20 @@ public class PriceServiceIT {
                 .extracting(Price::getValue)
                 .map(BigDecimal::toPlainString)
                 .containsExactly("12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
+        }
+
+        @Test
+        void should_return_only_the_first_three_prices() {
+            final Pageable theFirstThreePrices = PageRequest.of(0, 3, ORDER_BY_INSTANT_DESC);
+
+            final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, theFirstThreePrices);
+
+            assertThat(actualPrices).hasSize(3);
+            // Checking ordering
+            assertThat(actualPrices)
+                .extracting(Price::getValue)
+                .map(BigDecimal::toPlainString)
+                .containsExactly("12.70", "19.00", "16.50");
         }
     }
 }
