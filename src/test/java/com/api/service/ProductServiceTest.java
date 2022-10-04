@@ -13,8 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 public class ProductServiceTest {
 
@@ -31,6 +30,18 @@ public class ProductServiceTest {
 
     @Nested
     class GetByBarcodeAndSaveIfNecessaryTest {
+
+        @Test
+        @DisplayName("Should throw NullPointerException")
+        void if_barcode_is_null_then_should_throw_an_exception() {
+            final Throwable actualThrowable =
+                    catchThrowable(() -> productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(null));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(productRepositoryMock);
+        }
     }
 
     private static final class Resources {
