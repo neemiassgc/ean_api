@@ -71,7 +71,7 @@ public class PriceServiceIT {
             final String nonExistingBarcode = "7891000055121";
 
             final Throwable actualThrowable =
-                catchThrowable(() -> priceService.findByProductBarcode(nonExistingBarcode, ORDER_BY_INSTANT_DESC));
+                    catchThrowable(() -> priceService.findByProductBarcode(nonExistingBarcode, ORDER_BY_INSTANT_DESC));
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
@@ -88,9 +88,9 @@ public class PriceServiceIT {
             assertThat(actualPrices).hasSize(10);
             // Checking ordering
             assertThat(actualPrices)
-                .extracting(Price::getValue)
-                .map(BigDecimal::toPlainString)
-                .containsExactly("12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
+                    .extracting(Price::getValue)
+                    .map(BigDecimal::toPlainString)
+                    .containsExactly("12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
         }
 
         @Test
@@ -102,9 +102,24 @@ public class PriceServiceIT {
             assertThat(actualPrices).hasSize(3);
             // Checking ordering
             assertThat(actualPrices)
+                    .extracting(Price::getValue)
+                    .map(BigDecimal::toPlainString)
+                    .containsExactly("12.70", "19.00", "16.50");
+        }
+
+        @Test
+        @DisplayName("Should return all prices available")
+        void when_page_size_is_over_max_page_size_then_should_return_all_prices() {
+            final Pageable overMaxPageSize = PageRequest.of(0, 12, ORDER_BY_INSTANT_DESC);
+
+            final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, overMaxPageSize);
+
+            assertThat(actualPrices).hasSize(10);
+            // Checking ordering
+            assertThat(actualPrices)
                 .extracting(Price::getValue)
                 .map(BigDecimal::toPlainString)
-                .containsExactly("12.70", "19.00", "16.50");
+                .containsExactly("12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
         }
     }
 }
