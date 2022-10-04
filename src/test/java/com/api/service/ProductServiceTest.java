@@ -9,10 +9,13 @@ import com.api.service.interfaces.ProductService;
 import org.hibernate.validator.constraints.time.DurationMax;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -142,6 +145,25 @@ public class ProductServiceTest {
     @Nested
     class FindAllTest {
 
+        @Test
+        @DisplayName("Should return all products ordered by its sequence code")
+        void should_return_all_products_ordered_by_its_sequence_code() {
+            final Sort orderBySequenceCodeAsc = Sort.by("sequenceCode").ascending();
+            final List<Product> orderedList = new ArrayList<>(Resources.PRODUCT_LIST);
+            orderedList.sort(Comparator.comparing(Product::getSequenceCode));
+            given(productRepositoryMock.findAll(eq(orderBySequenceCodeAsc)))
+                .willReturn(orderedList);
+
+            final List<Product> actualList = productServiceImplUnderTest.findAll(orderBySequenceCodeAsc);
+
+            assertThat(actualList).hasSize(3);
+            // checking sorting
+            assertThat(actualList).extracting(Product::getSequenceCode)
+                .containsExactly(29250, 93556, 120983);
+
+            verify(productRepositoryMock, times(1)).findAll(eq(orderBySequenceCodeAsc));
+            verify(productRepositoryMock, only()).findAll(eq(orderBySequenceCodeAsc));
+        }
     }
 
     private static final class Resources {
