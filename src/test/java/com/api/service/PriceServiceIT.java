@@ -7,12 +7,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @SpringBootTest
 @Transactional(readOnly = true)
@@ -33,6 +36,21 @@ public class PriceServiceIT {
 
             assertThat(actualPrice).isNotNull();
             assertThat(actualPrice.getValue()).isEqualTo(new BigDecimal("12.70"));
+        }
+
+        @Test
+        @DisplayName("Should throw ResponseStatusException NOT FOUND")
+        void when_id_does_not_exist_then_should_throw_an_exception() {
+            final UUID nonExisting = UUID.fromString("e236e904-49f0-41b0-b3aa-c9f582f38fc1");
+
+            final Throwable actualThrowable = catchThrowable(() -> priceService.findById(nonExisting));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
+                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                assertThat(exception.getReason()).isEqualTo("Price not found");
+            });
         }
     }
 }
