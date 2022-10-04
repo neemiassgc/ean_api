@@ -6,26 +6,27 @@ import com.api.projection.SimpleProductWithStatus;
 import com.api.repository.ProductRepository;
 import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
-import org.hibernate.validator.constraints.time.DurationMax;
-import org.junit.jupiter.api.*;
-import org.mockito.BDDMockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 
 public class ProductServiceTest {
 
-    private ProductService productServiceImplUnderTest;
+    private ProductService productServiceUnderTest;
     private ProductRepository productRepositoryMock;
     private ProductExternalService productExternalServiceMock;
 
@@ -33,17 +34,19 @@ public class ProductServiceTest {
     void setup() {
         productExternalServiceMock = mock(ProductExternalService.class);
         productRepositoryMock = mock(ProductRepository.class);
-        productServiceImplUnderTest = new ProductServiceImpl(productRepositoryMock, productExternalServiceMock);
+        productServiceUnderTest = new ProductServiceImpl(productRepositoryMock, productExternalServiceMock);
     }
 
     @Nested
     class GetByBarcodeAndSaveIfNecessaryTest {
 
+        private static final String BARCODE = "7891000055120";
+
         @Test
         @DisplayName("Should throw NullPointerException")
         void if_barcode_is_null_then_should_throw_an_exception() {
             final Throwable actualThrowable =
-                    catchThrowable(() -> productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(null));
+                catchThrowable(() -> productServiceUnderTest.getByBarcodeAndSaveIfNecessary(null));
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
@@ -54,51 +57,37 @@ public class ProductServiceTest {
         @Test
         @DisplayName("Should return a product from db")
         void when_a_product_exist_in_db_then_should_return_it() {
-            final String targetBarcode = "7891000055120";
             final Product expectedProduct = Resources.PRODUCT_LIST.get(0);
-            given(productRepositoryMock.findByBarcode(eq(targetBarcode)))
+            given(productRepositoryMock.findByBarcode(eq(BARCODE)))
                 .willReturn(Optional.of(expectedProduct));
 
             final SimpleProductWithStatus actualSimpleProductWithStatus =
-                productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(targetBarcode);
+                productServiceUnderTest.getByBarcodeAndSaveIfNecessary(BARCODE);
 
-            assertThat(actualSimpleProductWithStatus).isNotNull();
-            assertThat(actualSimpleProductWithStatus.getHttpStatus()).isEqualTo(HttpStatus.OK);
-            assertThat(actualSimpleProductWithStatus.getSimpleProduct()).satisfies(simpleProduct -> {
-                assertThat(simpleProduct.getDescription()).isEqualTo("ACHOC PO NESCAU 800G");
-                assertThat(simpleProduct.getBarcode()).isEqualTo("7891000055120");
-                assertThat(simpleProduct.getSequenceCode()).isEqualTo(29250);
-            });
+            checkProductWithHttpStatus(actualSimpleProductWithStatus, HttpStatus.OK);
 
-            verify(productRepositoryMock, times(1)).findByBarcode(eq(targetBarcode));
-            verify(productRepositoryMock, only()).findByBarcode(eq(targetBarcode));
+            verify(productRepositoryMock, times(1)).findByBarcode(eq(BARCODE));
+            verify(productRepositoryMock, only()).findByBarcode(eq(BARCODE));
         }
 
         @Test
         @DisplayName("Should return a product from an external api")
         void when_a_product_does_not_exist_in_db_then_should_return_from_an_external_api() {
-            final String targetBarcode = "7891000055120";
             final Product expectedProduct = Resources.PRODUCT_LIST.get(0);
-            given(productRepositoryMock.findByBarcode(eq(targetBarcode)))
+            given(productRepositoryMock.findByBarcode(eq(BARCODE)))
                 .willReturn(Optional.empty());
-            given(productExternalServiceMock.fetchByBarcode(eq(targetBarcode)))
+            given(productExternalServiceMock.fetchByBarcode(eq(BARCODE)))
                 .willReturn(Optional.of(expectedProduct));
             given(productRepositoryMock.save(eq(expectedProduct)))
                 .willAnswer(answer -> answer.getArgument(0, Product.class));
 
             final SimpleProductWithStatus actualSimpleProductWithStatus =
-                productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(targetBarcode);
+                productServiceUnderTest.getByBarcodeAndSaveIfNecessary(BARCODE);
 
-            assertThat(actualSimpleProductWithStatus).isNotNull();
-            assertThat(actualSimpleProductWithStatus.getHttpStatus()).isEqualTo(HttpStatus.CREATED);
-            assertThat(actualSimpleProductWithStatus.getSimpleProduct()).satisfies(simpleProduct -> {
-                assertThat(simpleProduct.getDescription()).isEqualTo("ACHOC PO NESCAU 800G");
-                assertThat(simpleProduct.getBarcode()).isEqualTo("7891000055120");
-                assertThat(simpleProduct.getSequenceCode()).isEqualTo(29250);
-            });
+            checkProductWithHttpStatus(actualSimpleProductWithStatus, HttpStatus.CREATED);
 
-            verify(productRepositoryMock, times(1)).findByBarcode(eq(targetBarcode));
-            verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(targetBarcode));
+            verify(productRepositoryMock, times(1)).findByBarcode(eq(BARCODE));
+            verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(BARCODE));
             verify(productRepositoryMock, times(1)).save(eq(expectedProduct));
         }
 
@@ -112,7 +101,7 @@ public class ProductServiceTest {
                 .willReturn(Optional.empty());
 
             final Throwable actualThrowable =
-                catchThrowable(() -> productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(nonExistentBarcodeAnywhere));
+                catchThrowable(() -> productServiceUnderTest.getByBarcodeAndSaveIfNecessary(nonExistentBarcodeAnywhere));
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
@@ -125,6 +114,16 @@ public class ProductServiceTest {
             verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(nonExistentBarcodeAnywhere));
             verifyNoMoreInteractions(productRepositoryMock, productExternalServiceMock);
         }
+
+        private void checkProductWithHttpStatus(final SimpleProductWithStatus simpleProductWithStatus, final HttpStatus httpStatus) {
+            assertThat(simpleProductWithStatus).isNotNull();
+            assertThat(simpleProductWithStatus.getHttpStatus()).isEqualTo(httpStatus);
+            assertThat(simpleProductWithStatus.getSimpleProduct()).satisfies(simpleProduct -> {
+                assertThat(simpleProduct.getDescription()).isEqualTo("ACHOC PO NESCAU 800G");
+                assertThat(simpleProduct.getBarcode()).isEqualTo("7891000055120");
+                assertThat(simpleProduct.getSequenceCode()).isEqualTo(29250);
+            });
+        }
     }
 
     @Test
@@ -133,7 +132,7 @@ public class ProductServiceTest {
         given(productRepositoryMock.findAllWithLastPrice())
             .willReturn(Resources.PRODUCT_LIST);
 
-        final List<Product> actualProducts = productServiceImplUnderTest.findAllWithLatestPrice();
+        final List<Product> actualProducts = productServiceUnderTest.findAllWithLatestPrice();
 
         assertThat(actualProducts).hasSize(3);
         assertThat(actualProducts).extracting(Product::getPrices).hasSize(3);
@@ -145,48 +144,51 @@ public class ProductServiceTest {
     @Nested
     class FindAllTest {
 
+        private final List<Product> ORDERED_LIST = Resources.PRODUCT_LIST
+            .stream()
+            .sorted(Comparator.comparing(Product::getSequenceCode))
+            .collect(Collectors.toList());
+
+        private final Sort ORDER_BY_SEQUENCE_CODE = Sort.by("sequenceCode").ascending();
+
         @Test
         @DisplayName("Should return all products ordered by its sequence code")
         void should_return_all_products_ordered_by_its_sequence_code() {
-            final Sort orderBySequenceCodeAsc = Sort.by("sequenceCode").ascending();
-            final List<Product> orderedList = new ArrayList<>(Resources.PRODUCT_LIST);
-            orderedList.sort(Comparator.comparing(Product::getSequenceCode));
-            given(productRepositoryMock.findAll(eq(orderBySequenceCodeAsc)))
-                .willReturn(orderedList);
+            given(productRepositoryMock.findAll(eq(ORDER_BY_SEQUENCE_CODE)))
+                .willReturn(ORDERED_LIST);
 
-            final List<Product> actualList = productServiceImplUnderTest.findAll(orderBySequenceCodeAsc);
+            final List<Product> actualList = productServiceUnderTest.findAll(ORDER_BY_SEQUENCE_CODE);
 
             assertThat(actualList).hasSize(3);
-            // checking sorting
-            assertThat(actualList).extracting(Product::getSequenceCode)
-                .containsExactly(29250, 93556, 120983);
+            checkSortingWithSequenceCode(actualList, 29250, 93556, 120983);
 
-            verify(productRepositoryMock, times(1)).findAll(eq(orderBySequenceCodeAsc));
-            verify(productRepositoryMock, only()).findAll(eq(orderBySequenceCodeAsc));
+            verify(productRepositoryMock, times(1)).findAll(eq(ORDER_BY_SEQUENCE_CODE));
+            verify(productRepositoryMock, only()).findAll(eq(ORDER_BY_SEQUENCE_CODE));
         }
 
         @Test
         @DisplayName("Should return a page with the first two products")
         void should_return_a_page_with_the_first_two_products_ordered_by_its_sequence_code() {
-            final Sort orderBySequenceCodeAsc = Sort.by("sequenceCode").ascending();
-            final Pageable pageWithTheFirstTwoProducts = PageRequest.of(0, 2).withSort(orderBySequenceCodeAsc);
-            final List<Product> orderedList = new ArrayList<>(Resources.PRODUCT_LIST);
-            orderedList.sort(Comparator.comparing(Product::getSequenceCode));
+            final Pageable pageWithTheFirstTwoProducts = PageRequest.of(0, 2).withSort(ORDER_BY_SEQUENCE_CODE);
+            final List<Product> twoProducts = ORDERED_LIST.subList(0, 2);
             given(productRepositoryMock.findAll(eq(pageWithTheFirstTwoProducts)))
-                .willReturn(new PageImpl<>(orderedList.subList(0, 2)));
+                .willReturn(new PageImpl<>(twoProducts));
 
-            final Page<Product> actualPage = productServiceImplUnderTest.findAll(pageWithTheFirstTwoProducts);
+            final Page<Product> actualPage = productServiceUnderTest.findAll(pageWithTheFirstTwoProducts);
 
             assertThat(actualPage).isNotNull();
             assertThat(actualPage.getTotalPages()).isOne();
             assertThat(actualPage.getTotalElements()).isEqualTo(2);
             assertThat(actualPage.getContent()).hasSize(2);
-            // checking sorting
-            assertThat(actualPage.getContent()).extracting(Product::getSequenceCode)
-                .containsExactly(29250, 93556);
+            checkSortingWithSequenceCode(actualPage.getContent(), 29250, 93556);
 
             verify(productRepositoryMock, times(1)).findAll(eq(pageWithTheFirstTwoProducts));
             verify(productRepositoryMock, only()).findAll(eq(pageWithTheFirstTwoProducts));
+        }
+
+        private void checkSortingWithSequenceCode(final List<Product> actualProducts, final Integer... sequenceCodes) {
+            assertThat(actualProducts).extracting(Product::getSequenceCode)
+                .containsExactly(sequenceCodes);
         }
     }
 
