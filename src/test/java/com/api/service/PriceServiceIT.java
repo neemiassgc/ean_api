@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,6 +77,18 @@ public class PriceServiceIT {
                 assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
                 assertThat(exception.getReason()).isEqualTo("Product not found");
             });
+        }
+
+        @Test
+        void should_return_prices_ordered_by_its_instant_desc() {
+            final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, ORDER_BY_INSTANT_DESC);
+
+            assertThat(actualPrices).hasSize(10);
+            // Checking ordering
+            assertThat(actualPrices)
+                .extracting(Price::getValue)
+                .map(BigDecimal::toPlainString)
+                .containsExactly("12.70", "19.00", "16.50", "6.61", "16.80", "9.85", "10.60", "16.10", "12.60", "19.10");
         }
     }
 }
