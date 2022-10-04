@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.time.DurationMax;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -96,6 +97,30 @@ public class ProductServiceTest {
             verify(productRepositoryMock, times(1)).findByBarcode(eq(targetBarcode));
             verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(targetBarcode));
             verify(productRepositoryMock, times(1)).save(eq(expectedProduct));
+        }
+
+        @Test
+        @DisplayName("Should throw an ResponseStatusException | NOT FOUND")
+        void when_a_product_is_not_found_then_should_throw_an_exception() {
+            final String nonExistentBarcodeAnywhere = "7891000055345";
+            given(productRepositoryMock.findByBarcode(eq(nonExistentBarcodeAnywhere)))
+                .willReturn(Optional.empty());
+            given(productExternalServiceMock.fetchByBarcode(eq(nonExistentBarcodeAnywhere)))
+                .willReturn(Optional.empty());
+
+            final Throwable actualThrowable =
+                catchThrowable(() -> productServiceImplUnderTest.getByBarcodeAndSaveIfNecessary(nonExistentBarcodeAnywhere));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
+                assertThat(exception.getReason()).isEqualTo("Product not found");
+                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            });
+
+            verify(productRepositoryMock, times(1)).findByBarcode(eq(nonExistentBarcodeAnywhere));
+            verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(nonExistentBarcodeAnywhere));
+            verifyNoMoreInteractions(productRepositoryMock, productExternalServiceMock);
         }
     }
 
