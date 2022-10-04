@@ -9,7 +9,7 @@ import com.api.service.interfaces.ProductService;
 import org.hibernate.validator.constraints.time.DurationMax;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -163,6 +163,30 @@ public class ProductServiceTest {
 
             verify(productRepositoryMock, times(1)).findAll(eq(orderBySequenceCodeAsc));
             verify(productRepositoryMock, only()).findAll(eq(orderBySequenceCodeAsc));
+        }
+
+        @Test
+        @DisplayName("Should return a page with the first two products")
+        void should_return_a_page_with_the_first_two_products_ordered_by_its_sequence_code() {
+            final Sort orderBySequenceCodeAsc = Sort.by("sequenceCode").ascending();
+            final Pageable pageWithTheFirstTwoProducts = PageRequest.of(0, 2).withSort(orderBySequenceCodeAsc);
+            final List<Product> orderedList = new ArrayList<>(Resources.PRODUCT_LIST);
+            orderedList.sort(Comparator.comparing(Product::getSequenceCode));
+            given(productRepositoryMock.findAll(eq(pageWithTheFirstTwoProducts)))
+                .willReturn(new PageImpl<>(orderedList.subList(0, 2)));
+
+            final Page<Product> actualPage = productServiceImplUnderTest.findAll(pageWithTheFirstTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getTotalPages()).isOne();
+            assertThat(actualPage.getTotalElements()).isEqualTo(2);
+            assertThat(actualPage.getContent()).hasSize(2);
+            // checking sorting
+            assertThat(actualPage.getContent()).extracting(Product::getSequenceCode)
+                .containsExactly(29250, 93556);
+
+            verify(productRepositoryMock, times(1)).findAll(eq(pageWithTheFirstTwoProducts));
+            verify(productRepositoryMock, only()).findAll(eq(pageWithTheFirstTwoProducts));
         }
     }
 
