@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -84,6 +86,8 @@ final class PriceServiceImplTest {
     @Nested
     class FindByProductBarcodeTest {
 
+        private static final String BARCODE = "7891000055120";
+
         @Test
         @DisplayName("Should throw NullPointerException")
         void when_barcode_is_null_then_throw_an_exception() {
@@ -150,6 +154,29 @@ final class PriceServiceImplTest {
 
             verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc));
             verify(priceRepositoryMock, only()).findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc));
+        }
+
+        @Test
+        @DisplayName("Should return only the first three prices")
+        void given_a_pageable_then_should_return_only_the_first_three_prices() {
+            final Sort orderByInstantDesc = Sort.by("instant").descending();
+            final Pageable theFirstThreePrices = PageRequest.of(0, 3).withSort(orderByInstantDesc);
+            final List<Price> expectedPrices = new ArrayList<>(Resources.LIST_OF_PRICES.subList(0, 3));
+            expectedPrices.sort(Resources.ORDER_BY_INSTANT_DESC);
+            given(priceRepositoryMock.findByProductBarcode(eq(BARCODE), eq(theFirstThreePrices)))
+                .willReturn(expectedPrices);
+
+            final List<Price> actualPrices = priceServiceUnderTest.findByProductBarcode(BARCODE, theFirstThreePrices);
+
+            assertThat(actualPrices).hasSize(3);
+            // Checking ordering
+            assertThat(actualPrices)
+                .extracting(Price::getInstant)
+                .map(Resources::extractMonthFromInstant)
+                .containsExactly(APRIL, FEBRUARY, JANUARY);
+
+            verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(BARCODE), eq(theFirstThreePrices));
+            verify(priceRepositoryMock, only()).findByProductBarcode(eq(BARCODE), eq(theFirstThreePrices));
         }
     }
 
