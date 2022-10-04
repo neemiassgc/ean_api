@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -57,5 +58,23 @@ public class PriceServiceIT {
     @Nested
     final class FindByProductBarcodeTest {
 
+        private final String BARCODE = "7891000055120";
+        private final Sort ORDER_BY_INSTANT_DESC = Sort.by("instant").descending();
+
+        @Test
+        @DisplayName("Should throw ResponseStatusException NOT FOUND")
+        void when_product_does_not_exist_then_should_throw_an_exception() {
+            final String nonExistingBarcode = "7891000055121";
+
+            final Throwable actualThrowable =
+                catchThrowable(() -> priceService.findByProductBarcode(nonExistingBarcode, ORDER_BY_INSTANT_DESC));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
+                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                assertThat(exception.getReason()).isEqualTo("Product not found");
+            });
+        }
     }
 }
