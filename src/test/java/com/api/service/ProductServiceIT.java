@@ -12,8 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @SpringBootTest
 @Transactional(readOnly = true)
@@ -64,6 +66,22 @@ public class ProductServiceIT {
             });
             assertThat(productRepository.count()).isEqualTo(12);
             assertThat(priceRepository.count()).isEqualTo(67);
+        }
+
+        @Test
+        @DisplayName("Should throw ResponseStatusException NOT FOUND")
+        void when_a_product_does_not_exist_anywhere_then_should_throw_an_exception() {
+            final String nonExistentBarcode = "7894321724039";
+
+            final Throwable actualThrowable =
+                catchThrowable(() -> productServiceUnderTest.getByBarcodeAndSaveIfNecessary(nonExistentBarcode));
+
+            assertThat(actualThrowable).isNotNull();
+            assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
+            assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
+                assertThat(exception.getReason()).isEqualTo("Product not found");
+                assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            });
         }
     }
 }
