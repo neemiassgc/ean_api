@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -109,6 +110,16 @@ public class ProductServiceIT {
 
     @Nested
     class FindAllTest {
-        
+
+        @Test
+        @DisplayName("Should return all products with its latest price")
+        void should_return_all_products_with_its_latest_price() {
+            final List<Product> actualProductList =
+                productServiceUnderTest.findAllWithLatestPrice();
+
+            assertThat(actualProductList).hasSize(11);
+            assertThat(actualProductList).extracting(Product::getPrices)
+                .allMatch(prices -> prices.size() == 1);
+        }
     }
 }
