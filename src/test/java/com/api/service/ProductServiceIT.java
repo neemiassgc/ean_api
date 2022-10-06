@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.Commit;
@@ -136,6 +139,20 @@ public class ProductServiceIT {
             assertThat(actualProducts)
                 .extracting(Product::getSequenceCode)
                 .containsExactly(142862, 137513, 134262, 120983, 113249, 105711, 93556, 29250, 9785, 2909, 1184);
+        }
+
+        @Test
+        @DisplayName("Should return the first page with three products ordered by sequence code desc")
+        @Transactional
+        void should_return_the_first_page_with_three_products_ordered_by_sequence_code_desc() {
+            final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
+            final Pageable theFirstPageWithThreeProducts = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAll(theFirstPageWithThreeProducts);
+
+            assertThat(actualPage.getContent()).hasSize(3);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(12);
+            assertThat(actualPage).extracting(Product::getSequenceCode).containsExactly(142862, 137513, 134262);
         }
     }
 }
