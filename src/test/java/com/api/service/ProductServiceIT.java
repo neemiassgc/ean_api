@@ -106,4 +106,9 @@ public class ProductServiceIT {
         assertThat(productRepository.count()).isEqualTo(12);
         assertThat(priceRepository.count()).isEqualTo(67);
     }
+
+    @Nested
+    class FindAllTest {
+        
+    }
 }
