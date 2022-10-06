@@ -16,8 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -97,7 +95,6 @@ public class ProductServiceIT {
     @Test
     @DisplayName("Should save a new product")
     @Transactional
-    @Commit
     void should_save_a_new_product() {
         final Product newProduct = Product.builder()
             .description("Green Powder")
