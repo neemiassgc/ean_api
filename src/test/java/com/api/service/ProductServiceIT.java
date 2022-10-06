@@ -1,5 +1,7 @@
 package com.api.service;
 
+import com.api.entity.Price;
+import com.api.entity.Product;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.repository.PriceRepository;
 import com.api.repository.ProductRepository;
@@ -10,15 +12,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 @SpringBootTest
-@Transactional(readOnly = true)
 public class ProductServiceIT {
 
     @Autowired
@@ -83,5 +87,23 @@ public class ProductServiceIT {
                 assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
             });
         }
+    }
+
+    @Test
+    @DisplayName("Should save a new product")
+    @Transactional
+    @Commit
+    void should_save_a_new_product() {
+        final Product newProduct = Product.builder()
+            .description("Green Powder")
+            .barcode("8473019283745")
+            .sequenceCode(8374)
+            .build()
+            .addPrice(new Price(new BigDecimal("9.9")));
+
+        productServiceUnderTest.save(newProduct);
+
+        assertThat(productRepository.count()).isEqualTo(12);
+        assertThat(priceRepository.count()).isEqualTo(67);
     }
 }
