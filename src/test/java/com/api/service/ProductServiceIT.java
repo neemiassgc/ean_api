@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
@@ -120,6 +121,21 @@ public class ProductServiceIT {
             assertThat(actualProductList).hasSize(11);
             assertThat(actualProductList).extracting(Product::getPrices)
                 .allMatch(prices -> prices.size() == 1);
+        }
+
+        @Test
+        @DisplayName("Should return all products ordered by sequence code desc")
+        @Transactional
+        void should_return_all_products_ordered_by_sequence_code_desc() {
+            final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
+            final List<Product> actualProducts =
+                productServiceUnderTest.findAll(orderBySequenceCodeDesc);
+
+            assertThat(actualProducts).hasSize(11);
+            assertThat(actualProducts).flatExtracting(Product::getPrices).hasSize(66);
+            assertThat(actualProducts)
+                .extracting(Product::getSequenceCode)
+                .containsExactly(142862, 137513, 134262, 120983, 113249, 105711, 93556, 29250, 9785, 2909, 1184);
         }
     }
 }
