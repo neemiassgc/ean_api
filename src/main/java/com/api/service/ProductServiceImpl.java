@@ -61,4 +61,9 @@ public class ProductServiceImpl implements ProductService {
     public Page<Product> findAll(@NonNull Pageable pageable) {
         return productRepository.findAll(pageable);
     }
+
+    @Override
+    public Page<Product> findAllByUsernameIgnoreCaseContaining(@NonNull String username, @NonNull Pageable pageable) {
+        return productRepository.findAllByDescriptionIgnoreCaseContaining(username, pageable);
+    }
 }
