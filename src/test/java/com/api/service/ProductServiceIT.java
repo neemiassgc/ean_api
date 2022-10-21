@@ -155,6 +155,20 @@ public class ProductServiceIT {
 
     @Nested
     class FindAllByUsernameIgnoreCaseContainingTest {
-        
+
+        @Test
+        @DisplayName("Should return a page with two products by username")
+        @Transactional
+        void should_return_a_page_with_two_products_by_username() {
+            final String expressionToLookFor = "bauduc";
+            final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
+            final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            final Page<Product> actualPage =
+                    productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProductsOrLess);
+
+            assertThat(actualPage.getContent()).hasSize(2);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(7);
+            assertThat(actualPage).extracting(Product::getSequenceCode).containsExactly(134262, 113249);
+        }
     }
 }
