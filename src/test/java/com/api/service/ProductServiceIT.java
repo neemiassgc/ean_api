@@ -152,4 +152,9 @@ public class ProductServiceIT {
             assertThat(actualPage).extracting(Product::getSequenceCode).containsExactly(142862, 137513, 134262);
         }
     }
+
+    @Nested
+    class FindAllByUsernameIgnoreCaseContainingTest {
+        
+    }
 }
