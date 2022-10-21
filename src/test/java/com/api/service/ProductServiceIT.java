@@ -170,5 +170,18 @@ public class ProductServiceIT {
             assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(7);
             assertThat(actualPage).extracting(Product::getSequenceCode).containsExactly(134262, 113249);
         }
+
+        @Test
+        @DisplayName("When the expression to be used is empty then should return an empty list")
+        @Transactional
+        void when_the_expression_to_be_used_is_empty_then_should_return_an_empty_list() {
+            final String emptyExpression = "";
+            final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
+            final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
+
+            assertThat(actualPage.getContent()).isEmpty();
+        }
     }
 }
