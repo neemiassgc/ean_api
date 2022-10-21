@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -216,6 +217,26 @@ public class ProductServiceTest {
                 .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess));
             verify(productRepositoryMock, only())
                 .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess));
+        }
+
+        @Test
+        @DisplayName("When expression is empty then should return an empty list ")
+        void when_expression_is_empty_then_should_not_return_any_products() {
+            final String emptyExpression = "";
+            final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
+            final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            given(productRepositoryMock.findAllByDescriptionIgnoreCaseContaining(eq(emptyExpression), eq(theFirstPageWithThreeProductsOrLess)))
+                .willReturn(Page.empty());
+
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
+
+            assertThat(actualPage.getContent()).isEmpty();
+
+            verify(productRepositoryMock, times(1))
+                .findAllByDescriptionIgnoreCaseContaining(eq(emptyExpression), eq(theFirstPageWithThreeProductsOrLess));
+            verify(productRepositoryMock, only())
+                .findAllByDescriptionIgnoreCaseContaining(eq(emptyExpression), eq(theFirstPageWithThreeProductsOrLess));
         }
     }
 
