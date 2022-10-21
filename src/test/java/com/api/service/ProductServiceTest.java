@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -195,6 +196,27 @@ public class ProductServiceTest {
     @Nested
     class FindAllByUsernameIgnoreCaseContainingTest {
 
+        @Test
+        @DisplayName("Should return a page with two products like username")
+        void should_return_a_page_with_two_products_like_username() {
+            final String expressionToLookFor = "achoc";
+            final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
+            final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            given(productRepositoryMock.findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess)))
+                .willReturn(new PageImpl<>(Resources.PRODUCT_LIST.subList(0, 1)));
+
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProductsOrLess);
+
+            assertThat(actualPage.getContent()).hasSize(1);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(3);
+            assertThat(actualPage).extracting(Product::getSequenceCode).containsExactly(29250);
+
+            verify(productRepositoryMock, times(1))
+                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess));
+            verify(productRepositoryMock, only())
+                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess));
+        }
     }
 
     private static final class Resources {
