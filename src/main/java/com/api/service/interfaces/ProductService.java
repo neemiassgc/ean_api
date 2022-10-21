@@ -20,4 +20,6 @@ public interface ProductService {
     Page<Product> findAll(Pageable pageable);
 
     void save(Product product);
+
+    Page<Product> findAllByUsernameIgnoreCaseContaining(String username, Pageable pageable);
 }
