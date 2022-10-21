@@ -225,18 +225,13 @@ public class ProductServiceTest {
             final String emptyExpression = "";
             final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
             final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
-            given(productRepositoryMock.findAllByDescriptionIgnoreCaseContaining(eq(emptyExpression), eq(theFirstPageWithThreeProductsOrLess)))
-                .willReturn(Page.empty());
 
             final Page<Product> actualPage =
                 productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
 
             assertThat(actualPage.getContent()).isEmpty();
 
-            verify(productRepositoryMock, times(1))
-                .findAllByDescriptionIgnoreCaseContaining(eq(emptyExpression), eq(theFirstPageWithThreeProductsOrLess));
-            verify(productRepositoryMock, only())
-                .findAllByDescriptionIgnoreCaseContaining(eq(emptyExpression), eq(theFirstPageWithThreeProductsOrLess));
+            verifyNoInteractions(productRepositoryMock);
         }
     }
 

@@ -9,6 +9,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,6 +66,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> findAllByUsernameIgnoreCaseContaining(@NonNull String username, @NonNull Pageable pageable) {
-        return productRepository.findAllByDescriptionIgnoreCaseContaining(username, pageable);
+        return username.isEmpty() ?
+            new PageImpl<>(Collections.emptyList()) :
+            productRepository.findAllByDescriptionIgnoreCaseContaining(username, pageable);
     }
 }
