@@ -65,9 +65,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> findAllByUsernameIgnoreCaseContaining(@NonNull String username, @NonNull Pageable pageable) {
-        return username.isEmpty() ?
+    public Page<Product> findAllByDescriptionIgnoreCaseContaining(@NonNull String description, @NonNull Pageable pageable) {
+        return description.isEmpty() ?
             new PageImpl<>(Collections.emptyList()) :
-            productRepository.findAllByDescriptionIgnoreCaseContaining(username, pageable);
+            productRepository.findAllByDescriptionIgnoreCaseContaining(description, pageable);
     }
 }

@@ -21,5 +21,5 @@ public interface ProductService {
 
     void save(Product product);
 
-    Page<Product> findAllByUsernameIgnoreCaseContaining(String username, Pageable pageable);
+    Page<Product> findAllByDescriptionIgnoreCaseContaining(String description, Pageable pageable);
 }

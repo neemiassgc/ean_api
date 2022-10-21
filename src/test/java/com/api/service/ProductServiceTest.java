@@ -207,7 +207,7 @@ public class ProductServiceTest {
                 .willReturn(new PageImpl<>(Resources.PRODUCT_LIST.subList(0, 1)));
 
             final Page<Product> actualPage =
-                productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProductsOrLess);
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProductsOrLess);
 
             assertThat(actualPage.getContent()).hasSize(1);
             assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(3);
@@ -227,7 +227,7 @@ public class ProductServiceTest {
             final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
 
             final Page<Product> actualPage =
-                productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
 
             assertThat(actualPage.getContent()).isEmpty();
 

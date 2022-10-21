@@ -164,7 +164,7 @@ public class ProductServiceIT {
             final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
             final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
             final Page<Product> actualPage =
-                    productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProductsOrLess);
+                    productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProductsOrLess);
 
             assertThat(actualPage.getContent()).hasSize(2);
             assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(7);
@@ -179,7 +179,7 @@ public class ProductServiceIT {
             final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
             final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
             final Page<Product> actualPage =
-                productServiceUnderTest.findAllByUsernameIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
 
             assertThat(actualPage.getContent()).isEmpty();
         }
