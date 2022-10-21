@@ -10,6 +10,7 @@ import com.api.service.interfaces.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -18,6 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,10 +47,27 @@ public class ProductController {
     }
 
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPagedAll(@RequestParam(name = "pag") String pag) {
+    public ResponseEntity<?> getPagedAll(
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag
+    ) {
         final Page<Product> productPage =
             productService.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
 
+        return feedWithLinks(productPage);
+    }
+
+    @GetMapping(path = "/products", params = {"pag", "contains"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAllPagedContainingDescription(
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
+        @RequestParam("contains") @NotNull String contains
+    ) {
+        final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
+        final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseContaining(contains, pageable);
+
+        return feedWithLinks(productPage);
+    }
+
+    private ResponseEntity<?> feedWithLinks(final Page<Product> productPage) {
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
         CustomPagination<EntityModel<SimpleProduct>> pagedModel =
