@@ -112,7 +112,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products?pag=0-1 -> 200 OK")
-    void when_GET_getAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
+    void when_GET_getPagedAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
         final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 1, Sort.by("description").ascending());
         final List<Product> firstProduct = products.subList(0, 1);
 
@@ -142,7 +142,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products?pag=1-1 -> 200 OK")
-    void when_GET_getAll_should_response_the_middle_page_of_products_with_200() throws Exception  {
+    void when_GET_getPagedAll_should_response_the_middle_page_of_products_with_200() throws Exception  {
         final Pageable secondPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
         final List<Product> secondProduct = products.subList(1, 2);
 
@@ -172,7 +172,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products?pag=2-1 -> 200 OK")
-    void when_GET_getAll_should_response_the_last_page_of_products_with_200() throws Exception  {
+    void when_GET_getPagedAll_should_response_the_last_page_of_products_with_200() throws Exception  {
         final Pageable thirdPageOrderedByDescriptionAsc = PageRequest.of(2, 1, Sort.by("description").ascending());
         final List<Product> thirdProduct = products.subList(2, 3);
 
