@@ -293,4 +293,22 @@ class ProductControllerTest {
         verify(productService, times(1)).findAll(eq(fistPageOrderedByDescriptionAsc));
         verify(productService, only()).findAll(eq(fistPageOrderedByDescriptionAsc));
     }
+
+    @Test
+    @DisplayName("GET /api/products?pag-1-1&contains= -> 200 OK")
+    void when_contains_parameter_is_empty_then_GET_getAllPagedContainingDescription_should_return_an_empty_json_with_200() throws Exception {
+        final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
+
+        given(productService.findAll(eq(firstPageOrderedByDescriptionAsc)))
+            .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
+
+        makeRequestWithPage("1-1")
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
+
+        verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
+        verify(productService, only()).findAll(eq(firstPageOrderedByDescriptionAsc));
+    }
 }
