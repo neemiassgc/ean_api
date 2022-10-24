@@ -266,20 +266,31 @@ class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/products?pag=1-3&contains=a -> 200 - OK")
+    @DisplayName("GET /api/products?pag=1-3&contains=500g -> 200 - OK")
     void when_GET_getAllPagedContainingDescription_the_second_page_with_three_products_filtered_by_description() throws Exception {
-        final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 1, Sort.by("description").ascending());
+        final Pageable fistPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
 
-        given(productService.findAll(eq(fourthPageProductOrderedByDescriptionAsc)))
-            .willReturn(new PageImpl<>(Collections.emptyList(), fourthPageProductOrderedByDescriptionAsc, 0));
+        given(productService.findAll(eq(fistPageOrderedByDescriptionAsc)))
+            .willReturn(new PageImpl<>(products.subList(2, 3), fistPageOrderedByDescriptionAsc, 0));
 
-        makeRequestWithPage("3-1")
+        makeRequestWithPage("1-1")
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$").isEmpty());
+            .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
+            .andExpect(jsonPath("$.content[0].sequenceCode").value(2909))
+            .andExpect(jsonPath("$.content[0].barcode").value("7896656800018"))
+            .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
+            .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
+            .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
+            .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
+            .andExpect(jsonPath("$.currentCountOfItems").value(1))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.totalOfPages").value(2))
+            .andExpect(jsonPath("$.currentPage").value(1))
+            .andExpect(jsonPath("$.totalOfItems").value(2))
+            .andExpect(jsonPath("$.links").isEmpty());
 
-        verify(productService, times(1)).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
-        verify(productService, only()).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
+        verify(productService, times(1)).findAll(eq(fistPageOrderedByDescriptionAsc));
+        verify(productService, only()).findAll(eq(fistPageOrderedByDescriptionAsc));
     }
 }
