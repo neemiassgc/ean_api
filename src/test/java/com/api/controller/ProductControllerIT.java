@@ -259,5 +259,29 @@ public class ProductControllerIT {
 
     @Nested
     class GetAllPagedContainingDescriptionTest {
+
+        @Test
+        @DisplayName("GET "+BASE_ENDPOINT+"?pag=0-2&contains=500g -> 200 OK")
+        void should_response_a_page_with_two_products_filtered_by_description() throws Exception {
+            final String contains = "500g";
+            final String firstPageWithTwoProducts = "0-2";
+
+            makeRequestWithPageAndContains(firstPageWithTwoProducts, contains)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalOfPages").value(1))
+                .andExpect(jsonPath("$.currentCountOfItems").value(2))
+                .andExpect(jsonPath("$.totalOfItems").value(2))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.content[*].barcode", contains("7898279792299", "7896656800018")))
+                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(jsonPath("$.content[*].links[0].href", contains(concatWithUrl(PRICES_URL, "7898279792299", "7896656800018"))))
+                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(jsonPath("$.content[*].links[1].href", contains(concatWithUrl(SELF_URL+"/", "7898279792299", "7896656800018"))))
+                .andExpect(jsonPath("$.links").isEmpty());
+        }
     }
 }
