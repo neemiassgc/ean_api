@@ -241,4 +241,7 @@ public class ProductControllerIT {
         }
     }
 
+    @Nested
+    class GetAllPagedContainingDescriptionTest {
+    }
 }
