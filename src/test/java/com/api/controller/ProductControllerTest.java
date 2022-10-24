@@ -54,6 +54,11 @@ class ProductControllerTest {
             .description("CAFE UTAM 500G")
             .sequenceCode(2909)
             .barcode("7896656800018")
+            .build(),
+        Product.builder()
+            .description("BALA GELATINA FINI 500G BURGUER")
+            .barcode("78982797922990")
+            .sequenceCode(93556)
             .build()
     );
 
@@ -76,20 +81,20 @@ class ProductControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018")))
+            .andExpect(jsonPath("$", hasSize(4)))
+            .andExpect(jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018", "78982797922990")))
             .andExpect(jsonPath("[*].links[0].rel", everyItem(equalTo("prices"))))
             .andExpect(
                 jsonPath(
                     "$[*].links[0].href",
-                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "7891000055120", "7896336010058", "7896656800018"))
+                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
                 )
             )
             .andExpect(jsonPath("[*].links[1].rel", everyItem(equalTo("self"))))
             .andExpect(
                 jsonPath(
                     "$[*].links[1].href",
-                    contains(concatWithUrl("http://localhost/api/products/", "7891000055120", "7896336010058", "7896656800018"))
+                    contains(concatWithUrl("http://localhost/api/products/", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
                 )
             );
 
@@ -258,5 +263,23 @@ class ProductControllerTest {
             .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
 
         verify(productService, times(1)).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
+    }
+
+    @Test
+    @DisplayName("GET /api/products?pag=1-3&contains=a -> 200 - OK")
+    void when_GET_getAllPagedContainingDescription_the_second_page_with_three_products_filtered_by_description() throws Exception {
+        final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 1, Sort.by("description").ascending());
+
+        given(productService.findAll(eq(fourthPageProductOrderedByDescriptionAsc)))
+            .willReturn(new PageImpl<>(Collections.emptyList(), fourthPageProductOrderedByDescriptionAsc, 0));
+
+        makeRequestWithPage("3-1")
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
+
+        verify(productService, times(1)).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
+        verify(productService, only()).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
     }
 }
