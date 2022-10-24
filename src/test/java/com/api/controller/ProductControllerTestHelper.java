@@ -14,7 +14,7 @@ final class ProductControllerTestHelper {
 
     static MockMvc mockMvc;
 
-    private static final String URL_BASE = "/api/products/";
+    private static final String URL = "/api/products/";
 
     private ProductControllerTestHelper() {}
 
@@ -25,20 +25,24 @@ final class ProductControllerTestHelper {
     }
 
     static ResultActions makeRequestByBarcode(final String barcode) throws Exception {
-        return mockMvc.perform(setupRequestHeaders(get(URL_BASE+barcode)));
+        return mockMvc.perform(setupRequestHeaders(get(URL+barcode)));
     }
 
     static ResultActions makeRequestWithPage(final String page) throws Exception {
-        return mockMvc.perform(setupRequestHeaders(get(URL_BASE+"?pag="+page)));
+        return mockMvc.perform(setupRequestHeaders(get(URL+"?pag="+page)));
     }
 
     static ResultActions makeRequest() throws Exception {
-        return mockMvc.perform(setupRequestHeaders(get(URL_BASE)));
+        return mockMvc.perform(setupRequestHeaders(get(URL)));
     }
 
     static String[] concatWithUrl(final String url, final String... values) {
         return Stream.of(values)
             .map(value -> url+value)
             .toArray(String[]::new);
+    }
+
+    static ResultActions makeRequestWithPageAndContains(final String page, final String contains) throws Exception {
+        return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&contains=%s", URL, page, contains))));
     }
 }
