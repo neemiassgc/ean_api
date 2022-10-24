@@ -5,8 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.nio.charset.StandardCharsets;
 
 import static com.api.controller.ProductControllerTestHelper.*;
 import static org.hamcrest.Matchers.*;
@@ -189,6 +192,19 @@ public class ProductControllerIT {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
+        }
+
+        @Test
+        @DisplayName("GET "+BASE_ENDPOINT+"?pag=0-&contains=500g -> 400 BAD REQUEST")
+        void should_response_violations_of_the_parameter_pag_with_400() throws Exception {
+            final String contains = "500g";
+            final String firstPageWithTwoProducts = "0-";
+
+            makeRequestWithPageAndContains(firstPageWithTwoProducts, contains)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].violationMessage").value("must match digit-digit"));
         }
     }
 
