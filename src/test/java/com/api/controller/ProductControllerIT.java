@@ -307,5 +307,17 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.content[*].links[1].href", contains(concatWithUrl(SELF_URL+"/", "7891962057620"))))
                 .andExpect(jsonPath("$.links").isEmpty());
         }
+
+        @Test
+        @DisplayName("GET "+BASE_ENDPOINT+"?pag=1-1&contains= -> 200 OK")
+        void should_response_an_empty_page_filtered_by_description() throws Exception {
+            final String contains = "";
+            final String secondPageWithOneProduct = "1-1";
+
+            makeRequestWithPageAndContains(secondPageWithOneProduct, contains)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isEmpty());
+        }
     }
 }
