@@ -24,4 +24,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findAllWithLastPrice();
 
     Page<Product> findAllByDescriptionIgnoreCaseContaining(String description, Pageable pageable);
+
+    Page<Product> findAllByDescriptionIgnoreCaseStartingWith(String description, Pageable pageable);
 }
