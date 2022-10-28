@@ -319,5 +319,10 @@ public class ProductControllerIT {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isEmpty());
         }
+
+        @Test
+        void anything_to_test() {
+
+        }
     }
 }
