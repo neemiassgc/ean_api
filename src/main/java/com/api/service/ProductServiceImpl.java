@@ -67,6 +67,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<Product> findAllByDescriptionIgnoreCaseContaining(@NonNull String description, @NonNull Pageable pageable) {
         return description.isEmpty() ?
+
+    @Override
+    public Page<Product> findAllByDescriptionIgnoreCaseStartingWith(String description, Pageable pageable) {
+        return returnABlankPageIfEmptyOrAPageFilled(
+            description,
+            () -> productRepository.findAllByDescriptionIgnoreCaseStartingWith(description, pageable)
+        );
+    }
             new PageImpl<>(Collections.emptyList()) :
             productRepository.findAllByDescriptionIgnoreCaseContaining(description, pageable);
     }
