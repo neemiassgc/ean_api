@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Service
 @Transactional(readOnly = true)
@@ -66,7 +67,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> findAllByDescriptionIgnoreCaseContaining(@NonNull String description, @NonNull Pageable pageable) {
-        return description.isEmpty() ?
+        return returnABlankPageIfEmptyOrAPageFilled(
+            description,
+            () -> productRepository.findAllByDescriptionIgnoreCaseContaining(description, pageable)
+        );
+    }
 
     @Override
     public Page<Product> findAllByDescriptionIgnoreCaseStartingWith(String description, Pageable pageable) {
@@ -75,7 +80,10 @@ public class ProductServiceImpl implements ProductService {
             () -> productRepository.findAllByDescriptionIgnoreCaseStartingWith(description, pageable)
         );
     }
+
+    private Page<Product> returnABlankPageIfEmptyOrAPageFilled(final String expression, final Supplier<Page<Product>> pageSupplier) {
+        return expression.isEmpty() ?
             new PageImpl<>(Collections.emptyList()) :
-            productRepository.findAllByDescriptionIgnoreCaseContaining(description, pageable);
+            pageSupplier.get();
     }
 }
