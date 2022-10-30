@@ -235,6 +235,11 @@ public class ProductServiceTest {
         }
     }
 
+    @Nested
+    class FindAllByDescriptionIgnoreCaseStartingWithTest {
+
+    }
+
     private static final class Resources {
 
         private static final List<Product> PRODUCT_LIST = List.of(
