@@ -238,6 +238,34 @@ public class ProductServiceTest {
     @Nested
     class FindAllByDescriptionIgnoreCaseStartingWithTest {
 
+        @Test
+        @DisplayName("Should return a page with two products filtered by starting with a")
+        void should_return_page_with_two_products() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable aPageWithTheFirstTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final String startsWith = "a";
+            given(productRepositoryMock
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts)))
+                .willReturn(new PageImpl<>(Resources.PRODUCT_LIST.subList(0, 2)));
+
+            final Page<Product> actualPage = productServiceUnderTest
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheFirstTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getTotalPages()).isOne();
+            assertThat(actualPage.getTotalElements()).isEqualTo(2);
+            assertThat(actualPage.getContent()).hasSize(2);
+            assertThat(actualPage.getContent())
+                .extracting(Product::getSequenceCode)
+                .containsExactly(29250, 120983);
+            assertThat(actualPage.getContent())
+                .flatExtracting(Product::getPrices).hasSize(6);
+
+            verify(productRepositoryMock, times(1))
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts));
+            verify(productRepositoryMock, only())
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts));
+        }
     }
 
     private static final class Resources {
