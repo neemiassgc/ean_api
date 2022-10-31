@@ -289,6 +289,25 @@ public class ProductServiceTest {
             verify(productRepositoryMock, only())
                 .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts));
         }
+
+        @Test
+        @DisplayName("Should return an empty page when startsWith is an empty value")
+        void should_return_an_empty_page_when_startsWith_is_an_empty_value() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable aPageWithTheFirstTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final String startsWith = "";
+            given(productRepositoryMock
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts)))
+                .willReturn(new PageImpl<>(Collections.emptyList()));
+
+            final Page<Product> actualPage = productServiceUnderTest
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheFirstTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getContent()).isEmpty();
+
+            verifyNoInteractions(productRepositoryMock);
+        }
     }
 
     private static final class Resources {
