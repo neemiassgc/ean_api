@@ -184,4 +184,9 @@ public class ProductServiceIT {
             assertThat(actualPage.getContent()).isEmpty();
         }
     }
+
+    @Nested
+    class FindAllByDescriptionIgnoreCaseStartingWithTest {
+    }
+
 }
