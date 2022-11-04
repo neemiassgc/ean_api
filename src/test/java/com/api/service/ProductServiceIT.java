@@ -11,10 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +21,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class ProductServiceIT {
@@ -186,7 +185,28 @@ public class ProductServiceIT {
     }
 
     @Nested
+    @Transactional
     class FindAllByDescriptionIgnoreCaseStartingWithTest {
+
+        @Test
+        @DisplayName("Should return a page with three products")
+        void should_return_a_page_with_three_products() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable aPageWithTheThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
+            final String startsWith = "b";
+
+            final Page<Product> actualPage = productServiceUnderTest
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheThreeProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getTotalPages()).isOne();
+            assertThat(actualPage.getTotalElements()).isEqualTo(3);
+            assertThat(actualPage.getContent()).hasSize(3);
+            assertThat(actualPage.getContent())
+                .extracting(Product::getSequenceCode)
+                .containsExactly(93556, 142862, 113249);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(21);
+        }
     }
 
 }
