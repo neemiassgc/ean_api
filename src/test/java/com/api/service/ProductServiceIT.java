@@ -207,6 +207,21 @@ public class ProductServiceIT {
                 .containsExactly(93556, 142862, 113249);
             assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(21);
         }
+
+        @Test
+        @DisplayName("When startsWith does not match anything then should return an empty page")
+        void when_startsWith_does_not_match_anything_then_should_return_an_empty_page() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable aPageWithTheThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
+            final String startsWith = "crystal";
+
+            final Page<Product> actualPage = productServiceUnderTest
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheThreeProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage).isEmpty();
+            assertThat(actualPage.getTotalElements()).isZero();
+        }
     }
 
 }
