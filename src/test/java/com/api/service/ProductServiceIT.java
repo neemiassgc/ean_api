@@ -222,6 +222,21 @@ public class ProductServiceIT {
             assertThat(actualPage).isEmpty();
             assertThat(actualPage.getTotalElements()).isZero();
         }
+
+        @Test
+        @DisplayName("When startsWith is empty then should return an empty page")
+        void when_startsWith_is_empty_then_should_return_an_empty_page() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable aPageWithTheThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
+            final String startsWith = "";
+
+            final Page<Product> actualPage = productServiceUnderTest
+                    .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheThreeProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage).isEmpty();
+            assertThat(actualPage.getTotalElements()).isZero();
+        }
     }
 
 }
