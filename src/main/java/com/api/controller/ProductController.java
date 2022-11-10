@@ -66,6 +66,17 @@ public class ProductController {
         return feedWithLinks(productPage);
     }
 
+    @GetMapping(path = "/products", params = {"pag", "startsWith"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAllPagedStartingWithDescription(
+            @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
+            @RequestParam("contains") @NotNull String startsWith
+    ) {
+        final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
+        final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageable);
+
+        return feedWithLinks(productPage);
+    }
+
     private ResponseEntity<?> feedWithLinks(final Page<Product> productPage) {
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
