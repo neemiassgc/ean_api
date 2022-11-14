@@ -311,4 +311,11 @@ class ProductControllerTest {
         verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
         verify(productService, only()).findAll(eq(firstPageOrderedByDescriptionAsc));
     }
+
+
+    @Test
+    @DisplayName("GET /api/products?pag=0-2&startsWith=a -> 200 OK")
+    void should_return_a_page_with_two_products_filtered_by_startsWith() {
+
+    }
 }
