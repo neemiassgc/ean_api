@@ -5,6 +5,7 @@ import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -72,47 +73,51 @@ class ProductControllerTest {
         ProductControllerTestHelper.mockMvc = mockMvc;
     }
 
-    @Test
-    @DisplayName("GET /api/products -> 200 OK")
-    void when_GET_getAll_should_return_all_products_with_200() throws Exception {
-        given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(products);
+    @Nested
+    class GetAllTest {
 
-        makeRequest()
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$", hasSize(4)))
-            .andExpect(jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018", "78982797922990")))
-            .andExpect(jsonPath("[*].links[0].rel", everyItem(equalTo("prices"))))
-            .andExpect(
-                jsonPath(
-                    "$[*].links[0].href",
-                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
+        @Test
+        @DisplayName("GET /api/products -> 200 OK")
+        void when_GET_getAll_should_return_all_products_with_200() throws Exception {
+            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(products);
+
+            makeRequest()
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(4)))
+                .andExpect(jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018", "78982797922990")))
+                .andExpect(jsonPath("[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(
+                    jsonPath(
+                        "$[*].links[0].href",
+                        contains(concatWithUrl("http://localhost/api/prices?barcode=", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
+                    )
                 )
-            )
-            .andExpect(jsonPath("[*].links[1].rel", everyItem(equalTo("self"))))
-            .andExpect(
-                jsonPath(
-                    "$[*].links[1].href",
-                    contains(concatWithUrl("http://localhost/api/products/", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
-                )
-            );
+                .andExpect(jsonPath("[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(
+                    jsonPath(
+                        "$[*].links[1].href",
+                        contains(concatWithUrl("http://localhost/api/products/", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
+                    )
+                );
 
-        verify(productService, times(1)).findAll((ArgumentMatchers.any(Sort.class)));
-    }
+            verify(productService, times(1)).findAll((ArgumentMatchers.any(Sort.class)));
+        }
 
-    @Test
-    @DisplayName("GET /api/products -> 200 OK")
-    void when_GET_getAll_should_response_a_empty_json_with_200() throws Exception  {
-        given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
+        @Test
+        @DisplayName("GET /api/products -> 200 OK")
+        void when_GET_getAll_should_response_a_empty_json_with_200() throws Exception {
+            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
 
-        makeRequest()
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$").isEmpty());
+            makeRequest()
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$").isArray())
+                    .andExpect(jsonPath("$").isEmpty());
 
-        verify(productService, times(1)).findAll(ArgumentMatchers.any(Sort.class));
+            verify(productService, times(1)).findAll(ArgumentMatchers.any(Sort.class));
+        }
     }
 
     @Test
@@ -310,12 +315,5 @@ class ProductControllerTest {
 
         verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
         verify(productService, only()).findAll(eq(firstPageOrderedByDescriptionAsc));
-    }
-
-
-    @Test
-    @DisplayName("GET /api/products?pag=0-2&startsWith=a -> 200 OK")
-    void should_return_a_page_with_two_products_filtered_by_startsWith() {
-
     }
 }
