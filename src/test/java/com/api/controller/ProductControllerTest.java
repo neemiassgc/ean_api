@@ -120,112 +120,116 @@ class ProductControllerTest {
         }
     }
 
-    @Test
-    @DisplayName("GET /api/products?pag=0-1 -> 200 OK")
-    void when_GET_getPagedAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
-        final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 1, Sort.by("description").ascending());
-        final List<Product> firstProduct = products.subList(0, 1);
+    @Nested
+    class GetAllPagedTest {
 
-        given(productService.findAll(eq(firstPageOrderedByDescriptionAsc)))
-            .willReturn(new PageImpl<>(firstProduct, firstPageOrderedByDescriptionAsc, 3));
+        @Test
+        @DisplayName("GET /api/products?pag=0-1 -> 200 OK")
+        void when_GET_getPagedAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
+            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 1, Sort.by("description").ascending());
+            final List<Product> firstProduct = products.subList(0, 1);
 
-        makeRequestWithPage("0-1")
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.content[0].description").value("ACHOC PO NESCAU 800G"))
-            .andExpect(jsonPath("$.content[0].sequenceCode").value(29250))
-            .andExpect(jsonPath("$.content[0].barcode").value("7891000055120"))
-            .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
-            .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
-            .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
-            .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7891000055120"))
-            .andExpect(jsonPath("$.currentCountOfItems").value(1))
-            .andExpect(jsonPath("$.currentPage").value(0))
-            .andExpect(jsonPath("$.hasNext").value(true))
-            .andExpect(jsonPath("$.totalOfPages").value(3))
-            .andExpect(jsonPath("$.totalOfItems").value(3))
-            .andExpect(jsonPath("$.links[0].rel").value("next page"))
-            .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-1"));
+            given(productService.findAll(eq(firstPageOrderedByDescriptionAsc)))
+                .willReturn(new PageImpl<>(firstProduct, firstPageOrderedByDescriptionAsc, 3));
 
-        verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
-    }
+            makeRequestWithPage("0-1")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content[0].description").value("ACHOC PO NESCAU 800G"))
+                .andExpect(jsonPath("$.content[0].sequenceCode").value(29250))
+                .andExpect(jsonPath("$.content[0].barcode").value("7891000055120"))
+                .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
+                .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
+                .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
+                .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7891000055120"))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.links[0].rel").value("next page"))
+                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-1"));
 
-    @Test
-    @DisplayName("GET /api/products?pag=1-1 -> 200 OK")
-    void when_GET_getPagedAll_should_response_the_middle_page_of_products_with_200() throws Exception  {
-        final Pageable secondPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
-        final List<Product> secondProduct = products.subList(1, 2);
+            verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
+        }
 
-        given(productService.findAll(eq(secondPageOrderedByDescriptionAsc)))
-            .willReturn(new PageImpl<>(secondProduct, secondPageOrderedByDescriptionAsc, 3));
+        @Test
+        @DisplayName("GET /api/products?pag=1-1 -> 200 OK")
+        void when_GET_getPagedAll_should_response_the_middle_page_of_products_with_200() throws Exception  {
+            final Pageable secondPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
+            final List<Product> secondProduct = products.subList(1, 2);
 
-        makeRequestWithPage("1-1")
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.content[0].description").value("AMENDOIM SALG CROKISSIMO 400G PIMENTA"))
-            .andExpect(jsonPath("$.content[0].sequenceCode").value(120983))
-            .andExpect(jsonPath("$.content[0].barcode").value("7896336010058"))
-            .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
-            .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
-            .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896336010058"))
-            .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896336010058"))
-            .andExpect(jsonPath("$.currentPage").value(1))
-            .andExpect(jsonPath("$.totalOfPages").value(3))
-            .andExpect(jsonPath("$.currentCountOfItems").value(1))
-            .andExpect(jsonPath("$.totalOfItems").value(3))
-            .andExpect(jsonPath("$.hasNext").value(true))
-            .andExpect(jsonPath("$.links[0].rel").value("next page"))
-            .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-1"));
+            given(productService.findAll(eq(secondPageOrderedByDescriptionAsc)))
+                .willReturn(new PageImpl<>(secondProduct, secondPageOrderedByDescriptionAsc, 3));
 
-        verify(productService, times(1)).findAll(eq(secondPageOrderedByDescriptionAsc));
-    }
+            makeRequestWithPage("1-1")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content[0].description").value("AMENDOIM SALG CROKISSIMO 400G PIMENTA"))
+                .andExpect(jsonPath("$.content[0].sequenceCode").value(120983))
+                .andExpect(jsonPath("$.content[0].barcode").value("7896336010058"))
+                .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
+                .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
+                .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896336010058"))
+                .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896336010058"))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.links[0].rel").value("next page"))
+                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-1"));
 
-    @Test
-    @DisplayName("GET /api/products?pag=2-1 -> 200 OK")
-    void when_GET_getPagedAll_should_response_the_last_page_of_products_with_200() throws Exception  {
-        final Pageable thirdPageOrderedByDescriptionAsc = PageRequest.of(2, 1, Sort.by("description").ascending());
-        final List<Product> thirdProduct = products.subList(2, 3);
+            verify(productService, times(1)).findAll(eq(secondPageOrderedByDescriptionAsc));
+        }
 
-        given(productService.findAll(eq(thirdPageOrderedByDescriptionAsc)))
-            .willReturn(new PageImpl<>(thirdProduct, thirdPageOrderedByDescriptionAsc, 3));
+        @Test
+        @DisplayName("GET /api/products?pag=2-1 -> 200 OK")
+        void when_GET_getPagedAll_should_response_the_last_page_of_products_with_200() throws Exception  {
+            final Pageable thirdPageOrderedByDescriptionAsc = PageRequest.of(2, 1, Sort.by("description").ascending());
+            final List<Product> thirdProduct = products.subList(2, 3);
 
-        makeRequestWithPage("2-1")
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
-            .andExpect(jsonPath("$.content[0].sequenceCode").value(2909))
-            .andExpect(jsonPath("$.content[0].barcode").value("7896656800018"))
-            .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
-            .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
-            .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
-            .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
-            .andExpect(jsonPath("$.currentCountOfItems").value(1))
-            .andExpect(jsonPath("$.hasNext").value(false))
-            .andExpect(jsonPath("$.totalOfPages").value(3))
-            .andExpect(jsonPath("$.currentPage").value(2))
-            .andExpect(jsonPath("$.totalOfItems").value(3))
-            .andExpect(jsonPath("$.links").isArray())
-            .andExpect(jsonPath("$.links").isEmpty());
+            given(productService.findAll(eq(thirdPageOrderedByDescriptionAsc)))
+                .willReturn(new PageImpl<>(thirdProduct, thirdPageOrderedByDescriptionAsc, 3));
 
-        verify(productService, times(1)).findAll(eq(thirdPageOrderedByDescriptionAsc));
-    }
+            makeRequestWithPage("2-1")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
+                .andExpect(jsonPath("$.content[0].sequenceCode").value(2909))
+                .andExpect(jsonPath("$.content[0].barcode").value("7896656800018"))
+                .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
+                .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
+                .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
+                .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.currentPage").value(2))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.links").isArray())
+                .andExpect(jsonPath("$.links").isEmpty());
 
-    @Test
-    @DisplayName("GET /api/products?pag=3-1 -> 200 OK")
-    void when_pag_is_over_the_limits_then_GET_getPagedAll_should_response_an_empty_array_with_200() throws Exception  {
-        final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 1, Sort.by("description").ascending());
+            verify(productService, times(1)).findAll(eq(thirdPageOrderedByDescriptionAsc));
+        }
 
-        given(productService.findAll(eq(fourthPageProductOrderedByDescriptionAsc)))
-            .willReturn(new PageImpl<>(Collections.emptyList(), fourthPageProductOrderedByDescriptionAsc, 0));
+        @Test
+        @DisplayName("GET /api/products?pag=3-1 -> 200 OK")
+        void when_pag_is_over_the_limits_then_GET_getPagedAll_should_response_an_empty_array_with_200() throws Exception  {
+            final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 1, Sort.by("description").ascending());
 
-        makeRequestWithPage("3-1")
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$").isEmpty());
+            given(productService.findAll(eq(fourthPageProductOrderedByDescriptionAsc)))
+                .willReturn(new PageImpl<>(Collections.emptyList(), fourthPageProductOrderedByDescriptionAsc, 0));
 
-        verify(productService, times(1)).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
-        verify(productService, only()).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
+            makeRequestWithPage("3-1")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+            verify(productService, times(1)).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
+            verify(productService, only()).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
+        }
     }
 
     @Test
