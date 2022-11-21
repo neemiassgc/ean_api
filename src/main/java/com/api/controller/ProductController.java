@@ -46,7 +46,7 @@ public class ProductController {
     }
 
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPagedAll(
+    public ResponseEntity<?> getAllPaged(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag
     ) {
         final Page<Product> productPage =
@@ -84,7 +84,7 @@ public class ProductController {
             new CustomPagination<>(productPage, mapAndAddLinks(productPage.getContent()));
 
         pagedModel.addIf(productPage.hasNext(), () ->
-            linkTo(methodOn(this.getClass()).getPagedAll((productPage.getNumber() + 1)+"-"+productPage.getSize()))
+            linkTo(methodOn(this.getClass()).getAllPaged((productPage.getNumber() + 1)+"-"+productPage.getSize()))
                 .withRel("next page")
         );
 
