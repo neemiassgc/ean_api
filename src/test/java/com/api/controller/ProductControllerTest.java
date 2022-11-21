@@ -232,47 +232,52 @@ class ProductControllerTest {
         }
     }
 
-    @Test
-    @DisplayName("GET /api/products/7891000051230 -> 404 - NOT FOUND")
-    void when_GET_getByBarcode_and_the_product_is_not_found_then_should_return_a_message_error_with_404() throws Exception  {
-        final String targetBarcode = "7891000051230";
+    @Nested
+    class GetByBarcodeTest {
 
-        given(productService.getByBarcodeAndSaveIfNecessary(eq(targetBarcode)))
-            .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        @Test
+        @DisplayName("GET /api/products/7891000051230 -> 404 - NOT FOUND")
+        void when_GET_getByBarcode_and_the_product_is_not_found_then_should_return_a_message_error_with_404() throws Exception  {
+            final String targetBarcode = "7891000051230";
 
-        makeRequestByBarcode(targetBarcode)
-            .andExpect(status().isNotFound())
-            .andExpect(header().exists("Content-Type"))
-            .andExpect(content().contentType(MediaType.TEXT_PLAIN))
-            .andExpect(content().string("Product not found"));
+            given(productService.getByBarcodeAndSaveIfNecessary(eq(targetBarcode)))
+                .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-        verify(productService, times(1)).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
-        verify(productService, only()).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
+            makeRequestByBarcode(targetBarcode)
+                .andExpect(status().isNotFound())
+                .andExpect(header().exists("Content-Type"))
+                .andExpect(content().contentType(MediaType.TEXT_PLAIN))
+                .andExpect(content().string("Product not found"));
+
+            verify(productService, times(1)).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
+            verify(productService, only()).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
+        }
+
+        @Test
+        @DisplayName("GET /api/products/7891000055120 -> 200 - OK")
+        void when_GET_getByBarcode_should_return_a_product_with_200() throws Exception  {
+            final String targetBarcode = "7891000055120";
+            final SimpleProductWithStatus simpleProductWithStatus =
+                products.get(0).toSimpleProductWithStatus(HttpStatus.OK);
+
+            given(productService.getByBarcodeAndSaveIfNecessary(eq(targetBarcode)))
+                .willReturn(simpleProductWithStatus);
+
+            makeRequestByBarcode(targetBarcode)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.description").value("ACHOC PO NESCAU 800G"))
+                .andExpect(jsonPath("$.sequenceCode").value(29250))
+                .andExpect(jsonPath("$.barcode").value("7891000055120"))
+                .andExpect(jsonPath("$.links[0].rel").value("prices"))
+                .andExpect(jsonPath("$.links[1].rel").value("self"))
+                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
+                .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
+
+            verify(productService, times(1)).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
+        }
     }
 
-    @Test
-    @DisplayName("GET /api/products/7891000055120 -> 200 - OK")
-    void when_GET_getByBarcode_should_return_a_product_with_200() throws Exception  {
-        final String targetBarcode = "7891000055120";
-        final SimpleProductWithStatus simpleProductWithStatus =
-            products.get(0).toSimpleProductWithStatus(HttpStatus.OK);
-
-        given(productService.getByBarcodeAndSaveIfNecessary(eq(targetBarcode)))
-            .willReturn(simpleProductWithStatus);
-
-        makeRequestByBarcode(targetBarcode)
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.description").value("ACHOC PO NESCAU 800G"))
-            .andExpect(jsonPath("$.sequenceCode").value(29250))
-            .andExpect(jsonPath("$.barcode").value("7891000055120"))
-            .andExpect(jsonPath("$.links[0].rel").value("prices"))
-            .andExpect(jsonPath("$.links[1].rel").value("self"))
-            .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
-            .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
-
-        verify(productService, times(1)).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
-    }
 
     @Test
     @DisplayName("GET /api/products?pag=1-3&contains=500g -> 200 - OK")
