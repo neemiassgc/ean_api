@@ -40,29 +40,6 @@ class ProductControllerTest {
 
     private MockMvc mockMvc;
 
-    private static List<Product> products = List.of(
-        Product.builder()
-            .description("ACHOC PO NESCAU 800G")
-            .sequenceCode(29250)
-            .barcode("7891000055120")
-            .build(),
-        Product.builder()
-            .description("AMENDOIM SALG CROKISSIMO 400G PIMENTA")
-            .sequenceCode(120983)
-            .barcode("7896336010058")
-            .build(),
-        Product.builder()
-            .description("CAFE UTAM 500G")
-            .sequenceCode(2909)
-            .barcode("7896656800018")
-            .build(),
-        Product.builder()
-            .description("BALA GELATINA FINI 500G BURGUER")
-            .barcode("78982797922990")
-            .sequenceCode(93556)
-            .build()
-    );
-
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(
@@ -78,8 +55,8 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products -> 200 OK")
-        void when_GET_getAll_should_return_all_products_with_200() throws Exception {
-            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(products);
+        void should_return_all_products__OK() throws Exception {
+            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(PRODUCTS_SAMPLE);
 
             makeRequest()
                 .andExpect(status().isOk())
@@ -107,14 +84,14 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products -> 200 OK")
-        void when_GET_getAll_should_response_a_empty_json_with_200() throws Exception {
+        void should_return_a_empty_json__OK() throws Exception {
             given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
 
             makeRequest()
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$").isEmpty());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
 
             verify(productService, times(1)).findAll(ArgumentMatchers.any(Sort.class));
         }
@@ -125,9 +102,9 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products?pag=0-1 -> 200 OK")
-        void when_GET_getPagedAll_should_response_the_fist_page_of_products_with_200() throws Exception  {
+        void should_return_the_fist_page_with_one_product__OK() throws Exception  {
             final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 1, Sort.by("description").ascending());
-            final List<Product> firstProduct = products.subList(0, 1);
+            final List<Product> firstProduct = PRODUCTS_SAMPLE.subList(0, 1);
 
             given(productService.findAll(eq(firstPageOrderedByDescriptionAsc)))
                 .willReturn(new PageImpl<>(firstProduct, firstPageOrderedByDescriptionAsc, 3));
@@ -155,9 +132,9 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products?pag=1-1 -> 200 OK")
-        void when_GET_getPagedAll_should_response_the_middle_page_of_products_with_200() throws Exception  {
+        void should_return_the_middle_page_with_one_product__OK() throws Exception  {
             final Pageable secondPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
-            final List<Product> secondProduct = products.subList(1, 2);
+            final List<Product> secondProduct = PRODUCTS_SAMPLE.subList(1, 2);
 
             given(productService.findAll(eq(secondPageOrderedByDescriptionAsc)))
                 .willReturn(new PageImpl<>(secondProduct, secondPageOrderedByDescriptionAsc, 3));
@@ -185,9 +162,9 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products?pag=2-1 -> 200 OK")
-        void when_GET_getPagedAll_should_response_the_last_page_of_products_with_200() throws Exception  {
+        void should_return_the_last_page_with_one_product__OK() throws Exception  {
             final Pageable thirdPageOrderedByDescriptionAsc = PageRequest.of(2, 1, Sort.by("description").ascending());
-            final List<Product> thirdProduct = products.subList(2, 3);
+            final List<Product> thirdProduct = PRODUCTS_SAMPLE.subList(2, 3);
 
             given(productService.findAll(eq(thirdPageOrderedByDescriptionAsc)))
                 .willReturn(new PageImpl<>(thirdProduct, thirdPageOrderedByDescriptionAsc, 3));
@@ -215,7 +192,7 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products?pag=3-1 -> 200 OK")
-        void when_pag_is_over_the_limits_then_GET_getPagedAll_should_response_an_empty_array_with_200() throws Exception  {
+        void when_pag_is_over_the_limits_then_should_return_an_empty_array__OK() throws Exception  {
             final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 1, Sort.by("description").ascending());
 
             given(productService.findAll(eq(fourthPageProductOrderedByDescriptionAsc)))
@@ -237,7 +214,7 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products/7891000051230 -> 404 - NOT FOUND")
-        void when_GET_getByBarcode_and_the_product_is_not_found_then_should_return_a_message_error_with_404() throws Exception  {
+        void when_the_product_is_not_found_then_should_return_a_message_error__NOT_FOUND() throws Exception  {
             final String targetBarcode = "7891000051230";
 
             given(productService.getByBarcodeAndSaveIfNecessary(eq(targetBarcode)))
@@ -255,10 +232,10 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products/7891000055120 -> 200 - OK")
-        void when_GET_getByBarcode_should_return_a_product_with_200() throws Exception  {
+        void when_the_product_is_found_should_return_a_product__OK() throws Exception  {
             final String targetBarcode = "7891000055120";
             final SimpleProductWithStatus simpleProductWithStatus =
-                products.get(0).toSimpleProductWithStatus(HttpStatus.OK);
+                PRODUCTS_SAMPLE.get(0).toSimpleProductWithStatus(HttpStatus.OK);
 
             given(productService.getByBarcodeAndSaveIfNecessary(eq(targetBarcode)))
                 .willReturn(simpleProductWithStatus);
@@ -283,13 +260,14 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products?pag=1-3&contains=500g -> 200 - OK")
-        void when_GET_getAllPagedContainingDescription_the_second_page_with_three_products_filtered_by_description() throws Exception {
+        void should_return_the_second_page_with_three_products_that_contains_500g__OK() throws Exception {
             final Pageable fistPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
+            final String contains = "500g";
 
-            given(productService.findAll(eq(fistPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(products.subList(2, 3), fistPageOrderedByDescriptionAsc, 0));
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(fistPageOrderedByDescriptionAsc)))
+                .willReturn(new PageImpl<>(PRODUCTS_SAMPLE.subList(2, 3), fistPageOrderedByDescriptionAsc, 0));
 
-            makeRequestWithPage("1-1")
+            makeRequestWithPageAndContains("1-1", contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
@@ -306,26 +284,27 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.totalOfItems").value(2))
                 .andExpect(jsonPath("$.links").isEmpty());
 
-            verify(productService, times(1)).findAll(eq(fistPageOrderedByDescriptionAsc));
-            verify(productService, only()).findAll(eq(fistPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(fistPageOrderedByDescriptionAsc));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(fistPageOrderedByDescriptionAsc));
         }
 
         @Test
         @DisplayName("GET /api/products?pag-1-1&contains= -> 200 OK")
-        void when_contains_parameter_is_empty_then_GET_getAllPagedContainingDescription_should_return_an_empty_json_with_200() throws Exception {
+        void when_contains_is_empty_then_should_return_an_empty_json__OK() throws Exception {
             final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
+            final String contains = "";
 
-            given(productService.findAll(eq(firstPageOrderedByDescriptionAsc)))
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc)))
                 .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
 
-            makeRequestWithPage("1-1")
+            makeRequestWithPageAndContains("1-1", contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-            verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
-            verify(productService, only()).findAll(eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
         }
     }
 }
