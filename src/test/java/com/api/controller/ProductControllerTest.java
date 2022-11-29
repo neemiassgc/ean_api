@@ -326,5 +326,10 @@ class ProductControllerTest {
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
             verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
         }
+
+
+        void something_to_commit_and_after_merge() {
+
+        }
     }
 }
