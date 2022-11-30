@@ -39,9 +39,12 @@ final class ProductControllerTestHelper {
     }
 
     static String[] concatWithUrl(final String url, final String... values) {
-        return Stream.of(values)
-            .map(value -> url+value)
-            .toArray(String[]::new);
+        final String[] valuesToReturn = new String[values.length];
+
+        for (int i = 0; i < values.length; i++)
+            valuesToReturn[i] = url+values[i];
+
+        return valuesToReturn;
     }
 
     static ResultActions makeRequestWithPageAndContains(final String page, final String contains) throws Exception {
