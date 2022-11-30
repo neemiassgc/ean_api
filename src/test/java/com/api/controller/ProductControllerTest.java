@@ -58,24 +58,29 @@ class ProductControllerTest {
         void should_return_all_products__OK() throws Exception {
             given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(PRODUCTS_SAMPLE);
 
+            final String[] barcodesForTest = {
+                "7891000055120", "7896336010058", "7896656800018", "78982797922990", "7896003737257",
+                "7891000000427", "7891150080850", "7896102513714", "7896292340503", "7896036090619",
+                "7898930672441", "7891172422379", "7891991002646", "7896110195162", "7896048285539"
+            };
             makeRequest()
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(4)))
-                .andExpect(jsonPath("$[*].barcode", contains("7891000055120", "7896336010058", "7896656800018", "78982797922990")))
+                .andExpect(jsonPath("$", hasSize(15)))
+                .andExpect(jsonPath("$[*].barcode", contains(barcodesForTest)))
                 .andExpect(jsonPath("[*].links[0].rel", everyItem(equalTo("prices"))))
                 .andExpect(
                     jsonPath(
                         "$[*].links[0].href",
-                        contains(concatWithUrl("http://localhost/api/prices?barcode=", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
+                        contains(concatWithUrl("http://localhost/api/prices?barcode=", barcodesForTest))
                     )
                 )
                 .andExpect(jsonPath("[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(
                     jsonPath(
                         "$[*].links[1].href",
-                        contains(concatWithUrl("http://localhost/api/products/", "7891000055120", "7896336010058", "7896656800018", "78982797922990"))
+                        contains(concatWithUrl("http://localhost/api/products/", barcodesForTest))
                     )
                 );
 
