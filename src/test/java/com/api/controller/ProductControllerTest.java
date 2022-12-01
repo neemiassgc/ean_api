@@ -264,16 +264,16 @@ class ProductControllerTest {
     class GetAllPagedContainingDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=1-3&contains=500g -> 200 - OK")
-        // here needs more attention, so take a look at here later
-        void should_return_the_second_page_with_three_products_that_contains_500g__OK() throws Exception {
-            final Pageable fistPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
+        @DisplayName("GET /api/products?pag=0-3&contains=500g -> 200 - OK")
+        void should_return_the_first_page_with_three_products_that_contains_500g__OK() throws Exception {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPageWithThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
             final String contains = "500g";
 
-            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(fistPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(PRODUCTS_SAMPLE.subList(2, 3), fistPageOrderedByDescriptionAsc, 0));
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithThreeProducts)))
+                .willReturn(new PageImpl<>(filterByContaining(contains), firstPageWithThreeProducts, 3));
 
-            makeRequestWithPageAndContains("1-1", contains)
+            makeRequestWithPageAndContains("0-3", contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
@@ -283,15 +283,15 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
                 .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
                 .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
-                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.currentCountOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpect(jsonPath("$.totalOfPages").value(2))
-                .andExpect(jsonPath("$.currentPage").value(1))
-                .andExpect(jsonPath("$.totalOfItems").value(2))
+                .andExpect(jsonPath("$.totalOfPages").value(1))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.links").isEmpty());
 
-            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(fistPageOrderedByDescriptionAsc));
-            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(fistPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithThreeProducts));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithThreeProducts));
         }
 
         @Test
