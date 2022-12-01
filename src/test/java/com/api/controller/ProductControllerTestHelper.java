@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,6 +52,12 @@ final class ProductControllerTestHelper {
         return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&contains=%s", URL, page, contains))));
     }
 
+    static List<Product> filterByContaining(final List<Product> productsToFilter, final String keyword) {
+        return productsToFilter
+            .stream()
+            .filter(product -> product.getDescription().contains(keyword))
+            .collect(Collectors.toList());
+    }
     static final List<Product> PRODUCTS_SAMPLE = List.of(
         Product.builder()
             .description("ACHOC PO NESCAU 800G")
