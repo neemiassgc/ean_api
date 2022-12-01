@@ -65,6 +65,14 @@ final class ProductControllerTestHelper {
             .filter(product -> product.getDescription().startsWith(keyword))
             .collect(Collectors.toList());
     }
+
+    static List<Product> filterByEndingWith(final List<Product> productsToFilter, final String keyword) {
+        return productsToFilter
+            .stream()
+            .filter(product -> product.getDescription().endsWith(keyword))
+            .collect(Collectors.toList());
+    }
+
     static final List<Product> PRODUCTS_SAMPLE = List.of(
         Product.builder()
             .description("ACHOC PO NESCAU 800G")
