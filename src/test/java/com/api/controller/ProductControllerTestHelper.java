@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,25 +53,23 @@ final class ProductControllerTestHelper {
         return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&contains=%s", URL, page, contains))));
     }
 
-    static List<Product> filterByContaining(final List<Product> productsToFilter, final String keyword) {
-        return productsToFilter
+    private static List<Product> filterByDescription(final Predicate<String> predicate) {
+        return PRODUCTS_SAMPLE
             .stream()
-            .filter(product -> product.getDescription().contains(keyword))
+            .filter(product -> predicate.test(product.getDescription().toLowerCase()))
             .collect(Collectors.toList());
     }
 
-    static List<Product> filterByStartingWith(final List<Product> productsToFilter, final String keyword) {
-        return productsToFilter
-            .stream()
-            .filter(product -> product.getDescription().startsWith(keyword))
-            .collect(Collectors.toList());
+    static List<Product> filterByContaining(final String keyword) {
+        return filterByDescription(description -> description.contains(keyword));
     }
 
-    static List<Product> filterByEndingWith(final List<Product> productsToFilter, final String keyword) {
-        return productsToFilter
-            .stream()
-            .filter(product -> product.getDescription().endsWith(keyword))
-            .collect(Collectors.toList());
+    static List<Product> filterByStartingWith(final String keyword) {
+        return filterByDescription(description -> description.startsWith(keyword));
+    }
+
+    static List<Product> filterByEndingWith(final String keyword) {
+        return filterByDescription(description -> description.endsWith(keyword));
     }
 
     static final List<Product> PRODUCTS_SAMPLE = List.of(
