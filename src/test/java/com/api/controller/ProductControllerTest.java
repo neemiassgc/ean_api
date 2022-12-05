@@ -129,7 +129,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.totalOfPages").value(3))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
-                .andExpect(jsonPath("$.links[0].rel").value("next page"))
+                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
                 .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-1"));
 
             verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
@@ -159,7 +159,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.currentCountOfItems").value(1))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(true))
-                .andExpect(jsonPath("$.links[0].rel").value("next page"))
+                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
                 .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-1"));
 
             verify(productService, times(1)).findAll(eq(secondPageOrderedByDescriptionAsc));
