@@ -16,13 +16,13 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -52,7 +52,7 @@ public class ProductController {
         final Page<Product> productPage =
             productService.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
 
-        return feedWithLinks(productPage);
+        return feedWithLinks(productPage, null);
     }
 
     @GetMapping(path = "/products", params = {"pag", "contains"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,30 +63,37 @@ public class ProductController {
         final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
         final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseContaining(contains, pageable);
 
-        return feedWithLinks(productPage);
+        return feedWithLinks(productPage, Map.entry("contains", contains));
     }
 
-    @GetMapping(path = "/products", params = {"pag", "startsWith"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/products", params = {"pag", "starts-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllPagedStartingWithDescription(
-            @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
-            @RequestParam("contains") @NotNull String startsWith
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
+        @RequestParam("starts-with") @NotNull String startsWith
     ) {
         final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
         final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageable);
 
-        return feedWithLinks(productPage);
+        return feedWithLinks(productPage, Map.entry("starts_with", startsWith));
     }
 
-    private ResponseEntity<?> feedWithLinks(final Page<Product> productPage) {
+    private ResponseEntity<?> feedWithLinks(final Page<Product> productPage, @Nullable final Map.Entry<String, String> entry) {
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
         CustomPagination<EntityModel<SimpleProduct>> pagedModel =
             new CustomPagination<>(productPage, mapAndAddLinks(productPage.getContent()));
 
-        pagedModel.addIf(productPage.hasNext(), () ->
-            linkTo(methodOn(this.getClass()).getAllPaged((productPage.getNumber() + 1)+"-"+productPage.getSize()))
-                .withRel("next page")
-        );
+        pagedModel.addIf(productPage.hasNext(), () -> {
+            final ProductController productController = methodOn(this.getClass());
+            final String nextPage = (productPage.getNumber() + 1) + "-" + productPage.getSize();
+            if (Objects.isNull(entry))
+                return linkTo(productController.getAllPaged(nextPage)).withRel("Next page");
+            final Map<String, ResponseEntity<?>> filterOptions = Map.of(
+                "contains", productController.getAllPagedContainingDescription(nextPage, entry.getValue()),
+                "starts-with", productController.getAllPagedStartingWithDescription(nextPage, entry.getValue())
+            );
+            return linkTo(filterOptions.get(entry.getKey())).withRel("Next page");
+        });
 
         return ResponseEntity.ok(pagedModel);
     }
