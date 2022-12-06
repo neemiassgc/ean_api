@@ -53,6 +53,10 @@ final class ProductControllerTestHelper {
         return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&contains=%s", URL, page, contains))));
     }
 
+    static ResultActions makeRequestWithPageAndStartsWith(final String page, final String startsWith) throws Exception {
+        return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&starts-with=%s", URL, page, startsWith))));
+    }
+
     private static List<Product> filterByDescription(final Predicate<String> predicate) {
         return PRODUCTS_SAMPLE
             .stream()
