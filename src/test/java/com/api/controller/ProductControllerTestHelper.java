@@ -103,6 +103,21 @@ final class ProductControllerTestHelper {
             .sequenceCode(127635)
             .build(),
         Product.builder()
+            .description("BISC ZABET 350G LEITE")
+            .barcode("7896085087028")
+            .sequenceCode(144038)
+            .build(),
+        Product.builder()
+            .description("BOLINHO BAUDUC 40G GOTAS CHOC")
+            .barcode("7891962037219")
+            .sequenceCode(98894)
+            .build(),
+        Product.builder()
+            .description("BISC WAFER TODDY 132G CHOC")
+            .barcode("7896071024709")
+            .sequenceCode(122504)
+            .build(),
+        Product.builder()
             .description("LEITE PO NINHO 400G INTEG")
             .barcode("7891000000427")
             .sequenceCode(892)
