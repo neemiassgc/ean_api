@@ -3,10 +3,7 @@ package com.api.controller;
 import com.api.entity.Product;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -59,15 +56,18 @@ class ProductControllerTest {
             given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(PRODUCTS_SAMPLE);
 
             final String[] barcodesForTest = {
-                "7891000055120", "7896336010058", "7896656800018", "78982797922990", "7896003737257",
-                "7891000000427", "7891150080850", "7896102513714", "7896292340503", "7896036090619",
-                "7898930672441", "7891172422379", "7891991002646", "7896110195162", "7896048285539"
+                "7891000055120", "7896336010058", "7896656800018",
+                "78982797922990", "7896003737257", "7896085087028",
+                "7891962037219", "7896071024709", "7891000000427",
+                "7891150080850", "7896102513714", "7896292340503",
+                "7896036090619", "7898930672441", "7891172422379",
+                "7891991002646", "7896110195162", "7896048285539"
             };
             makeRequest()
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(15)))
+                .andExpect(jsonPath("$", hasSize(18)))
                 .andExpect(jsonPath("$[*].barcode", contains(barcodesForTest)))
                 .andExpect(jsonPath("[*].links[0].rel", everyItem(equalTo("prices"))))
                 .andExpect(
@@ -336,6 +336,38 @@ class ProductControllerTest {
     @Nested
     class GetAllPagedStartingWithDescriptionTest {
 
-        
+//        @Test
+//        @DisplayName("GET /api/products?pag=0-2&starts-with=bisc")
+//        void should_return_the_first_page_with_two_products_that_starts_with_bisc__OK() throws Exception {
+//            final Sort orderedByDescriptionAsc = Sort.by("description").ascending();
+//            final Pageable firstPage = PageRequest.of(0, 2, orderedByDescriptionAsc);
+//            final String startsWith = "bisc";
+//
+//            given(productService.findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage)))
+//                .willReturn(new PageImpl<>(filterByStartingWith(startsWith), firstPage, 0));
+//
+//            makeRequestWithPageAndStartsWith("0-2", startsWith)
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$.content[*].description", contains("PAP ALUMINIO WYDA 30X7.5", "PAP HIG F.D NEVE C8 COMPACTO NEUT")))
+//                .andExpect(jsonPath("$.content[*].barcode", contains("7898930672441", "7891172422379")))
+//                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+//                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+//                .andExpect(jsonPath(
+//                    "$.content[*].links[0].href",
+//                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "7898930672441", "7891172422379"))
+//                ))
+//                .andExpect(jsonPath("$.content[*].links[1].href", contains(concatWithUrl("http://localhost/api/products/", "7898930672441", "7891172422379"))))
+//                .andExpect(jsonPath("$.currentCountOfItems").value(3))
+//                .andExpect(jsonPath("$.hasNext").value(false))
+//                .andExpect(jsonPath("$.totalOfPages").value(1))
+//                .andExpect(jsonPath("$.currentPage").value(0))
+//                .andExpect(jsonPath("$.totalOfItems").value(3))
+//                .andExpect(jsonPath("$.links").isEmpty());
+//
+//
+//            verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
+//            verify(productService, only()).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
+//        }
     }
 }
