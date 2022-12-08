@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -57,23 +56,24 @@ final class ProductControllerTestHelper {
         return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&starts-with=%s", URL, page, startsWith))));
     }
 
-    private static List<Product> filterByDescription(final Predicate<String> predicate) {
+    private static List<Product> filterByDescription(final Predicate<String> predicate, final int limit) {
         return PRODUCTS_SAMPLE
             .stream()
             .filter(product -> predicate.test(product.getDescription().toLowerCase()))
+            .limit(limit)
             .collect(Collectors.toList());
     }
 
-    static List<Product> filterByContaining(final String keyword) {
-        return filterByDescription(description -> description.contains(keyword));
+    static List<Product> filterByContaining(final String keyword, final int limit) {
+        return filterByDescription(description -> description.contains(keyword), limit);
     }
 
-    static List<Product> filterByStartingWith(final String keyword) {
-        return filterByDescription(description -> description.startsWith(keyword));
+    static List<Product> filterByStartingWith(final String keyword, final int limit) {
+        return filterByDescription(description -> description.startsWith(keyword), limit);
     }
 
-    static List<Product> filterByEndingWith(final String keyword) {
-        return filterByDescription(description -> description.endsWith(keyword));
+    static List<Product> filterByEndingWith(final String keyword, final int limit) {
+        return filterByDescription(description -> description.endsWith(keyword), limit);
     }
 
     static final List<Product> PRODUCTS_SAMPLE = List.of(
