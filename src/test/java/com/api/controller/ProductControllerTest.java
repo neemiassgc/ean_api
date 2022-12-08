@@ -271,7 +271,7 @@ class ProductControllerTest {
             final String contains = "500g";
 
             given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithThreeProducts)))
-                .willReturn(new PageImpl<>(filterByContaining(contains), firstPageWithThreeProducts, 3));
+                .willReturn(new PageImpl<>(filterByContaining(contains, 3), firstPageWithThreeProducts, 3));
 
             makeRequestWithPageAndContains("0-3", contains)
                 .andExpect(status().isOk())
@@ -336,38 +336,45 @@ class ProductControllerTest {
     @Nested
     class GetAllPagedStartingWithDescriptionTest {
 
-//        @Test
-//        @DisplayName("GET /api/products?pag=0-2&starts-with=bisc")
-//        void should_return_the_first_page_with_two_products_that_starts_with_bisc__OK() throws Exception {
-//            final Sort orderedByDescriptionAsc = Sort.by("description").ascending();
-//            final Pageable firstPage = PageRequest.of(0, 2, orderedByDescriptionAsc);
-//            final String startsWith = "bisc";
-//
-//            given(productService.findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage)))
-//                .willReturn(new PageImpl<>(filterByStartingWith(startsWith), firstPage, 0));
-//
-//            makeRequestWithPageAndStartsWith("0-2", startsWith)
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.content[*].description", contains("PAP ALUMINIO WYDA 30X7.5", "PAP HIG F.D NEVE C8 COMPACTO NEUT")))
-//                .andExpect(jsonPath("$.content[*].barcode", contains("7898930672441", "7891172422379")))
-//                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-//                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-//                .andExpect(jsonPath(
-//                    "$.content[*].links[0].href",
-//                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "7898930672441", "7891172422379"))
-//                ))
-//                .andExpect(jsonPath("$.content[*].links[1].href", contains(concatWithUrl("http://localhost/api/products/", "7898930672441", "7891172422379"))))
-//                .andExpect(jsonPath("$.currentCountOfItems").value(3))
-//                .andExpect(jsonPath("$.hasNext").value(false))
-//                .andExpect(jsonPath("$.totalOfPages").value(1))
-//                .andExpect(jsonPath("$.currentPage").value(0))
-//                .andExpect(jsonPath("$.totalOfItems").value(3))
-//                .andExpect(jsonPath("$.links").isEmpty());
-//
-//
-//            verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
-//            verify(productService, only()).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
-//        }
+        @Test
+        @DisplayName("GET /api/products?pag=0-2&starts-with=bisc")
+        void should_return_the_first_page_with_two_products_that_starts_with_bisc__OK() throws Exception {
+            final Sort orderedByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPage = PageRequest.of(0, 2, orderedByDescriptionAsc);
+            final String startsWith = "bisc";
+
+            given(productService.findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage)))
+                .willReturn(new PageImpl<>(filterByStartingWith(startsWith, 2), firstPage, 3));
+
+            makeRequestWithPageAndStartsWith("0-2", startsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath(
+                    "$.content[*].description",
+                    contains("BISC ROSQ MARILAN 350G INT", "BISC WAFER TODDY 132G CHOC")
+                ))
+                .andExpect(jsonPath("$.content[*].barcode", contains("7896003737257", "7896071024709")))
+                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(jsonPath(
+                    "$.content[*].links[0].href",
+                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "7896003737257", "7896071024709"))
+                ))
+                .andExpect(jsonPath(
+                    "$.content[*].links[1].href",
+                    contains(concatWithUrl("http://localhost/api/products/", "7896003737257", "7896071024709"))
+                ))
+                .andExpect(jsonPath("$.currentCountOfItems").value(2))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
+                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-2&starts-with=bisc"));
+
+
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
+        }
     }
 }
