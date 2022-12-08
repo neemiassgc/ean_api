@@ -88,11 +88,6 @@ final class ProductControllerTestHelper {
             .barcode("7896336010058")
             .build(),
         Product.builder()
-            .description("CAFE UTAM 500G")
-            .sequenceCode(2909)
-            .barcode("7896656800018")
-            .build(),
-        Product.builder()
             .description("BALA GELATINA FINI 500G BURGUER")
             .barcode("78982797922990")
             .sequenceCode(93556)
@@ -101,6 +96,11 @@ final class ProductControllerTestHelper {
             .description("BISC ROSQ MARILAN 350G INT")
             .barcode("7896003737257")
             .sequenceCode(127635)
+            .build(),
+        Product.builder()
+            .description("BISC WAFER TODDY 132G CHOC")
+            .barcode("7896071024709")
+            .sequenceCode(122504)
             .build(),
         Product.builder()
             .description("BISC ZABET 350G LEITE")
@@ -113,9 +113,9 @@ final class ProductControllerTestHelper {
             .sequenceCode(98894)
             .build(),
         Product.builder()
-            .description("BISC WAFER TODDY 132G CHOC")
-            .barcode("7896071024709")
-            .sequenceCode(122504)
+            .description("CAFE UTAM 500G")
+            .sequenceCode(2909)
+            .barcode("7896656800018")
             .build(),
         Product.builder()
             .description("LEITE PO NINHO 400G INTEG")
