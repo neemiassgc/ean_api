@@ -1,6 +1,8 @@
 package com.api.component;
 
+import com.api.entity.Product;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,6 +20,10 @@ public final class DomainUtils {
             Integer.parseInt(split[1]),
             sort
         );
+    }
+
+    public static String calculateNextPage(@NonNull final Page<Product> productPage) {
+        return (productPage.getNumber() + 1) + "-" + productPage.getSize();
     }
 
     public static BigDecimal parsePrice(final String priceInput) {
