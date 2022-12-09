@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -23,8 +24,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.api.component.DomainUtils.calculateNextPage;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -51,8 +54,9 @@ public class ProductController {
     ) {
         final Page<Product> productPage =
             productService.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
+        final String nextPage = calculateNextPage(productPage);
 
-        return feedWithLinks(productPage, null);
+        return feedWithLinks(productPage, controller -> controller.getAllPaged(nextPage));
     }
 
     @GetMapping(path = "/products", params = {"pag", "contains"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -62,8 +66,9 @@ public class ProductController {
     ) {
         final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
         final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseContaining(contains, pageable);
+        final String nextPage = calculateNextPage(productPage);
 
-        return feedWithLinks(productPage, Map.entry("contains", contains));
+        return feedWithLinks(productPage, controller -> controller.getAllPagedContainingDescription(nextPage, contains));
     }
 
     @GetMapping(path = "/products", params = {"pag", "starts-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,27 +78,19 @@ public class ProductController {
     ) {
         final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
         final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageable);
+        final String nextPage = calculateNextPage(productPage);
 
-        return feedWithLinks(productPage, Map.entry("starts_with", startsWith));
+        return feedWithLinks(productPage, controller -> controller.getAllPagedStartingWithDescription(nextPage, startsWith));
     }
 
-    private ResponseEntity<?> feedWithLinks(final Page<Product> productPage, @Nullable final Map.Entry<String, String> entry) {
+    private ResponseEntity<?> feedWithLinks(final Page<Product> productPage, final Function<ProductController, ResponseEntity<?>> function) {
         if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
 
         CustomPagination<EntityModel<SimpleProduct>> pagedModel =
             new CustomPagination<>(productPage, mapAndAddLinks(productPage.getContent()));
 
-        pagedModel.addIf(productPage.hasNext(), () -> {
-            final ProductController productController = methodOn(this.getClass());
-            final String nextPage = (productPage.getNumber() + 1) + "-" + productPage.getSize();
-            if (Objects.isNull(entry))
-                return linkTo(productController.getAllPaged(nextPage)).withRel("Next page");
-            final Map<String, ResponseEntity<?>> filterOptions = Map.of(
-                "contains", productController.getAllPagedContainingDescription(nextPage, entry.getValue()),
-                "starts-with", productController.getAllPagedStartingWithDescription(nextPage, entry.getValue())
-            );
-            return linkTo(filterOptions.get(entry.getKey())).withRel("Next page");
-        });
+        pagedModel.addIf(productPage.hasNext(),
+            () -> linkTo(function.apply(methodOn(ProductController.class))).withRel("Next page"));
 
         return ResponseEntity.ok(pagedModel);
     }
