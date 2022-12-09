@@ -264,34 +264,40 @@ class ProductControllerTest {
     class GetAllPagedContainingDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=0-3&contains=500g -> 200 - OK")
-        void should_return_the_first_page_with_three_products_that_contains_500g__OK() throws Exception {
+        @DisplayName("GET /api/products?pag=0-2&contains=500g -> 200 - OK")
+        void should_return_the_first_page_with_two_products_that_contains_500g__OK() throws Exception {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable firstPageWithThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
             final String contains = "500g";
 
-            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithThreeProducts)))
-                .willReturn(new PageImpl<>(filterByContaining(contains, 3), firstPageWithThreeProducts, 3));
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts)))
+                .willReturn(new PageImpl<>(filterByContaining(contains, 2), firstPageWithTwoProducts, 3));
 
-            makeRequestWithPageAndContains("0-3", contains)
+            makeRequestWithPageAndContains("0-2", contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
-                .andExpect(jsonPath("$.content[0].sequenceCode").value(2909))
-                .andExpect(jsonPath("$.content[0].barcode").value("7896656800018"))
-                .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
-                .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
-                .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
-                .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
-                .andExpect(jsonPath("$.currentCountOfItems").value(3))
-                .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpect(jsonPath("$.totalOfPages").value(1))
+                .andExpect(jsonPath("$.content[*].description", contains("BALA GELATINA FINI 500G BURGUER", "CAFE UTAM 500G")))
+                .andExpect(jsonPath("$.content[*].barcode", contains("78982797922990", "7896656800018")))
+                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(jsonPath(
+                    "$.content[*].links[0].href",
+                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "78982797922990", "7896656800018"))
+                ))
+                .andExpect(jsonPath(
+                    "$.content[*].links[1].href",
+                    contains(concatWithUrl("http://localhost/api/products/", "78982797922990", "7896656800018"))
+                ))
+                .andExpect(jsonPath("$.currentCountOfItems").value(2))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
-                .andExpect(jsonPath("$.links").isEmpty());
+                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
+                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-2&contains=500g"));
 
-            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithThreeProducts));
-            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithThreeProducts));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts));
         }
 
         @Test
