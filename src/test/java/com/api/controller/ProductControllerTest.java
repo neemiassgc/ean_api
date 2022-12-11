@@ -372,7 +372,7 @@ class ProductControllerTest {
     class GetAllPagedStartingWithDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=0-2&starts-with=bisc")
+        @DisplayName("GET /api/products?pag=0-2&starts-with=bisc -> 200")
         void should_return_the_first_page_with_two_products_that_start_with_bisc__OK() throws Exception {
             final Sort orderedByDescriptionAsc = Sort.by("description").ascending();
             final Pageable firstPage = PageRequest.of(0, 2, orderedByDescriptionAsc);
@@ -410,6 +410,25 @@ class ProductControllerTest {
 
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
             verify(productService, only()).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
+        }
+
+        @Test
+        @DisplayName("GET /api/products?pag=0-5&starts-with= -> 200")
+        void when_startsWith_is_empty_then_should_return_an_empty_json__200() throws Exception {
+            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 5, Sort.by("description").ascending());
+            final String startsWith = "";
+
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc)))
+                .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
+
+            makeRequestWithPageAndContains("0-5", startsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
         }
     }
 }
