@@ -294,7 +294,7 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products?pag=0-2&contains=500g -> 200 - OK")
-        void should_return_the_first_page_with_two_products_that_contains_500g__OK() throws Exception {
+        void should_return_the_first_page_with_two_products_that_contain_500g__OK() throws Exception {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
             final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
             final String contains = "500g";
@@ -373,7 +373,7 @@ class ProductControllerTest {
 
         @Test
         @DisplayName("GET /api/products?pag=0-2&starts-with=bisc")
-        void should_return_the_first_page_with_two_products_that_starts_with_bisc__OK() throws Exception {
+        void should_return_the_first_page_with_two_products_that_start_with_bisc__OK() throws Exception {
             final Sort orderedByDescriptionAsc = Sort.by("description").ascending();
             final Pageable firstPage = PageRequest.of(0, 2, orderedByDescriptionAsc);
             final String startsWith = "bisc";
