@@ -430,5 +430,24 @@ class ProductControllerTest {
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
             verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=0-5&startsWith=cheese")
+        void when_startsWith_does_not_match_anything_then_should_return_an_empty_json__200() throws Exception {
+            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 5, Sort.by("description").ascending());
+            final String startsWith = "cheese";
+
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc)))
+                .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
+
+            makeRequestWithPageAndContains("0-5", startsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
+        }
     }
 }
