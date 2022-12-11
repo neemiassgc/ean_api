@@ -185,29 +185,39 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=2-1 -> 200 OK")
-        void should_return_the_last_page_with_one_product__OK() throws Exception  {
-            final Pageable thirdPageOrderedByDescriptionAsc = PageRequest.of(2, 1, Sort.by("description").ascending());
-            final List<Product> thirdProduct = PRODUCTS_SAMPLE.subList(2, 3);
+        @DisplayName("GET /api/products?pag=2-5 -> 200 OK")
+        void should_return_the_last_page_with_five_products__OK() throws Exception  {
+            final Pageable thirdPageOrderedByDescriptionAsc = PageRequest.of(2, 5, Sort.by("description").ascending());
+            final List<Product> theLastFiveProducts = PRODUCTS_SAMPLE.subList(10, 15);
 
             given(productService.findAll(eq(thirdPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(thirdProduct, thirdPageOrderedByDescriptionAsc, 3));
+                .willReturn(new PageImpl<>(theLastFiveProducts, thirdPageOrderedByDescriptionAsc, 15));
 
-            makeRequestWithPage("2-1")
+            final String[] expectedBarcodeList = {
+                "7896102513714", "7896292340503",
+                "7896036090619", "7898930672441",
+                "7891172422379"
+            };
+
+            makeRequestWithPage("2-5")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[0].description").value("CAFE UTAM 500G"))
-                .andExpect(jsonPath("$.content[0].sequenceCode").value(2909))
-                .andExpect(jsonPath("$.content[0].barcode").value("7896656800018"))
-                .andExpect(jsonPath("$.content[0].links[0].rel").value("prices"))
-                .andExpect(jsonPath("$.content[0].links[1].rel").value("self"))
-                .andExpect(jsonPath("$.content[0].links[0].href").value("http://localhost/api/prices?barcode=7896656800018"))
-                .andExpect(jsonPath("$.content[0].links[1].href").value("http://localhost/api/products/7896656800018"))
-                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.content[*].barcode", contains(expectedBarcodeList)))
+                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(jsonPath(
+                    "$.content[*].links[0].href",
+                    contains(concatWithUrl("http://localhost/api/prices?barcode=", expectedBarcodeList))
+                ))
+                .andExpect(jsonPath(
+                    "$.content[*].links[1].href",
+                    contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
+                ))
+                .andExpect(jsonPath("$.currentCountOfItems").value(5))
                 .andExpect(jsonPath("$.hasNext").value(false))
                 .andExpect(jsonPath("$.totalOfPages").value(3))
                 .andExpect(jsonPath("$.currentPage").value(2))
-                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.totalOfItems").value(15))
                 .andExpect(jsonPath("$.links").isArray())
                 .andExpect(jsonPath("$.links").isEmpty());
 
