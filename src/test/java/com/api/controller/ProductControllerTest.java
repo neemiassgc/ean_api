@@ -225,14 +225,14 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=3-1 -> 200 OK")
+        @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
         void when_pag_is_over_the_limits_then_should_return_an_empty_array__OK() throws Exception  {
-            final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 1, Sort.by("description").ascending());
+            final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 5, Sort.by("description").ascending());
 
             given(productService.findAll(eq(fourthPageProductOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(Collections.emptyList(), fourthPageProductOrderedByDescriptionAsc, 0));
+                .willReturn(new PageImpl<>(Collections.emptyList(), fourthPageProductOrderedByDescriptionAsc, 15));
 
-            makeRequestWithPage("3-1")
+            makeRequestWithPage("3-5")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
