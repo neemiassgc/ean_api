@@ -1,14 +1,14 @@
 package com.api.controller;
 
-import com.api.entity.Product;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
-import java.util.List;
 
 import static com.api.controller.ProductControllerTestHelper.*;
 import static org.hamcrest.Matchers.contains;
@@ -108,11 +107,11 @@ class ProductControllerTest {
         @Test
         @DisplayName("GET /api/products?pag=0-5 -> 200 OK")
         void should_return_the_fist_page_with_five_products__OK() throws Exception  {
-            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 5, Sort.by("description").ascending());
-            final List<Product> topFiveProducts = PRODUCTS_SAMPLE.subList(0, 5);
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable firstPageWithFiveProducts = createPageable("0-5", orderByDescriptionAsc);
 
-            given(productService.findAll(eq(firstPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(topFiveProducts, firstPageOrderedByDescriptionAsc, 15));
+            given(productService.findAll(eq(firstPageWithFiveProducts)))
+                .willReturn(createPage(firstPageWithFiveProducts));
 
             final String[] expectedBarcodeList = {
                 "7891000055120", "7896336010058",
@@ -136,22 +135,22 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.hasNext").value(true))
-                .andExpect(jsonPath("$.totalOfPages").value(3))
-                .andExpect(jsonPath("$.totalOfItems").value(15))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
+                .andExpect(jsonPath("$.totalOfItems").value(18))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
                 .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-5"));
 
-            verify(productService, times(1)).findAll(eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAll(eq(firstPageWithFiveProducts));
         }
 
         @Test
         @DisplayName("GET /api/products?pag=1-5 -> 200 OK")
         void should_return_the_second_page_with_five_products__OK() throws Exception  {
-            final Pageable secondPageOrderedByDescriptionAsc = PageRequest.of(1, 5, Sort.by("description").ascending());
-            final List<Product> theMiddleFiveProducts = PRODUCTS_SAMPLE.subList(5, 10);
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable secondPageWithFiveProducts = createPageable("1-5", orderByDescriptionAsc);
 
-            given(productService.findAll(eq(secondPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(theMiddleFiveProducts, secondPageOrderedByDescriptionAsc, 15));
+            given(productService.findAll(eq(secondPageWithFiveProducts)))
+                .willReturn(createPage(secondPageWithFiveProducts));
 
             final String[] expectedBarcodeList = {
                 "7896085087028", "7891962037219",
@@ -174,24 +173,24 @@ class ProductControllerTest {
                         contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
                 ))
                 .andExpect(jsonPath("$.currentPage").value(1))
-                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
-                .andExpect(jsonPath("$.totalOfItems").value(15))
+                .andExpect(jsonPath("$.totalOfItems").value(18))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
                 .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-5"));
 
-            verify(productService, times(1)).findAll(eq(secondPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAll(eq(secondPageWithFiveProducts));
         }
 
         @Test
         @DisplayName("GET /api/products?pag=2-5 -> 200 OK")
-        void should_return_the_last_page_with_five_products__OK() throws Exception  {
-            final Pageable thirdPageOrderedByDescriptionAsc = PageRequest.of(2, 5, Sort.by("description").ascending());
-            final List<Product> theLastFiveProducts = PRODUCTS_SAMPLE.subList(10, 15);
+        void should_return_the_third_page_with_five_products__OK() throws Exception  {
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable thirdPageWithFiveProducts = createPageable("2-5", orderByDescriptionAsc);
 
-            given(productService.findAll(eq(thirdPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(theLastFiveProducts, thirdPageOrderedByDescriptionAsc, 15));
+            given(productService.findAll(eq(thirdPageWithFiveProducts)))
+                .willReturn(createPage(thirdPageWithFiveProducts));
 
             final String[] expectedBarcodeList = {
                 "7896102513714", "7896292340503",
@@ -214,10 +213,15 @@ class ProductControllerTest {
                     contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
                 ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
-                .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.currentPage").value(2))
-                .andExpect(jsonPath("$.totalOfItems").value(15))
+                .andExpect(jsonPath("$.totalOfItems").value(18))
+                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
+                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=3-5"));
+
+            verify(productService, times(1)).findAll(eq(thirdPageWithFiveProducts));
+        }
 
         @Test
         @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
@@ -256,12 +260,13 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
+        @DisplayName("GET /api/products?pag=4-5 -> 200 OK")
         void when_pag_is_over_the_limits_then_should_return_an_empty_array__OK() throws Exception  {
-            final Pageable fourthPageProductOrderedByDescriptionAsc = PageRequest.of(3, 5, Sort.by("description").ascending());
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable fourthPageProductWithFiveProducts = createPageable("3-5", orderByDescriptionAsc);
 
-            given(productService.findAll(eq(fourthPageProductOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(Collections.emptyList(), fourthPageProductOrderedByDescriptionAsc, 15));
+            given(productService.findAll(eq(fourthPageProductWithFiveProducts)))
+                .willReturn(emptyPage());
 
             makeRequestWithPage("3-5")
                 .andExpect(status().isOk())
@@ -269,8 +274,8 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-            verify(productService, times(1)).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
-            verify(productService, only()).findAll(eq(fourthPageProductOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAll(eq(fourthPageProductWithFiveProducts));
+            verify(productService, only()).findAll(eq(fourthPageProductWithFiveProducts));
         }
     }
 
@@ -326,12 +331,12 @@ class ProductControllerTest {
         @Test
         @DisplayName("GET /api/products?pag=0-2&contains=500g -> 200 - OK")
         void should_return_the_first_page_with_two_products_that_contain_500g__OK() throws Exception {
-            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable firstPageWithTwoProducts = createPageable("0-2", orderByDescriptionAsc);
             final String contains = "500g";
 
             given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts)))
-                .willReturn(new PageImpl<>(filterByContaining(contains, 2), firstPageWithTwoProducts, 3));
+                .willReturn(createPage(firstPageWithTwoProducts, filterByContaining(contains)));
 
             makeRequestWithPageAndContains("0-2", contains)
                 .andExpect(status().isOk())
@@ -363,11 +368,12 @@ class ProductControllerTest {
         @Test
         @DisplayName("GET /api/products?pag-1-1&contains= -> 200 OK")
         void when_contains_is_empty_then_should_return_an_empty_json__OK() throws Exception {
-            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable secondPageWithOneProduct = createPageable("1-1", orderByDescriptionAsc);
             final String contains = "";
 
-            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct)))
+                .willReturn(emptyPage());
 
             makeRequestWithPageAndContains("1-1", contains)
                 .andExpect(status().isOk())
@@ -375,18 +381,19 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
-            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct));
         }
 
         @Test
         @DisplayName("GET /api/products?pag-1-1&contains=800g -> 200 OK")
         void when_contains_does_not_match_anything_then_should_return_an_empty_json__OK() throws Exception {
-            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(1, 1, Sort.by("description").ascending());
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable secondPageWithOneProduct = createPageable("1-1", orderByDescriptionAsc);
             final String contains = "800g";
 
-            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct)))
+                .willReturn(emptyPage());
 
             makeRequestWithPageAndContains("1-1", contains)
                 .andExpect(status().isOk())
@@ -394,8 +401,8 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
-            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct));
         }
     }
 
@@ -405,12 +412,12 @@ class ProductControllerTest {
         @Test
         @DisplayName("GET /api/products?pag=0-2&starts-with=bisc -> 200")
         void should_return_the_first_page_with_two_products_that_start_with_bisc__OK() throws Exception {
-            final Sort orderedByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable firstPage = PageRequest.of(0, 2, orderedByDescriptionAsc);
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable firstPageWithTwoProducts = createPageable("0-2", orderByDescriptionAsc);
             final String startsWith = "bisc";
 
-            given(productService.findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage)))
-                .willReturn(new PageImpl<>(filterByStartingWith(startsWith, 2), firstPage, 3));
+            given(productService.findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts)))
+                .willReturn(createPage(firstPageWithTwoProducts, filterByStartingWith(startsWith)));
 
             makeRequestWithPageAndStartsWith("0-2", startsWith)
                 .andExpect(status().isOk())
@@ -439,18 +446,19 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-2&starts-with=bisc"));
 
 
-            verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
-            verify(productService, only()).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPage));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
         }
 
         @Test
         @DisplayName("GET /api/products?pag=0-5&starts-with= -> 200")
         void when_startsWith_is_empty_then_should_return_an_empty_json__200() throws Exception {
-            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 5, Sort.by("description").ascending());
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable firstPageWithFiveProducts = createPageable("0-5", orderByDescriptionAsc);
             final String startsWith = "";
 
-            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageWithFiveProducts)))
+                .willReturn(emptyPage());
 
             makeRequestWithPageAndContains("0-5", startsWith)
                 .andExpect(status().isOk())
@@ -458,18 +466,19 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
-            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageWithFiveProducts));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageWithFiveProducts));
         }
 
         @Test
         @DisplayName("GET /api/products?pag=0-5&startsWith=cheese")
         void when_startsWith_does_not_match_anything_then_should_return_an_empty_json__200() throws Exception {
-            final Pageable firstPageOrderedByDescriptionAsc = PageRequest.of(0, 5, Sort.by("description").ascending());
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable firstPageWithFiveProducts = createPageable("0-5", orderByDescriptionAsc);
             final String startsWith = "cheese";
 
-            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc)))
-                .willReturn(new PageImpl<>(Collections.emptyList(), firstPageOrderedByDescriptionAsc, 0));
+            given(productService.findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageWithFiveProducts)))
+                .willReturn(emptyPage());
 
             makeRequestWithPageAndContains("0-5", startsWith)
                 .andExpect(status().isOk())
@@ -477,8 +486,8 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
-            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageWithFiveProducts));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageWithFiveProducts));
         }
     }
 }
