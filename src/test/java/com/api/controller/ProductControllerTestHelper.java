@@ -88,6 +88,12 @@ final class ProductControllerTestHelper {
     static Page<Product> createPage(final Pageable pageable) {
         return createPage(pageable, PRODUCTS_SAMPLE);
     }
+
+    private static List<Product> selectProducts(final Pageable pageable, final List<Product> content) {
+        final int startIndex = pageable.getPageNumber() * pageable.getPageSize();
+        final int endIndex = startIndex + pageable.getPageSize();
+        return content.subList(startIndex, Math.min(endIndex, content.size()));
+    }
     }
 
     static final List<Product> PRODUCTS_SAMPLE = List.of(
