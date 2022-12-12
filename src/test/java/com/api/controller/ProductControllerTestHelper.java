@@ -94,6 +94,12 @@ final class ProductControllerTestHelper {
         final int endIndex = startIndex + pageable.getPageSize();
         return content.subList(startIndex, Math.min(endIndex, content.size()));
     }
+
+    static Page<Product> createPage(final Pageable pageable, final List<Product> products) {
+        final int totalItems = products.size();
+        final List<Product> content = selectProducts(pageable, products);
+        return new PageImpl<>(content, pageable, totalItems);
+    }
     }
 
     static final List<Product> PRODUCTS_SAMPLE = List.of(
