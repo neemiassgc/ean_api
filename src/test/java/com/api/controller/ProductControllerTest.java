@@ -218,10 +218,41 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.totalOfPages").value(3))
                 .andExpect(jsonPath("$.currentPage").value(2))
                 .andExpect(jsonPath("$.totalOfItems").value(15))
+
+        @Test
+        @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
+        void should_return_the_fourth_page_with_three_products() throws Exception {
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable fourthPageWithThreeProducts = createPageable("3-5", orderByDescriptionAsc);
+
+            given(productService.findAll(eq(fourthPageWithThreeProducts)))
+                .willReturn(createPage(fourthPageWithThreeProducts));
+
+            final String[] expectedBarcodeList = { "7891991002646", "7896110195162", "7896048285539" };
+
+            makeRequestWithPage("3-5")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content[*].barcode", contains(expectedBarcodeList)))
+                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(jsonPath(
+                        "$.content[*].links[0].href",
+                        contains(concatWithUrl("http://localhost/api/prices?barcode=", expectedBarcodeList))
+                ))
+                .andExpect(jsonPath(
+                        "$.content[*].links[1].href",
+                        contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
+                ))
+                .andExpect(jsonPath("$.currentCountOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
+                .andExpect(jsonPath("$.currentPage").value(3))
+                .andExpect(jsonPath("$.totalOfItems").value(18))
                 .andExpect(jsonPath("$.links").isArray())
                 .andExpect(jsonPath("$.links").isEmpty());
 
-            verify(productService, times(1)).findAll(eq(thirdPageOrderedByDescriptionAsc));
+            verify(productService, times(1)).findAll(eq(fourthPageWithThreeProducts));
         }
 
         @Test
