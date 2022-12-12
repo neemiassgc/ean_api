@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -100,6 +101,9 @@ final class ProductControllerTestHelper {
         final List<Product> content = selectProducts(pageable, products);
         return new PageImpl<>(content, pageable, totalItems);
     }
+
+    static Page<Product> emptyPage() {
+        return new PageImpl<>(Collections.emptyList(), PageRequest.ofSize(5), 0);
     }
 
     static final List<Product> PRODUCTS_SAMPLE = List.of(
