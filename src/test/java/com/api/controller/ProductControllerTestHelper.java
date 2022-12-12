@@ -74,6 +74,10 @@ final class ProductControllerTestHelper {
     static List<Product> filterByEndingWith(final String keyword) {
         return filterByDescription(description -> description.endsWith(keyword));
     }
+
+    static Sort getDefaultSorting() {
+        return Sort.by("description").ascending();
+    }
     }
 
     static final List<Product> PRODUCTS_SAMPLE = List.of(
