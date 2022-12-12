@@ -2,6 +2,7 @@ package com.api.controller;
 
 import com.api.component.DomainUtils;
 import com.api.entity.Product;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -82,6 +83,10 @@ final class ProductControllerTestHelper {
 
     static Pageable createPageable(final String pageExpression, final Sort sort) {
         return DomainUtils.parsePage(pageExpression, sort);
+    }
+
+    static Page<Product> createPage(final Pageable pageable) {
+        return createPage(pageable, PRODUCTS_SAMPLE);
     }
     }
 
