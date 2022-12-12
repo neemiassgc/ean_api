@@ -1,5 +1,6 @@
 package com.api.controller;
 
+import com.api.component.DomainUtils;
 import com.api.entity.Product;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -77,6 +78,10 @@ final class ProductControllerTestHelper {
 
     static Sort getDefaultSorting() {
         return Sort.by("description").ascending();
+    }
+
+    static Pageable createPageable(final String pageExpression, final Sort sort) {
+        return DomainUtils.parsePage(pageExpression, sort);
     }
     }
 
