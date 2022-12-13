@@ -1,5 +1,6 @@
 package com.api.controller;
 
+import com.api.component.Constants;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,14 +73,14 @@ class ProductControllerTest {
                 .andExpect(
                     jsonPath(
                         "$[*].links[0].href",
-                        contains(concatWithUrl("http://localhost/api/prices?barcode=", barcodesForTest))
+                        contains(concatWithUrl(Constants.PRICES_URL, barcodesForTest))
                     )
                 )
                 .andExpect(jsonPath("[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(
                     jsonPath(
                         "$[*].links[1].href",
-                        contains(concatWithUrl("http://localhost/api/products/", barcodesForTest))
+                        contains(concatWithUrl(Constants.PRODUCTS_URL+"/", barcodesForTest))
                     )
                 );
 
@@ -126,11 +127,11 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(jsonPath(
                     "$.content[*].links[0].href",
-                    contains(concatWithUrl("http://localhost/api/prices?barcode=", expectedBarcodeList))
+                    contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
                 ))
                 .andExpect(jsonPath(
                     "$.content[*].links[1].href",
-                    contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
+                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
                 ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
                 .andExpect(jsonPath("$.currentPage").value(0))
@@ -138,7 +139,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.totalOfItems").value(18))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-5"));
+                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-5"));
 
             verify(productService, times(1)).findAll(eq(firstPageWithFiveProducts));
         }
@@ -166,11 +167,11 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(jsonPath(
                         "$.content[*].links[0].href",
-                        contains(concatWithUrl("http://localhost/api/prices?barcode=", expectedBarcodeList))
+                        contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
                 ))
                 .andExpect(jsonPath(
                         "$.content[*].links[1].href",
-                        contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
+                        contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
                 ))
                 .andExpect(jsonPath("$.currentPage").value(1))
                 .andExpect(jsonPath("$.totalOfPages").value(4))
@@ -178,7 +179,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.totalOfItems").value(18))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=2-5"));
+                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=2-5"));
 
             verify(productService, times(1)).findAll(eq(secondPageWithFiveProducts));
         }
@@ -206,11 +207,11 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(jsonPath(
                     "$.content[*].links[0].href",
-                    contains(concatWithUrl("http://localhost/api/prices?barcode=", expectedBarcodeList))
+                    contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
                 ))
                 .andExpect(jsonPath(
                     "$.content[*].links[1].href",
-                    contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
+                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
                 ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
                 .andExpect(jsonPath("$.hasNext").value(true))
@@ -218,7 +219,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.currentPage").value(2))
                 .andExpect(jsonPath("$.totalOfItems").value(18))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=3-5"));
+                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=3-5"));
 
             verify(productService, times(1)).findAll(eq(thirdPageWithFiveProducts));
         }
@@ -242,11 +243,11 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(jsonPath(
                         "$.content[*].links[0].href",
-                        contains(concatWithUrl("http://localhost/api/prices?barcode=", expectedBarcodeList))
+                        contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
                 ))
                 .andExpect(jsonPath(
                         "$.content[*].links[1].href",
-                        contains(concatWithUrl("http://localhost/api/products/", expectedBarcodeList))
+                        contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
                 ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(false))
@@ -319,7 +320,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.links[0].rel").value("prices"))
                 .andExpect(jsonPath("$.links[1].rel").value("self"))
                 .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/prices?barcode=7891000055120"))
-                .andExpect(jsonPath("$.links[1].href").value("http://localhost/api/products/7891000055120"));
+                .andExpect(jsonPath("$.links[1].href").value(Constants.PRODUCTS_URL+"/7891000055120"));
 
             verify(productService, times(1)).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
         }
@@ -347,11 +348,11 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(jsonPath(
                     "$.content[*].links[0].href",
-                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "78982797922990", "7896656800018"))
+                    contains(concatWithUrl(Constants.PRICES_URL, "78982797922990", "7896656800018"))
                 ))
                 .andExpect(jsonPath(
                     "$.content[*].links[1].href",
-                    contains(concatWithUrl("http://localhost/api/products/", "78982797922990", "7896656800018"))
+                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "78982797922990", "7896656800018"))
                 ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(2))
                 .andExpect(jsonPath("$.hasNext").value(true))
@@ -359,7 +360,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-2&contains=500g"));
+                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-2&contains=500g"));
 
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts));
             verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts));
@@ -431,11 +432,11 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
                 .andExpect(jsonPath(
                     "$.content[*].links[0].href",
-                    contains(concatWithUrl("http://localhost/api/prices?barcode=", "7896003737257", "7896071024709"))
+                    contains(concatWithUrl(Constants.PRICES_URL, "7896003737257", "7896071024709"))
                 ))
                 .andExpect(jsonPath(
                     "$.content[*].links[1].href",
-                    contains(concatWithUrl("http://localhost/api/products/", "7896003737257", "7896071024709"))
+                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "7896003737257", "7896071024709"))
                 ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(2))
                 .andExpect(jsonPath("$.hasNext").value(true))
@@ -443,7 +444,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value("http://localhost/api/products?pag=1-2&starts-with=bisc"));
+                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-2&starts-with=bisc"));
 
 
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
