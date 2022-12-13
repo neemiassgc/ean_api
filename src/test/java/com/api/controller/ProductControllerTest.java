@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
@@ -35,16 +34,13 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
-    private MockMvc mockMvc;
-
     @BeforeEach
     void setUp() {
-        mockMvc = standaloneSetup(
+        ProductControllerTestHelper.mockMvc = standaloneSetup(
             new ProductController(productService),
             new GlobalErrorHandlingController()
         )
         .alwaysDo(print()).build();
-        ProductControllerTestHelper.mockMvc = mockMvc;
     }
 
     @Nested
