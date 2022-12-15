@@ -321,8 +321,25 @@ public class ProductControllerIT {
         }
 
         @Test
-        void anything_to_test() {
+        @DisplayName("GET /api/products?pag=0-1&contains=400g -> 200 OK")
+        void should_return_a_page_with_one_product__OK() throws Exception {
+            final String contains = "400g";
+            final String secondPageWithOneProduct = "0-1";
 
+            makeRequestWithPageAndContains(secondPageWithOneProduct, contains)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.totalOfItems").value(2))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpectAll(ContentTester.builder()
+                    .withExpectedBarcodeSet("7896336010058")
+                    .withNextPage("1-1&contains=400g").test()
+                );
         }
     }
 
