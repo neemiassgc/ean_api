@@ -277,6 +277,11 @@ public class ProductControllerIT {
         }
     }
 
+    @Nested
+    class GetAllPagedStartingWithDescriptionTest {
+
+    }
+
     private final static class ContentTester {
 
         private ContentTester() {}
