@@ -300,6 +300,25 @@ public class ProductControllerIT {
                     .withNextPage("1-2&starts-with=b").test()
                 );
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=1-2&starts-with=b -> 200 OK")
+        void should_return_the_second_page_with_one_product__OK() throws Exception {
+            final String secondPageWithOneProduct = "1-2";
+
+            makeRequestWithPageAndStartsWith(secondPageWithOneProduct, "b")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.content[0].description").value("BISC CEREALE BAUDUC 170G CACAU E CAST"))
+                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7891962047560").test());
+        }
     }
 
     private final static class ContentTester {
