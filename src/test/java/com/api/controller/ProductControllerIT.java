@@ -319,6 +319,18 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.content[0].description").value("BISC CEREALE BAUDUC 170G CACAU E CAST"))
                 .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7891962047560").test());
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=2-5&starts-with=torr")
+        void when_startsWith_does_not_match_anything_then_should_return_nothing() throws Exception {
+            final String thirdPageWithFiveProducts = "2-5";
+            final String startsWith = "torr";
+
+            makeRequestWithPageAndStartsWith(thirdPageWithFiveProducts, startsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isEmpty());
+        }
     }
 
     private final static class ContentTester {
