@@ -280,6 +280,26 @@ public class ProductControllerIT {
     @Nested
     class GetAllPagedStartingWithDescriptionTest {
 
+        @Test
+        @DisplayName("GET /api/products?pag=0-2&starts-with=b -> 200 OK")
+        void should_return_the_first_page_with_two_products__OK() throws Exception {
+            final String firstPageWithTwoProducts = "0-2";
+
+            makeRequestWithPageAndStartsWith(firstPageWithTwoProducts, "b")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentCountOfItems").value(2))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpectAll(ContentTester.builder()
+                    .withExpectedBarcodeSet("7898279792299", "7896045104482")
+                    .withNextPage("1-2&starts-with=b").test()
+                );
+        }
     }
 
     private final static class ContentTester {
