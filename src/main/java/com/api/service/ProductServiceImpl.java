@@ -81,6 +81,14 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
+    @Override
+    public Page<Product> findAllByDescriptionIgnoreCaseEndingWith(String description, Pageable pageable) {
+        return returnABlankPageIfEmptyOrAPageFilled(
+            description,
+            () -> productRepository.findAllByDescriptionIgnoreCaseEndingWith(description, pageable)
+        );
+    }
+
     private Page<Product> returnABlankPageIfEmptyOrAPageFilled(final String expression, final Supplier<Page<Product>> pageSupplier) {
         return expression.isEmpty() ?
             new PageImpl<>(Collections.emptyList()) :
