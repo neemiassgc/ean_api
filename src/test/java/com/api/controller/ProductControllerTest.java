@@ -1,5 +1,6 @@
 package com.api.controller;
 
+import com.api.Resources;
 import com.api.component.Constants;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
@@ -49,7 +50,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("GET /api/products -> 200 OK")
         void should_return_all_products__OK() throws Exception {
-            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(PRODUCTS_SAMPLE);
+            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Resources.PRODUCTS_SAMPLE);
 
             final String[] barcodesForTest = {
                 "7891000055120", "7896336010058", "78982797922990",
@@ -302,7 +303,7 @@ class ProductControllerTest {
         void when_the_product_is_found_should_return_a_product__OK() throws Exception  {
             final String targetBarcode = "7891000055120";
             final SimpleProductWithStatus simpleProductWithStatus =
-                PRODUCTS_SAMPLE.get(0).toSimpleProductWithStatus(HttpStatus.OK);
+               Resources.PRODUCTS_SAMPLE.get(0).toSimpleProductWithStatus(HttpStatus.OK);
 
             given(productService.getByBarcodeAndSaveIfNecessary(eq(targetBarcode)))
                 .willReturn(simpleProductWithStatus);
