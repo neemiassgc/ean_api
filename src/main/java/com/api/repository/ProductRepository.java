@@ -26,4 +26,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findAllByDescriptionIgnoreCaseContaining(String description, Pageable pageable);
 
     Page<Product> findAllByDescriptionIgnoreCaseStartingWith(String description, Pageable pageable);
+
+    Page<Product> findAllByDescriptionIgnoreCaseEndingWith(String description, Pageable pageable);
 }
