@@ -233,6 +233,27 @@ public class ProductServiceTest {
 
             verifyNoInteractions(productRepositoryMock);
         }
+
+        @Test
+        @DisplayName("When contains doesn't match anything then should return an empty list")
+        void when_contains_does_not_match_anything_then_should_return_an_empty_list() {
+            final String expressionToLookFor = "fruit";
+            final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
+            final Pageable theFirstPageWithThreeProducts = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            given(productRepositoryMock.findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProducts)))
+                .willReturn(Utility.createPage(Collections.emptyList()));
+
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProducts);
+
+            assertThat(actualPage.getContent()).hasSize(0);
+            assertThat(actualPage.getContent()).isEmpty();
+
+            verify(productRepositoryMock, times(1))
+                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProducts));
+            verify(productRepositoryMock, only())
+                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProducts));
+        }
     }
 
     @Nested
