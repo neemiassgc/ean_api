@@ -279,6 +279,21 @@ public class ProductServiceIT {
             assertThat(actualPage.getTotalElements()).isZero();
             assertThat(actualPage.getContent()).isEmpty();
         }
+
+        @Test
+        @DisplayName("When ends-with is empty then should return an empty page")
+        void when_ends_with_does_not_match_anything_then_should_an_empty_page() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2).withSort(orderByDescriptionAsc);
+            final String endsWith = "crystal";
+
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getTotalElements()).isZero();
+            assertThat(actualPage.getContent()).isEmpty();
+        }
     }
 
 }
