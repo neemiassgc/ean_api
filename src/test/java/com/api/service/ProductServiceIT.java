@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,8 +24,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class ProductServiceIT {
@@ -236,6 +237,32 @@ public class ProductServiceIT {
             assertThat(actualPage).isNotNull();
             assertThat(actualPage).isEmpty();
             assertThat(actualPage.getTotalElements()).isZero();
+        }
+    }
+
+    @Nested
+    @Transactional
+    class FindAllByDescriptionIgnoreCaseEndingWithTest {
+
+        @Test
+        @DisplayName("Should return a page with two products that end with a")
+        void should_return_a_page_with_two_products_that_end_with_a() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2).withSort(orderByDescriptionAsc);
+            final String endsWith = "a";
+
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getTotalPages()).isEqualTo(2);
+            assertThat(actualPage.getTotalElements()).isEqualTo(3);
+            assertThat(actualPage.getNumber()).isZero();
+            assertThat(actualPage.getNumberOfElements()).isEqualTo(2);
+            assertThat(actualPage.getContent()).hasSize(2);
+            assertThat(actualPage.getContent())
+                .extracting(Product::getSequenceCode).containsExactly(120983, 9785);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(11);
         }
     }
 
