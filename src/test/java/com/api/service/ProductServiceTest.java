@@ -378,6 +378,28 @@ public class ProductServiceTest {
 
             verifyNoInteractions(productRepositoryMock);
         }
+
+        @Test
+        @DisplayName("When ends with does not match anything then should return an empty page")
+        void when_ends_with_does_not_match_anything_then_should_return_an_empty_page() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final String endsWith = "carrot";
+            given(productRepositoryMock
+                .findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts)))
+                .willReturn(Utility.createPage(Collections.emptyList()));
+
+            final Page<Product> actualPage = productServiceUnderTest
+                .findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getContent()).isEmpty();
+
+            verify(productRepositoryMock, times(1))
+                .findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts));
+            verify(productRepositoryMock, only())
+                .findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts));
+        }
     }
 
     private static final class Utility {
