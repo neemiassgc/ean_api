@@ -1,7 +1,6 @@
 package com.api.service;
 
 import com.api.Resources;
-import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.repository.ProductRepository;
@@ -13,10 +12,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -205,7 +202,7 @@ public class ProductServiceTest {
             final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
             final Pageable theFirstPageWithThreeProducts = PageRequest.of(0, 3, orderBySequenceCodeDesc);
             given(productRepositoryMock.findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProducts)))
-                .willReturn(Utility.createPage(Utility.getAllContaining(expressionToLookFor)));
+                .willReturn(Utility.createPage(Utility.getAllContaining()));
 
             final Page<Product> actualPage =
                 productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProducts);
@@ -268,7 +265,7 @@ public class ProductServiceTest {
             final String startsWith = "bisc";
             given(productRepositoryMock
                 .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts)))
-                .willReturn(Utility.createPage(Utility.getAllStartingWith(startsWith)));
+                .willReturn(Utility.createPage(Utility.getAllStartingWith()));
 
             final Page<Product> actualPage = productServiceUnderTest
                 .findAllByDescriptionIgnoreCaseStartingWith(startsWith, firstPageWithTwoProducts);
@@ -342,7 +339,7 @@ public class ProductServiceTest {
             final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2).withSort(orderByDescriptionAsc);
             final String endsWith = "choc";
             given(productRepositoryMock.findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts)))
-                .willReturn(Utility.createPage(Utility.getAllEndingWith(endsWith)));
+                .willReturn(Utility.createPage(Utility.getAllEndingWith()));
 
             final Page<Product> actualPage =
                 productServiceUnderTest.findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
@@ -408,10 +405,6 @@ public class ProductServiceTest {
             return new PageImpl<>(content);
         }
 
-        private static List<Product> getUntil(final int index) {
-            return Resources.PRODUCTS_SAMPLE.subList(0, index);
-        }
-
         private static List<Product> getAllByFiltering(final Predicate<String> predicate) {
             return Resources
                 .PRODUCTS_SAMPLE
@@ -420,16 +413,16 @@ public class ProductServiceTest {
                 .collect(Collectors.toList());
         }
 
-        private static List<Product> getAllContaining(final String expression) {
-            return getAllByFiltering(description -> description.contains(expression));
+        private static List<Product> getAllContaining() {
+            return getAllByFiltering(description -> description.contains("500g"));
         }
 
-        private static List<Product> getAllStartingWith(final String expression) {
-            return getAllByFiltering(description -> description.startsWith(expression));
+        private static List<Product> getAllStartingWith() {
+            return getAllByFiltering(description -> description.startsWith("bisc"));
         }
 
-        private static List<Product> getAllEndingWith(final String expression) {
-            return getAllByFiltering(description -> description.endsWith(expression));
+        private static List<Product> getAllEndingWith() {
+            return getAllByFiltering(description -> description.endsWith("choc"));
         }
     }
 }
