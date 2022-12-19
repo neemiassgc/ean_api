@@ -241,7 +241,7 @@ public class ProductServiceIT {
     }
 
     @Nested
-    @Transactional
+    @Transactional(readOnly = true)
     class FindAllByDescriptionIgnoreCaseEndingWithTest {
 
         @Test
@@ -263,6 +263,21 @@ public class ProductServiceIT {
             assertThat(actualPage.getContent())
                 .extracting(Product::getSequenceCode).containsExactly(120983, 9785);
             assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(11);
+        }
+
+        @Test
+        @DisplayName("When ends-with is empty then should return an empty page")
+        void when_ends_with_is_empty_then_should_an_empty_page() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2).withSort(orderByDescriptionAsc);
+            final String endsWith = "";
+
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getTotalElements()).isZero();
+            assertThat(actualPage.getContent()).isEmpty();
         }
     }
 
