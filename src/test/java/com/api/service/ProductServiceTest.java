@@ -340,10 +340,6 @@ public class ProductServiceTest {
 
     private static final class Utility {
 
-        private static List<Product> getAllProducts() {
-            return Resources.PRODUCTS_SAMPLE;
-        }
-
         private static Page<Product> createPage(final List<Product> content) {
             return new PageImpl<>(content);
         }
