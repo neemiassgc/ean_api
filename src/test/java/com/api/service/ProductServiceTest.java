@@ -1,5 +1,6 @@
 package com.api.service;
 
+import com.api.Resources;
 import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.projection.SimpleProductWithStatus;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +44,8 @@ public class ProductServiceTest {
     @Nested
     class GetByBarcodeAndSaveIfNecessaryTest {
 
-        private static final String BARCODE = "7891000055120";
+        private final String BARCODE = "7891000055120";
+        private final Product EXPECTED_PRODUCT = Resources.PRODUCTS_SAMPLE.get(0);
 
         @Test
         @DisplayName("Should throw NullPointerException")
@@ -59,9 +62,7 @@ public class ProductServiceTest {
         @Test
         @DisplayName("Should return a product from db")
         void when_a_product_exist_in_db_then_should_return_it() {
-            final Product expectedProduct = Resources.PRODUCT_LIST.get(0);
-            given(productRepositoryMock.findByBarcode(eq(BARCODE)))
-                .willReturn(Optional.of(expectedProduct));
+            given(productRepositoryMock.findByBarcode(eq(BARCODE))).willReturn(Optional.of(EXPECTED_PRODUCT));
 
             final SimpleProductWithStatus actualSimpleProductWithStatus =
                 productServiceUnderTest.getByBarcodeAndSaveIfNecessary(BARCODE);
@@ -75,12 +76,9 @@ public class ProductServiceTest {
         @Test
         @DisplayName("Should return a product from an external api")
         void when_a_product_does_not_exist_in_db_then_should_return_from_an_external_api() {
-            final Product expectedProduct = Resources.PRODUCT_LIST.get(0);
-            given(productRepositoryMock.findByBarcode(eq(BARCODE)))
-                .willReturn(Optional.empty());
-            given(productExternalServiceMock.fetchByBarcode(eq(BARCODE)))
-                .willReturn(Optional.of(expectedProduct));
-            given(productRepositoryMock.save(eq(expectedProduct)))
+            given(productRepositoryMock.findByBarcode(eq(BARCODE))).willReturn(Optional.empty());
+            given(productExternalServiceMock.fetchByBarcode(eq(BARCODE))).willReturn(Optional.of(EXPECTED_PRODUCT));
+            given(productRepositoryMock.save(eq(EXPECTED_PRODUCT)))
                 .willAnswer(answer -> answer.getArgument(0, Product.class));
 
             final SimpleProductWithStatus actualSimpleProductWithStatus =
@@ -90,20 +88,18 @@ public class ProductServiceTest {
 
             verify(productRepositoryMock, times(1)).findByBarcode(eq(BARCODE));
             verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(BARCODE));
-            verify(productRepositoryMock, times(1)).save(eq(expectedProduct));
+            verify(productRepositoryMock, times(1)).save(eq(EXPECTED_PRODUCT));
         }
 
         @Test
         @DisplayName("Should throw an ResponseStatusException | NOT FOUND")
         void when_a_product_is_not_found_then_should_throw_an_exception() {
-            final String nonExistentBarcodeAnywhere = "7891000055345";
-            given(productRepositoryMock.findByBarcode(eq(nonExistentBarcodeAnywhere)))
-                .willReturn(Optional.empty());
-            given(productExternalServiceMock.fetchByBarcode(eq(nonExistentBarcodeAnywhere)))
-                .willReturn(Optional.empty());
+            final String nonExistentBarcode = "7891000055345";
+            given(productRepositoryMock.findByBarcode(eq(nonExistentBarcode))).willReturn(Optional.empty());
+            given(productExternalServiceMock.fetchByBarcode(eq(nonExistentBarcode))).willReturn(Optional.empty());
 
             final Throwable actualThrowable =
-                catchThrowable(() -> productServiceUnderTest.getByBarcodeAndSaveIfNecessary(nonExistentBarcodeAnywhere));
+                catchThrowable(() -> productServiceUnderTest.getByBarcodeAndSaveIfNecessary(nonExistentBarcode));
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
@@ -112,8 +108,8 @@ public class ProductServiceTest {
                 assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
             });
 
-            verify(productRepositoryMock, times(1)).findByBarcode(eq(nonExistentBarcodeAnywhere));
-            verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(nonExistentBarcodeAnywhere));
+            verify(productRepositoryMock, times(1)).findByBarcode(eq(nonExistentBarcode));
+            verify(productExternalServiceMock, times(1)).fetchByBarcode(eq(nonExistentBarcode));
             verifyNoMoreInteractions(productRepositoryMock, productExternalServiceMock);
         }
 
@@ -131,13 +127,12 @@ public class ProductServiceTest {
     @Test
     @DisplayName("Should return all products available")
     void should_return_all_products_available() {
-        given(productRepositoryMock.findAllWithLastPrice())
-            .willReturn(Resources.PRODUCT_LIST);
+        given(productRepositoryMock.findAllWithLastPrice()).willReturn(Resources.PRODUCTS_SAMPLE);
 
         final List<Product> actualProducts = productServiceUnderTest.findAllWithLatestPrice();
 
-        assertThat(actualProducts).hasSize(3);
-        assertThat(actualProducts).extracting(Product::getPrices).hasSize(3);
+        assertThat(actualProducts).hasSize(18);
+        assertThat(actualProducts).flatExtracting(Product::getPrices).hasSize(54);
 
         verify(productRepositoryMock, times(1)).findAllWithLastPrice();
         verify(productRepositoryMock, only()).findAllWithLastPrice();
@@ -146,23 +141,29 @@ public class ProductServiceTest {
     @Nested
     class FindAllTest {
 
-        private final List<Product> ORDERED_LIST = Resources.PRODUCT_LIST
+        private final List<Product> ORDERED_LIST = Resources.PRODUCTS_SAMPLE
             .stream()
-            .sorted(Comparator.comparing(Product::getSequenceCode))
+            .sorted(Comparator.comparing(Product::getDescription))
             .collect(Collectors.toList());
 
         private final Sort ORDER_BY_SEQUENCE_CODE = Sort.by("sequenceCode").ascending();
 
         @Test
-        @DisplayName("Should return all products ordered by its sequence code")
-        void should_return_all_products_ordered_by_its_sequence_code() {
-            given(productRepositoryMock.findAll(eq(ORDER_BY_SEQUENCE_CODE)))
-                .willReturn(ORDERED_LIST);
+        @DisplayName("Should return all products ordered by its description")
+        void should_return_all_products_ordered_by_its_description() {
+            given(productRepositoryMock.findAll(eq(ORDER_BY_SEQUENCE_CODE))).willReturn(ORDERED_LIST);
 
             final List<Product> actualList = productServiceUnderTest.findAll(ORDER_BY_SEQUENCE_CODE);
+            final Integer[] expectedSequenceCodes = new Integer[] {
+                29250, 120983, 93556, 127635,
+                122504, 144038, 98894, 2909,
+                892, 141947, 87689, 134049,
+                5648, 30881, 25336, 6367,
+                128177, 125017
+            };
 
-            assertThat(actualList).hasSize(3);
-            checkSortingWithSequenceCode(actualList, 29250, 93556, 120983);
+            assertThat(actualList).hasSize(18);
+            checkSortingWithSequenceCode(actualList, expectedSequenceCodes);
 
             verify(productRepositoryMock, times(1)).findAll(eq(ORDER_BY_SEQUENCE_CODE));
             verify(productRepositoryMock, only()).findAll(eq(ORDER_BY_SEQUENCE_CODE));
@@ -171,21 +172,21 @@ public class ProductServiceTest {
         @Test
         @DisplayName("Should return a page with the first two products")
         void should_return_a_page_with_the_first_two_products_ordered_by_its_sequence_code() {
-            final Pageable pageWithTheFirstTwoProducts = PageRequest.of(0, 2).withSort(ORDER_BY_SEQUENCE_CODE);
-            final List<Product> twoProducts = ORDERED_LIST.subList(0, 2);
-            given(productRepositoryMock.findAll(eq(pageWithTheFirstTwoProducts)))
-                .willReturn(new PageImpl<>(twoProducts));
+            final Pageable pageWithTwoProducts = PageRequest.of(0, 2).withSort(ORDER_BY_SEQUENCE_CODE);
+            final List<Product> theFistTwoProducts = ORDERED_LIST.subList(0, 2);
+            given(productRepositoryMock.findAll(eq(pageWithTwoProducts)))
+                .willReturn(Utility.createPage(theFistTwoProducts));
 
-            final Page<Product> actualPage = productServiceUnderTest.findAll(pageWithTheFirstTwoProducts);
+            final Page<Product> actualPage = productServiceUnderTest.findAll(pageWithTwoProducts);
 
             assertThat(actualPage).isNotNull();
             assertThat(actualPage.getTotalPages()).isOne();
             assertThat(actualPage.getTotalElements()).isEqualTo(2);
             assertThat(actualPage.getContent()).hasSize(2);
-            checkSortingWithSequenceCode(actualPage.getContent(), 29250, 93556);
+            checkSortingWithSequenceCode(actualPage.getContent(), 29250, 120983);
 
-            verify(productRepositoryMock, times(1)).findAll(eq(pageWithTheFirstTwoProducts));
-            verify(productRepositoryMock, only()).findAll(eq(pageWithTheFirstTwoProducts));
+            verify(productRepositoryMock, times(1)).findAll(eq(pageWithTwoProducts));
+            verify(productRepositoryMock, only()).findAll(eq(pageWithTwoProducts));
         }
 
         private void checkSortingWithSequenceCode(final List<Product> actualProducts, final Integer... sequenceCodes) {
@@ -198,25 +199,25 @@ public class ProductServiceTest {
     class FindAllByUsernameIgnoreCaseContainingTest {
 
         @Test
-        @DisplayName("Should return a page with two products like username")
-        void should_return_a_page_with_two_products_like_username() {
-            final String expressionToLookFor = "achoc";
+        @DisplayName("Should return a page with three products that contain 500g")
+        void should_return_a_page_with_three_products_that_contain_500g() {
+            final String expressionToLookFor = "500g";
             final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
-            final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
-            given(productRepositoryMock.findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess)))
-                .willReturn(new PageImpl<>(Resources.PRODUCT_LIST.subList(0, 1)));
+            final Pageable theFirstPageWithThreeProducts = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            given(productRepositoryMock.findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProducts)))
+                .willReturn(Utility.createPage(Utility.getAllContaining(expressionToLookFor)));
 
             final Page<Product> actualPage =
-                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProductsOrLess);
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(expressionToLookFor, theFirstPageWithThreeProducts);
 
-            assertThat(actualPage.getContent()).hasSize(1);
-            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(3);
-            assertThat(actualPage).extracting(Product::getSequenceCode).containsExactly(29250);
+            assertThat(actualPage.getContent()).hasSize(3);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(9);
+            assertThat(actualPage).extracting(Product::getSequenceCode).containsExactly(93556, 2909, 128177);
 
             verify(productRepositoryMock, times(1))
-                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess));
+                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProducts));
             verify(productRepositoryMock, only())
-                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProductsOrLess));
+                .findAllByDescriptionIgnoreCaseContaining(eq(expressionToLookFor), eq(theFirstPageWithThreeProducts));
         }
 
         @Test
@@ -224,10 +225,10 @@ public class ProductServiceTest {
         void when_expression_is_empty_then_should_not_return_any_products() {
             final String emptyExpression = "";
             final Sort orderBySequenceCodeDesc = Sort.by("sequenceCode").descending();
-            final Pageable theFirstPageWithThreeProductsOrLess = PageRequest.of(0, 3, orderBySequenceCodeDesc);
+            final Pageable theFirstPageWithThreeProducts = PageRequest.of(0, 3, orderBySequenceCodeDesc);
 
             final Page<Product> actualPage =
-                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProductsOrLess);
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseContaining(emptyExpression, theFirstPageWithThreeProducts);
 
             assertThat(actualPage.getContent()).isEmpty();
 
@@ -260,69 +261,69 @@ public class ProductServiceTest {
     class FindAllByDescriptionIgnoreCaseStartingWithTest {
 
         @Test
-        @DisplayName("Should return a page with two products filtered by starting with a")
-        void should_return_page_with_two_products() {
+        @DisplayName("Should return a page with three products that start with bisc")
+        void should_return_a_page_with_three_products_that_start_with_bisc() {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable aPageWithTheFirstTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
-            final String startsWith = "a";
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final String startsWith = "bisc";
             given(productRepositoryMock
-                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts)))
-                .willReturn(new PageImpl<>(Resources.PRODUCT_LIST.subList(0, 2)));
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts)))
+                .willReturn(Utility.createPage(Utility.getAllStartingWith(startsWith)));
 
             final Page<Product> actualPage = productServiceUnderTest
-                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheFirstTwoProducts);
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, firstPageWithTwoProducts);
 
             assertThat(actualPage).isNotNull();
             assertThat(actualPage.getTotalPages()).isOne();
-            assertThat(actualPage.getTotalElements()).isEqualTo(2);
-            assertThat(actualPage.getContent()).hasSize(2);
+            assertThat(actualPage.getTotalElements()).isEqualTo(3);
+            assertThat(actualPage.getContent()).hasSize(3);
             assertThat(actualPage.getContent())
                 .extracting(Product::getSequenceCode)
-                .containsExactly(29250, 120983);
+                .containsExactly(127635, 122504, 144038);
             assertThat(actualPage.getContent())
-                .flatExtracting(Product::getPrices).hasSize(6);
+                .flatExtracting(Product::getPrices).hasSize(9);
 
             verify(productRepositoryMock, times(1))
-                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts));
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
             verify(productRepositoryMock, only())
-                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts));
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
         }
 
         @Test
         @DisplayName("Should return an empty page when startsWith does not match anything")
         void should_return_an_empty_page_when_startsWith_does_not_match_anything() {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable aPageWithTheFirstTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
             final String startsWith = "pao";
 
             given(productRepositoryMock
-                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts)))
-                .willReturn(new PageImpl<>(Collections.emptyList()));
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts)))
+                .willReturn(Utility.createPage(Collections.emptyList()));
 
             final Page<Product> actualPage = productServiceUnderTest
-                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheFirstTwoProducts);
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, firstPageWithTwoProducts);
 
             assertThat(actualPage).isNotNull();
             assertThat(actualPage.getContent()).isEmpty();
 
             verify(productRepositoryMock, times(1))
-                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts));
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
             verify(productRepositoryMock, only())
-                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts));
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
         }
 
         @Test
         @DisplayName("Should return an empty page when startsWith is an empty value")
         void should_return_an_empty_page_when_startsWith_is_an_empty_value() {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable aPageWithTheFirstTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
             final String startsWith = "";
             given(productRepositoryMock
-                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(aPageWithTheFirstTwoProducts)))
-                .willReturn(new PageImpl<>(Collections.emptyList()));
+                .findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts)))
+                .willReturn(Utility.createPage(Collections.emptyList()));
 
             final Page<Product> actualPage = productServiceUnderTest
-                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheFirstTwoProducts);
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, firstPageWithTwoProducts);
 
             assertThat(actualPage).isNotNull();
             assertThat(actualPage.getContent()).isEmpty();
@@ -347,8 +348,8 @@ public class ProductServiceTest {
             return new PageImpl<>(content);
         }
 
-        private static Product getFrom(final int index) {
-            return Resources.PRODUCTS_SAMPLE.get(index + 1);
+        private static List<Product> getUntil(final int index) {
+            return Resources.PRODUCTS_SAMPLE.subList(0, index);
         }
 
         private static List<Product> getAllByFiltering(final Predicate<String> predicate) {
