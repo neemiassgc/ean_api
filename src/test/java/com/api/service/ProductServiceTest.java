@@ -361,6 +361,23 @@ public class ProductServiceTest {
                 .findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts));
 
         }
+
+        @Test
+        @DisplayName("When ends with is empty then should return an empty page")
+        void when_ends_with_is_empty_then_should_return_an_empty_page() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2).withSort(orderByDescriptionAsc);
+            final String endsWith = "";
+
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage).isEmpty();
+            assertThat(actualPage.getTotalElements()).isZero();
+
+            verifyNoInteractions(productRepositoryMock);
+        }
     }
 
     private static final class Utility {
