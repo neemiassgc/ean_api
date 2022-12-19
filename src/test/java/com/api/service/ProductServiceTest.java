@@ -335,7 +335,32 @@ public class ProductServiceTest {
     @Nested
     class FindAllByDescriptionIgnoreCaseEndingWithTest {
 
+        @Test
+        @DisplayName("Should return a page with two products that end with choc")
+        void should_return_a_page_with_two_products_that_end_with_choc() {
+            final Sort orderByDescriptionAsc = Sort.by("description").ascending();
+            final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2).withSort(orderByDescriptionAsc);
+            final String endsWith = "choc";
+            given(productRepositoryMock.findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts)))
+                .willReturn(Utility.createPage(Utility.getAllEndingWith(endsWith)));
 
+            final Page<Product> actualPage =
+                productServiceUnderTest.findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
+
+            assertThat(actualPage).isNotNull();
+            assertThat(actualPage.getTotalPages()).isOne();
+            assertThat(actualPage.getTotalElements()).isEqualTo(2);
+            assertThat(actualPage.getContent()).hasSize(2);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(6);
+            assertThat(actualPage.getContent())
+                .extracting(Product::getSequenceCode).containsExactly(122504, 98894);
+
+            verify(productRepositoryMock, times(1))
+                .findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts));
+            verify(productRepositoryMock, only())
+                .findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithTwoProducts));
+
+        }
     }
 
     private static final class Utility {
