@@ -488,4 +488,9 @@ class ProductControllerTest {
             verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(startsWith), eq(firstPageWithFiveProducts));
         }
     }
+
+    @Nested
+    class GetAllPagedEndingWithDescriptionTest {
+
+    }
 }
