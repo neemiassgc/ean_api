@@ -583,5 +583,25 @@ class ProductControllerTest {
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(emptyEndsWith), eq(firstPageWithThreeProducts));
             verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(emptyEndsWith), eq(firstPageWithThreeProducts));
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=0-3&ends-with=toddy -> 200 OK")
+        void when_endsWith_does_not_match_anything_then_should_return_an_empty_json__OK() throws Exception {
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable firstPageWithThreeProducts = createPageable("0-3", orderByDescriptionAsc);
+            final String endsWith = "toddy";
+
+            given(productService.findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithThreeProducts)))
+                .willReturn(emptyPage());
+
+            makeRequestWithPageAndEndsWith("0-3", endsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithThreeProducts));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithThreeProducts));
+        }
     }
 }
