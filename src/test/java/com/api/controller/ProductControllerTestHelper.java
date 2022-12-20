@@ -122,10 +122,16 @@ final class ProductControllerTestHelper {
         private ContentTester() {}
 
         private String nextPageExpression;
+        private String[] descriptions;
         private String[] expectedBarcodeSet;
 
         static ContentTester builder() {
             return new ContentTester();
+        }
+
+        ContentTester withDescriptions(final String... descriptions) {
+            this.descriptions = descriptions;
+            return this;
         }
 
         ContentTester withNextPage(final String nextPageExpression) {
@@ -140,6 +146,8 @@ final class ProductControllerTestHelper {
 
         ResultMatcher[] test() {
             final List<ResultMatcher> resultMatcherList = new ArrayList<>(7);
+            if (Objects.nonNull(descriptions))
+                resultMatcherList.add(jsonPath("$.content[*].description", contains(descriptions)));
             resultMatcherList.add(jsonPath("$.content[*].barcode", contains(expectedBarcodeSet)));
             resultMatcherList.add(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))));
             resultMatcherList.add(jsonPath("$.content[*].links[0].href", contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeSet))));
