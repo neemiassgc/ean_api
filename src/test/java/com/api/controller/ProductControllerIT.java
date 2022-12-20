@@ -8,11 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 import static com.api.controller.ProductControllerTestHelper.*;
 import static org.hamcrest.Matchers.*;
@@ -330,45 +325,6 @@ public class ProductControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isEmpty());
-        }
-    }
-
-    private final static class ContentTester {
-
-        private ContentTester() {}
-
-        private String nextPageExpression;
-        private String[] expectedBarcodeSet;
-
-        private static ContentTester builder() {
-            return new ContentTester();
-        }
-
-        private ContentTester withNextPage(final String nextPageExpression) {
-            this.nextPageExpression = nextPageExpression;
-            return this;
-        }
-
-        private ContentTester withExpectedBarcodeSet(final String... expectedBarcodeSet) {
-            this.expectedBarcodeSet = expectedBarcodeSet;
-            return this;
-        }
-
-        private ResultMatcher[] test() {
-            final List<ResultMatcher> resultMatcherList = new ArrayList<>(7);
-            resultMatcherList.add(jsonPath("$.content[*].barcode", contains(expectedBarcodeSet)));
-            resultMatcherList.add(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))));
-            resultMatcherList.add(jsonPath("$.content[*].links[0].href", contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeSet))));
-            resultMatcherList.add(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))));
-            resultMatcherList.add(jsonPath("$.content[*].links[1].href", contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeSet))));
-
-            if (Objects.nonNull(nextPageExpression)) {
-                resultMatcherList.add(jsonPath("$.links[0].rel").value("Next page"));
-                resultMatcherList.add(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL + "?pag=" + nextPageExpression));
-            }
-            else resultMatcherList.add(jsonPath("$.links").isEmpty());
-
-            return resultMatcherList.toArray(ResultMatcher[]::new);
         }
     }
 }
