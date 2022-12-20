@@ -111,7 +111,7 @@ class ProductControllerTest {
             given(productService.findAll(eq(firstPageWithFiveProducts)))
                 .willReturn(createPage(firstPageWithFiveProducts));
 
-            final String[] expectedBarcodeList = {
+            final String[] expectedBarcodeSet = {
                 "7891000055120", "7896336010058",
                 "78982797922990", "7896003737257",
                 "7896071024709"
@@ -119,24 +119,15 @@ class ProductControllerTest {
             makeRequestWithPage("0-5")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[*].barcode", contains(expectedBarcodeList)))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                    "$.content[*].links[0].href",
-                    contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
-                ))
-                .andExpect(jsonPath(
-                    "$.content[*].links[1].href",
-                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
-                ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.totalOfItems").value(18))
-                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-5"));
+                .andExpectAll(ContentTester.builder()
+                    .withExpectedBarcodeSet(expectedBarcodeSet)
+                    .withNextPage("1-5").test()
+                );
 
             verify(productService, times(1)).findAll(eq(firstPageWithFiveProducts));
         }
@@ -150,7 +141,7 @@ class ProductControllerTest {
             given(productService.findAll(eq(secondPageWithFiveProducts)))
                 .willReturn(createPage(secondPageWithFiveProducts));
 
-            final String[] expectedBarcodeList = {
+            final String[] expectedBarcodeSet = {
                 "7896085087028", "7891962037219",
                 "7896656800018", "7891000000427",
                 "7891150080850"
@@ -159,24 +150,15 @@ class ProductControllerTest {
             makeRequestWithPage("1-5")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[*].barcode", contains(expectedBarcodeList)))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                        "$.content[*].links[0].href",
-                        contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
-                ))
-                .andExpect(jsonPath(
-                        "$.content[*].links[1].href",
-                        contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
-                ))
                 .andExpect(jsonPath("$.currentPage").value(1))
                 .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
                 .andExpect(jsonPath("$.totalOfItems").value(18))
                 .andExpect(jsonPath("$.hasNext").value(true))
-                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=2-5"));
+                .andExpectAll(ContentTester.builder()
+                    .withExpectedBarcodeSet(expectedBarcodeSet)
+                    .withNextPage("2-5").test()
+                );
 
             verify(productService, times(1)).findAll(eq(secondPageWithFiveProducts));
         }
@@ -190,7 +172,7 @@ class ProductControllerTest {
             given(productService.findAll(eq(thirdPageWithFiveProducts)))
                 .willReturn(createPage(thirdPageWithFiveProducts));
 
-            final String[] expectedBarcodeList = {
+            final String[] expectedBarcodeSet = {
                 "7896102513714", "7896292340503",
                 "7896036090619", "7898930672441",
                 "7891172422379"
@@ -199,24 +181,15 @@ class ProductControllerTest {
             makeRequestWithPage("2-5")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[*].barcode", contains(expectedBarcodeList)))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                    "$.content[*].links[0].href",
-                    contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
-                ))
-                .andExpect(jsonPath(
-                    "$.content[*].links[1].href",
-                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
-                ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.currentPage").value(2))
                 .andExpect(jsonPath("$.totalOfItems").value(18))
-                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=3-5"));
+                .andExpectAll(ContentTester.builder()
+                    .withExpectedBarcodeSet(expectedBarcodeSet)
+                    .withNextPage("3-5").test()
+                );
 
             verify(productService, times(1)).findAll(eq(thirdPageWithFiveProducts));
         }
@@ -230,29 +203,17 @@ class ProductControllerTest {
             given(productService.findAll(eq(fourthPageWithThreeProducts)))
                 .willReturn(createPage(fourthPageWithThreeProducts));
 
-            final String[] expectedBarcodeList = { "7891991002646", "7896110195162", "7896048285539" };
+            final String[] expectedBarcodeSet = { "7891991002646", "7896110195162", "7896048285539" };
 
             makeRequestWithPage("3-5")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[*].barcode", contains(expectedBarcodeList)))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                        "$.content[*].links[0].href",
-                        contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))
-                ))
-                .andExpect(jsonPath(
-                        "$.content[*].links[1].href",
-                        contains(concatWithUrl(Constants.PRODUCTS_URL+"/", expectedBarcodeList))
-                ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(false))
                 .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.currentPage").value(3))
                 .andExpect(jsonPath("$.totalOfItems").value(18))
-                .andExpect(jsonPath("$.links").isArray())
-                .andExpect(jsonPath("$.links").isEmpty());
+                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet(expectedBarcodeSet).test());
 
             verify(productService, times(1)).findAll(eq(fourthPageWithThreeProducts));
         }
@@ -336,28 +297,24 @@ class ProductControllerTest {
             given(productService.findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts)))
                 .willReturn(createPage(firstPageWithTwoProducts, filterByContaining(contains)));
 
+            final String[] expectedBarcodeSet = new String[]{"78982797922990", "7896656800018"};
+
             makeRequestWithPageAndContains("0-2", contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[*].description", contains("BALA GELATINA FINI 500G BURGUER", "CAFE UTAM 500G")))
-                .andExpect(jsonPath("$.content[*].barcode", contains("78982797922990", "7896656800018")))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                    "$.content[*].links[0].href",
-                    contains(concatWithUrl(Constants.PRICES_URL, "78982797922990", "7896656800018"))
-                ))
-                .andExpect(jsonPath(
-                    "$.content[*].links[1].href",
-                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "78982797922990", "7896656800018"))
-                ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(2))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.totalOfPages").value(2))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-2&contains=500g"));
+                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-2&contains=500g"))
+                .andExpectAll(ContentTester.builder()
+                    .withDescriptions("BALA GELATINA FINI 500G BURGUER", "CAFE UTAM 500G")
+                    .withExpectedBarcodeSet(expectedBarcodeSet)
+                    .withNextPage("1-2&contains=500g")
+                    .test()
+                );
 
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts));
             verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(firstPageWithTwoProducts));
@@ -417,31 +374,21 @@ class ProductControllerTest {
             given(productService.findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts)))
                 .willReturn(createPage(firstPageWithTwoProducts, filterByStartingWith(startsWith)));
 
+            final String[] expectedBarcodeSet = new String[]{"7896003737257", "7896071024709"};
+
             makeRequestWithPageAndStartsWith("0-2", startsWith)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath(
-                    "$.content[*].description",
-                    contains("BISC ROSQ MARILAN 350G INT", "BISC WAFER TODDY 132G CHOC")
-                ))
-                .andExpect(jsonPath("$.content[*].barcode", contains("7896003737257", "7896071024709")))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                    "$.content[*].links[0].href",
-                    contains(concatWithUrl(Constants.PRICES_URL, "7896003737257", "7896071024709"))
-                ))
-                .andExpect(jsonPath(
-                    "$.content[*].links[1].href",
-                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "7896003737257", "7896071024709"))
-                ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(2))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.totalOfPages").value(2))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
-                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-2&starts-with=bisc"));
+                .andExpectAll(ContentTester.builder()
+                    .withDescriptions("BISC ROSQ MARILAN 350G INT", "BISC WAFER TODDY 132G CHOC")
+                    .withExpectedBarcodeSet(expectedBarcodeSet)
+                    .withNextPage("1-2&starts-with=bisc").test()
+                );
 
 
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseStartingWith(eq(startsWith), eq(firstPageWithTwoProducts));
@@ -504,25 +451,16 @@ class ProductControllerTest {
             makeRequestWithPageAndEndsWith("0-1", endsWith)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[*].description", contains("BISC WAFER TODDY 132G CHOC")))
-                .andExpect(jsonPath("$.content[*].barcode", contains("7896071024709")))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                    "$.content[*].links[0].href",
-                    contains(concatWithUrl(Constants.PRICES_URL, "7896071024709"))
-                ))
-                .andExpect(jsonPath(
-                    "$.content[*].links[1].href",
-                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "7896071024709"))
-                ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(1))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.totalOfPages").value(2))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.totalOfItems").value(2))
-                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
-                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-1&ends-with="+endsWith));
+                .andExpectAll(ContentTester.builder()
+                    .withExpectedBarcodeSet("7896071024709")
+                    .withDescriptions("BISC WAFER TODDY 132G CHOC")
+                    .withNextPage("1-1&ends-with="+endsWith).test()
+                );
 
 
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct));
@@ -541,23 +479,15 @@ class ProductControllerTest {
             makeRequestWithPageAndEndsWith("1-1", endsWith)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content[*].description", contains("BOLINHO BAUDUC 40G GOTAS CHOC")))
-                .andExpect(jsonPath("$.content[*].barcode", contains("7891962037219")))
-                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
-                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
-                .andExpect(jsonPath(
-                    "$.content[*].links[0].href",
-                    contains(concatWithUrl(Constants.PRICES_URL, "7891962037219"))
-                ))
-                .andExpect(jsonPath(
-                    "$.content[*].links[1].href",
-                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "7891962037219"))
-                ))
                 .andExpect(jsonPath("$.currentCountOfItems").value(1))
                 .andExpect(jsonPath("$.hasNext").value(false))
                 .andExpect(jsonPath("$.totalOfPages").value(2))
                 .andExpect(jsonPath("$.currentPage").value(1))
-                .andExpect(jsonPath("$.totalOfItems").value(2));
+                .andExpect(jsonPath("$.totalOfItems").value(2))
+                    .andExpectAll(ContentTester.builder()
+                    .withDescriptions("BOLINHO BAUDUC 40G GOTAS CHOC")
+                    .withExpectedBarcodeSet("7891962037219").test()
+                );
 
 
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(theLastPageWithOneProduct));
