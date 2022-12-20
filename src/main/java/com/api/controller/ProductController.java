@@ -14,16 +14,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -81,6 +80,18 @@ public class ProductController {
         final String nextPage = calculateNextPage(productPage);
 
         return feedWithLinks(productPage, controller -> controller.getAllPagedStartingWithDescription(nextPage, startsWith));
+    }
+
+    @GetMapping(path = "/products", params = {"pag", "ends-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAllPagedEndingWithDescription(
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
+        @RequestParam("ends-with") @NotNull String endsWith
+    ) {
+        final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
+        final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseEndingWith(endsWith, pageable);
+        final String nextPage = calculateNextPage(productPage);
+
+        return feedWithLinks(productPage, controller -> controller.getAllPagedEndingWithDescription(nextPage, endsWith));
     }
 
     private ResponseEntity<?> feedWithLinks(final Page<Product> productPage, final Function<ProductController, ResponseEntity<?>> function) {
