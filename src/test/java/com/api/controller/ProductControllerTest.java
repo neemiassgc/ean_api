@@ -528,5 +528,40 @@ class ProductControllerTest {
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct));
             verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct));
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=1-1&ends-with=choc -> 200 OK")
+        void should_return_the_last_page_with_one_product_that_end_with_choc__OK() throws Exception {
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable theLastPageWithOneProduct = createPageable("1-1", orderByDescriptionAsc);
+            final String endsWith = "choc";
+            given(productService.findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(theLastPageWithOneProduct)))
+                .willReturn(createPage(theLastPageWithOneProduct, filterByEndingWith(endsWith)));
+
+            makeRequestWithPageAndEndsWith("1-1", endsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content[*].description", contains("BOLINHO BAUDUC 40G GOTAS CHOC")))
+                .andExpect(jsonPath("$.content[*].barcode", contains("7891962037219")))
+                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(jsonPath(
+                    "$.content[*].links[0].href",
+                    contains(concatWithUrl(Constants.PRICES_URL, "7891962037219"))
+                ))
+                .andExpect(jsonPath(
+                    "$.content[*].links[1].href",
+                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "7891962037219"))
+                ))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.totalOfItems").value(2));
+
+
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(theLastPageWithOneProduct));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(theLastPageWithOneProduct));
+        }
     }
 }
