@@ -492,5 +492,41 @@ class ProductControllerTest {
     @Nested
     class GetAllPagedEndingWithDescriptionTest {
 
+        @Test
+        @DisplayName("GET /api/products?pag=0-1&ends-with=choc -> 200 OK")
+        void should_return_a_page_with_one_product_that_end_with_choc__OK() throws Exception {
+            final Sort orderByDescriptionAsc = getDefaultSorting();
+            final Pageable firstPageWithOneProduct = createPageable("0-1", orderByDescriptionAsc);
+            final String endsWith = "choc";
+            given(productService.findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct)))
+                .willReturn(createPage(firstPageWithOneProduct, filterByEndingWith(endsWith)));
+
+            makeRequestWithPageAndEndsWith("0-1", endsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content[*].description", contains("BISC WAFER TODDY 132G CHOC")))
+                .andExpect(jsonPath("$.content[*].barcode", contains("7896071024709")))
+                .andExpect(jsonPath("$.content[*].links[0].rel", everyItem(equalTo("prices"))))
+                .andExpect(jsonPath("$.content[*].links[1].rel", everyItem(equalTo("self"))))
+                .andExpect(jsonPath(
+                    "$.content[*].links[0].href",
+                    contains(concatWithUrl(Constants.PRICES_URL, "7896071024709"))
+                ))
+                .andExpect(jsonPath(
+                    "$.content[*].links[1].href",
+                    contains(concatWithUrl(Constants.PRODUCTS_URL+"/", "7896071024709"))
+                ))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalOfItems").value(2))
+                .andExpect(jsonPath("$.links[0].rel").value("Next page"))
+                .andExpect(jsonPath("$.links[0].href").value(Constants.PRODUCTS_URL+"?pag=1-1&ends-with="+endsWith));
+
+
+            verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct));
+            verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct));
+        }
     }
 }
