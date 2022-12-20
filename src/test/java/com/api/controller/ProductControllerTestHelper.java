@@ -60,6 +60,10 @@ final class ProductControllerTestHelper {
         return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&starts-with=%s", URL, page, startsWith))));
     }
 
+    static ResultActions makeRequestWithPageAndEndsWith(final String page, final String endsWith) throws Exception {
+        return mockMvc.perform(setupRequestHeaders(get(String.format("%s?pag=%s&ends-with=%s", URL, page, endsWith))));
+    }
+
     private static List<Product> filterByDescription(final Predicate<String> predicate) {
         return Resources.PRODUCTS_SAMPLE
             .stream()
