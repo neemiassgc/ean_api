@@ -281,7 +281,7 @@ class ProductControllerTest {
     class GetByBarcodeTest {
 
         @Test
-        @DisplayName("GET /api/products/7891000051230 -> 404 - NOT FOUND")
+        @DisplayName("GET /api/products/7891000051230 -> 404 NOT FOUND")
         void when_the_product_is_not_found_then_should_return_a_message_error__NOT_FOUND() throws Exception  {
             final String targetBarcode = "7891000051230";
 
@@ -299,7 +299,7 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("GET /api/products/7891000055120 -> 200 - OK")
+        @DisplayName("GET /api/products/7891000055120 -> 200 OK")
         void when_the_product_is_found_should_return_a_product__OK() throws Exception  {
             final String targetBarcode = "7891000055120";
             final SimpleProductWithStatus simpleProductWithStatus =
@@ -327,7 +327,7 @@ class ProductControllerTest {
     class GetAllPagedContainingDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=0-2&contains=500g -> 200 - OK")
+        @DisplayName("GET /api/products?pag=0-2&contains=500g -> 200 OK")
         void should_return_the_first_page_with_two_products_that_contain_500g__OK() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
             final Pageable firstPageWithTwoProducts = createPageable("0-2", orderByDescriptionAsc);
@@ -408,7 +408,7 @@ class ProductControllerTest {
     class GetAllPagedStartingWithDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=0-2&starts-with=bisc -> 200")
+        @DisplayName("GET /api/products?pag=0-2&starts-with=bisc -> 200 OK")
         void should_return_the_first_page_with_two_products_that_start_with_bisc__OK() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
             final Pageable firstPageWithTwoProducts = createPageable("0-2", orderByDescriptionAsc);
@@ -449,8 +449,8 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=0-5&starts-with= -> 200")
-        void when_startsWith_is_empty_then_should_return_an_empty_json__200() throws Exception {
+        @DisplayName("GET /api/products?pag=0-5&starts-with= -> 200 OK")
+        void when_startsWith_is_empty_then_should_return_an_empty_json__OK() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
             final Pageable firstPageWithFiveProducts = createPageable("0-5", orderByDescriptionAsc);
             final String startsWith = "";
@@ -469,8 +469,8 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=0-5&startsWith=cheese")
-        void when_startsWith_does_not_match_anything_then_should_return_an_empty_json__200() throws Exception {
+        @DisplayName("GET /api/products?pag=0-5&startsWith=cheese -> 200 OK")
+        void when_startsWith_does_not_match_anything_then_should_return_an_empty_json__OK() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
             final Pageable firstPageWithFiveProducts = createPageable("0-5", orderByDescriptionAsc);
             final String startsWith = "cheese";
