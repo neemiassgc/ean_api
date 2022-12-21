@@ -371,5 +371,17 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.hasNext").value(false))
                 .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7896036093085").test());
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=1-3&ends-with=mango -> 200 OK")
+        void when_ends_with_is_does_not_match_anything_then_should_return_an_empty_json__OK() throws Exception {
+            final String secondPageWithThreeProducts = "1-2";
+            final String endsWith = "mango";
+
+            makeRequestWithPageAndEndsWith(secondPageWithThreeProducts, endsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isEmpty());
+        }
     }
 }
