@@ -383,5 +383,17 @@ public class ProductControllerIT {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isEmpty());
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=1-3&ends-with= -> 200 OK")
+        void when_ends_with_is_empty_then_should_return_an_empty_json__OK() throws Exception {
+            final String secondPageWithThreeProducts = "1-2";
+            final String endsWith = "";
+
+            makeRequestWithPageAndEndsWith(secondPageWithThreeProducts, endsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isEmpty());
+        }
     }
 }
