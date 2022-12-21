@@ -352,5 +352,24 @@ public class ProductControllerIT {
                     .withNextPage("1-2&ends-with=a").test()
                 );
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=1-2&ends-with=a -> 200 OK")
+        void should_return_the_last_page_with_one_product__OK() throws Exception {
+            final String lastPageWithOneProduct = "1-2";
+            final String endsWith = "a";
+
+            makeRequestWithPageAndEndsWith(lastPageWithOneProduct, endsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7896036093085").test());
+        }
     }
 }
