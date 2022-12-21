@@ -331,5 +331,26 @@ public class ProductControllerIT {
     @Nested
     class GetAllPagedEndingWithDescriptionTest {
 
+        @Test
+        @DisplayName("GET /api/products?pag=0-2&ends-with=a -> 200 OK")
+        void should_return_the_first_page_with_two_products__OK() throws Exception {
+            final String firstPageWithTwoProducts = "0-2";
+            final String endsWith = "a";
+
+            makeRequestWithPageAndEndsWith(firstPageWithTwoProducts, endsWith)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalOfPages").value(2))
+                .andExpect(jsonPath("$.currentCountOfItems").value(2))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpectAll(ContentTester.builder()
+                    .withExpectedBarcodeSet("7896336010058", "7891098010575")
+                    .withNextPage("1-2&ends-with=a").test()
+                );
+        }
     }
 }
