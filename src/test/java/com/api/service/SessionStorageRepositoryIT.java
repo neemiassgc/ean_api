@@ -28,10 +28,10 @@ public class SessionStorageRepositoryIT {
 
         Assertions.assertThat(actualOptional).isNotNull();
         Assertions.assertThat(actualOptional).isPresent();
-        Assertions.assertThat(actualOptional.get().getCreationDate()).isEqualTo(LocalDate.of(2022, Month.JULY, 21));
+        Assertions.assertThat(actualOptional.get().getCreationDate()).isEqualTo(LocalDate.of(2022, Month.AUGUST, 22));
         Assertions.assertThat(actualOptional.get().getCookieKey()).isEqualTo("COOKIE_SAVEG_MOBILE");
-        Assertions.assertThat(actualOptional.get().getCookieValue()).isEqualTo("ORA_WWV-1Ad8ftQ9pjqwmineownr");
-        Assertions.assertThat(actualOptional.get().getInstance()).isEqualTo(4078553012341L);
-        Assertions.assertThat(actualOptional.get().getAjaxId()).isEqualTo("87C8742DE5B50364E11627DF664BB0QWEJPIOQJW983QWEJASDFJL5331F");
+        Assertions.assertThat(actualOptional.get().getCookieValue()).isEqualTo("ORA_WWV-HmoA2AwKhE2wAsGvDiUb7jX1; HttpOnly");
+        Assertions.assertThat(actualOptional.get().getInstance()).isEqualTo(5066967960488L);
+        Assertions.assertThat(actualOptional.get().getAjaxId()).isEqualTo("7DA1AD29552D4D7267E9B3B32D8BDF4D9DD98E92B089E3F8BE5F5409F3407F50");
     }
 }
