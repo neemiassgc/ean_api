@@ -49,15 +49,15 @@ public class ProductController {
     }
 
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getAllPaged(
+    public ResponseEntity<?> getAll(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag
     ) {
         final ProductData productData = new ProductData(pag, productService::findAll);
-        return feedWithLinks(productData.getProductPage(), controller -> controller.getAllPaged(productData.getNextPage()));
+        return feedWithLinks(productData.getProductPage(), controller -> controller.getAll(productData.getNextPage()));
     }
 
     @GetMapping(path = "/products", params = {"pag", "contains"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getAllPagedContainingDescription(
+    public ResponseEntity<?> getAllContainingDescription(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("contains") @NotNull String contains
     ) {
@@ -65,12 +65,12 @@ public class ProductController {
             new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseContaining(contains, pageable));
         return feedWithLinks(
             productData.getProductPage(),
-            controller -> controller.getAllPagedContainingDescription(productData.getNextPage(), contains)
+            controller -> controller.getAllContainingDescription(productData.getNextPage(), contains)
         );
     }
 
     @GetMapping(path = "/products", params = {"pag", "starts-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getAllPagedStartingWithDescription(
+    public ResponseEntity<?> getAllStartingWithDescription(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("starts-with") @NotNull String startsWith
     ) {
@@ -78,12 +78,12 @@ public class ProductController {
             new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageable));
         return feedWithLinks(
             productData.getProductPage(),
-            controller -> controller.getAllPagedStartingWithDescription(productData.getNextPage(), startsWith)
+            controller -> controller.getAllStartingWithDescription(productData.getNextPage(), startsWith)
         );
     }
 
     @GetMapping(path = "/products", params = {"pag", "ends-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getAllPagedEndingWithDescription(
+    public ResponseEntity<?> getAllEndingWithDescription(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("ends-with") @NotNull String endsWith
     ) {
@@ -91,7 +91,7 @@ public class ProductController {
             new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseEndingWith(endsWith, pageable));
         return feedWithLinks(
             productData.getProductPage(),
-            controller -> controller.getAllPagedEndingWithDescription(productData.getNextPage(), endsWith)
+            controller -> controller.getAllEndingWithDescription(productData.getNextPage(), endsWith)
         );
     }
 

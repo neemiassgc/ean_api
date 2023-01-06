@@ -85,24 +85,6 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("GET /api/products -> 200 OK")
-        void should_return_a_empty_json__OK() throws Exception {
-            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
-
-            makeRequest()
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
-
-            verify(productService, times(1)).findAll(ArgumentMatchers.any(Sort.class));
-        }
-    }
-
-    @Nested
-    class GetAllPagedTest {
-
-        @Test
         @DisplayName("GET /api/products?pag=0-5 -> 200 OK")
         void should_return_the_fist_page_with_five_products__OK() throws Exception  {
             final Sort orderByDescriptionAsc = getDefaultSorting();
@@ -236,6 +218,20 @@ class ProductControllerTest {
             verify(productService, times(1)).findAll(eq(fourthPageProductWithFiveProducts));
             verify(productService, only()).findAll(eq(fourthPageProductWithFiveProducts));
         }
+
+        @Test
+        @DisplayName("GET /api/products -> 200 OK")
+        void should_return_a_empty_json__OK() throws Exception {
+            given(productService.findAll(ArgumentMatchers.any(Sort.class))).willReturn(Collections.emptyList());
+
+            makeRequest()
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+            verify(productService, times(1)).findAll(ArgumentMatchers.any(Sort.class));
+        }
     }
 
     @Nested
@@ -285,7 +281,7 @@ class ProductControllerTest {
     }
 
     @Nested
-    class GetAllPagedContainingDescriptionTest {
+    class GetAllContainingDescriptionTest {
 
         @Test
         @DisplayName("GET /api/products?pag=0-2&contains=500g -> 200 OK")
@@ -362,7 +358,7 @@ class ProductControllerTest {
     }
 
     @Nested
-    class GetAllPagedStartingWithDescriptionTest {
+    class GetAllStartingWithDescriptionTest {
 
         @Test
         @DisplayName("GET /api/products?pag=0-2&starts-with=bisc -> 200 OK")
@@ -437,7 +433,7 @@ class ProductControllerTest {
     }
 
     @Nested
-    class GetAllPagedEndingWithDescriptionTest {
+    class GetAllEndingWithDescriptionTest {
 
         @Test
         @DisplayName("GET /api/products?pag=0-1&ends-with=choc -> 200 OK")
