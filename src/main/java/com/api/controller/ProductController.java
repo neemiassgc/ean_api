@@ -49,7 +49,7 @@ public class ProductController {
 
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllPaged(
-        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag
     ) {
         final Page<Product> productPage =
             productService.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
@@ -60,7 +60,7 @@ public class ProductController {
 
     @GetMapping(path = "/products", params = {"pag", "contains"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllPagedContainingDescription(
-        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("contains") @NotNull String contains
     ) {
         final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
@@ -72,7 +72,7 @@ public class ProductController {
 
     @GetMapping(path = "/products", params = {"pag", "starts-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllPagedStartingWithDescription(
-        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("starts-with") @NotNull String startsWith
     ) {
         final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
@@ -84,7 +84,7 @@ public class ProductController {
 
     @GetMapping(path = "/products", params = {"pag", "ends-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllPagedEndingWithDescription(
-        @RequestParam(name = "pag") @Pattern(regexp = "\\d-\\d", message = "must match digit-digit") String pag,
+        @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("ends-with") @NotNull String endsWith
     ) {
         final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
