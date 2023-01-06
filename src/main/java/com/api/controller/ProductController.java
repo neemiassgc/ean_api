@@ -7,6 +7,7 @@ import com.api.projection.CustomPagination;
 import com.api.projection.SimpleProduct;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -51,11 +52,8 @@ public class ProductController {
     public ResponseEntity<?> getAllPaged(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag
     ) {
-        final Page<Product> productPage =
-            productService.findAll(DomainUtils.parsePage(pag, Sort.by("description").ascending()));
-        final String nextPage = calculateNextPage(productPage);
-
-        return feedWithLinks(productPage, controller -> controller.getAllPaged(nextPage));
+        final ProductData productData = new ProductData(pag, productService::findAll);
+        return feedWithLinks(productData.getProductPage(), controller -> controller.getAllPaged(productData.getNextPage()));
     }
 
     @GetMapping(path = "/products", params = {"pag", "contains"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,11 +61,12 @@ public class ProductController {
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("contains") @NotNull String contains
     ) {
-        final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
-        final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseContaining(contains, pageable);
-        final String nextPage = calculateNextPage(productPage);
-
-        return feedWithLinks(productPage, controller -> controller.getAllPagedContainingDescription(nextPage, contains));
+        final ProductData productData =
+            new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseContaining(contains, pageable));
+        return feedWithLinks(
+            productData.getProductPage(),
+            controller -> controller.getAllPagedContainingDescription(productData.getNextPage(), contains)
+        );
     }
 
     @GetMapping(path = "/products", params = {"pag", "starts-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -75,11 +74,12 @@ public class ProductController {
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("starts-with") @NotNull String startsWith
     ) {
-        final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
-        final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageable);
-        final String nextPage = calculateNextPage(productPage);
-
-        return feedWithLinks(productPage, controller -> controller.getAllPagedStartingWithDescription(nextPage, startsWith));
+        final ProductData productData =
+            new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageable));
+        return feedWithLinks(
+            productData.getProductPage(),
+            controller -> controller.getAllPagedStartingWithDescription(productData.getNextPage(), startsWith)
+        );
     }
 
     @GetMapping(path = "/products", params = {"pag", "ends-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -87,11 +87,12 @@ public class ProductController {
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
         @RequestParam("ends-with") @NotNull String endsWith
     ) {
-        final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
-        final Page<Product> productPage = productService.findAllByDescriptionIgnoreCaseEndingWith(endsWith, pageable);
-        final String nextPage = calculateNextPage(productPage);
-
-        return feedWithLinks(productPage, controller -> controller.getAllPagedEndingWithDescription(nextPage, endsWith));
+        final ProductData productData =
+            new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseEndingWith(endsWith, pageable));
+        return feedWithLinks(
+            productData.getProductPage(),
+            controller -> controller.getAllPagedEndingWithDescription(productData.getNextPage(), endsWith)
+        );
     }
 
     private ResponseEntity<?> feedWithLinks(final Page<Product> productPage, final Function<ProductController, ResponseEntity<?>> function) {
@@ -136,5 +137,17 @@ public class ProductController {
                 return EntityModel.of(simpleProduct).add(linkToPrices, linkToSelf);
             })
             .collect(Collectors.toList());
+    }
+
+    @Getter
+    private static class ProductData {
+        private final Page<Product> productPage;
+        private final String nextPage;
+
+        private ProductData(final String pag, final Function<Pageable, Page<Product>> function) {
+            final Pageable pageable = DomainUtils.parsePage(pag, Sort.by("description"));
+            this.productPage = function.apply(pageable);
+            this.nextPage = calculateNextPage(productPage);
+        }
     }
 }
