@@ -1,4 +1,4 @@
 FROM ibm-semeru-runtimes:open-11-jre-focal
 WORKDIR /app
-COPY ./build/libs/saveg-local-market-api-SNAPSHOT.jar ./
-CMD ["java", "-jar", "./saveg-local-market-api-SNAPSHOT.jar"]
+COPY ./build/libs/grocery-products-api-SNAPSHOT.jar ./
+CMD ["java", "-jar", "./grocery-products-api-SNAPSHOT.jar"]

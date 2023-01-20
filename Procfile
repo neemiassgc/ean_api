@@ -1,1 +1,1 @@
-web: java -jar ./build/libs/saveg-local-market-api-SNAPSHOT.jar
+web: java -jar ./build/libs/grocery-products-api-SNAPSHOT.jar
