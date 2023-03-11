@@ -8,14 +8,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ScanJobIT {
+public class PricingJobIT {
 
-    @Autowired private ScanJob scanJob;
+    @Autowired private PricingJob pricingJob;
     @Autowired private PriceRepository priceRepository;
 
     @Test
     void should_save_different_unequal_prices() {
-        scanJob.execute(null);
+        pricingJob.execute();
 
         final long actualAmountOfPrices = priceRepository.count();
 
