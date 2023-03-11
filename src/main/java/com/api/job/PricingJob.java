@@ -9,8 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -24,14 +22,14 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class ScanJob implements Job {
+public class PricingJob implements Job {
 
     private final ProductExternalServiceImpl productExternalServiceImpl;
     private final ProductService productService;
     private final EmailService emailService;
 
     @Override
-    public void execute(JobExecutionContext context) {
+    public void execute() {
         final long startMeasureTime = System.currentTimeMillis();
         final Info info;
 
