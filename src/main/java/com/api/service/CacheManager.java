@@ -19,4 +19,18 @@ public class CacheManager {
         final List<UUID> uuidList = value.stream().map(Product::getId).collect(Collectors.toList());
         cache.put(key, uuidList);
     }
+
+    public final Optional<List<Product>> get(final String key) {
+        try {
+            final List<Product> products = Optional.ofNullable(cache.get(key))
+                .orElseThrow()
+                .stream()
+                .map(uuid -> findByUUID(uuid).orElseThrow())
+                .collect(Collectors.toList());
+            return Optional.of(products);
+        }
+        catch (NoSuchElementException ex) {
+            return Optional.empty();
+        }
+    }
 }
