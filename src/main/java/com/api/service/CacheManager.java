@@ -13,4 +13,10 @@ public class CacheManager {
 
     private final Set<Product> source = new TreeSet<>(Comparator.comparing(Product::getDescription));
     private final ConcurrentMap<String, List<UUID>> cache = new ConcurrentHashMap<>();
+
+    public final void put(final String key, List<Product> value) {
+        source.addAll(value);
+        final List<UUID> uuidList = value.stream().map(Product::getId).collect(Collectors.toList());
+        cache.put(key, uuidList);
+    }
 }
