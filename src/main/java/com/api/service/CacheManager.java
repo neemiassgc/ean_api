@@ -33,4 +33,11 @@ public class CacheManager {
             return Optional.empty();
         }
     }
+
+    private Optional<Product> findByUUID(final UUID uuid) {
+        for (final Product product : source)
+            if (product.getId().equals(uuid))
+                return Optional.of(product);
+        return Optional.empty();
+    }
 }
