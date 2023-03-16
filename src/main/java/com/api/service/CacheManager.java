@@ -1,43 +1,46 @@
 package com.api.service;
 
-import com.api.entity.Product;
-import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service
-public class CacheManager {
+public final class CacheManager<TARGET, KEY> {
 
-    private final Set<Product> source = new TreeSet<>(Comparator.comparing(Product::getDescription));
-    private final ConcurrentMap<String, List<UUID>> cache = new ConcurrentHashMap<>();
+    private final Set<TARGET> source;
+    private final Function<TARGET, KEY> keyExtractorFunction;
+    private final ConcurrentMap<String, List<KEY>> cache = new ConcurrentHashMap<>();
 
-    public final void put(final String key, List<Product> value) {
-        source.addAll(value);
-        final List<UUID> uuidList = value.stream().map(Product::getId).collect(Collectors.toList());
-        cache.put(key, uuidList);
+    public CacheManager(final Comparator<TARGET> targetComparator, final Function<TARGET, KEY> keyExtractorFunction) {
+        this.source = new TreeSet<>(targetComparator);
+        this.keyExtractorFunction = keyExtractorFunction;
     }
 
-    public final Optional<List<Product>> get(final String key) {
+    public void put(final String key, List<TARGET> value) {
+        source.addAll(value);
+        final List<KEY> keyList = value.stream().map(keyExtractorFunction).collect(Collectors.toList());
+        cache.put(key, keyList);
+    }
+
+    public Optional<List<TARGET>> get(final String link) {
         try {
-            final List<Product> products = Optional.ofNullable(cache.get(key))
+            final List<TARGET> list = Optional.ofNullable(cache.get(link))
                 .orElseThrow()
                 .stream()
-                .map(uuid -> findByUUID(uuid).orElseThrow())
+                .map(key -> findByKey(key).orElseThrow())
                 .collect(Collectors.toList());
-            return Optional.of(products);
+            return Optional.of(list);
         }
         catch (NoSuchElementException ex) {
             return Optional.empty();
         }
     }
 
-    private Optional<Product> findByUUID(final UUID uuid) {
-        for (final Product product : source)
-            if (product.getId().equals(uuid))
-                return Optional.of(product);
+    private Optional<TARGET> findByKey(final KEY key) {
+        for (final TARGET item : source)
+            if (keyExtractorFunction.apply(item).equals(key))
+                return Optional.of(item);
         return Optional.empty();
     }
 }
