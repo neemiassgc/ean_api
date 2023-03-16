@@ -43,7 +43,8 @@ public class Product {
     private List<Price> prices = new ArrayList<>();
 
     @Builder
-    public Product(final String description, final String barcode, final Integer sequenceCode) {
+    public Product(final UUID id, final String description, final String barcode, final Integer sequenceCode) {
+        this.id = id;
         this.description = description;
         this.barcode = barcode;
         this.sequenceCode = sequenceCode;
