@@ -1,7 +1,9 @@
 package com.api.configuration;
 
+import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.service.CacheManager;
+import com.api.service.interfaces.PriceService;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -92,5 +94,10 @@ public class BeansConfiguration {
     @Bean
     public CacheManager<Product, UUID> productCacheManager() {
         return new CacheManager<>(Comparator.comparing(Product::getDescription), Product::getId);
+    }
+
+    @Bean
+    public CacheManager<Price, UUID> priceCacheManager() {
+        return new CacheManager<>(Comparator.comparing(Price::getId), Price::getId);
     }
 }
