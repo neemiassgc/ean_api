@@ -1,5 +1,7 @@
 package com.api.service;
 
+import org.springframework.lang.NonNull;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -12,18 +14,18 @@ public final class CacheManager<TARGET, KEY> {
     private final Function<TARGET, KEY> keyExtractorFunction;
     private final ConcurrentMap<String, List<KEY>> cache = new ConcurrentHashMap<>();
 
-    public CacheManager(final Comparator<TARGET> targetComparator, final Function<TARGET, KEY> keyExtractorFunction) {
+    public CacheManager(@NonNull final Comparator<TARGET> targetComparator, @NonNull final Function<TARGET, KEY> keyExtractorFunction) {
         this.source = new TreeSet<>(targetComparator);
         this.keyExtractorFunction = keyExtractorFunction;
     }
 
-    public void put(final String key, List<TARGET> value) {
+    public void put(@NonNull final String key, @NonNull List<TARGET> value) {
         source.addAll(value);
         final List<KEY> keyList = value.stream().map(keyExtractorFunction).collect(Collectors.toList());
         cache.put(key, keyList);
     }
 
-    public Optional<List<TARGET>> get(final String link) {
+    public Optional<List<TARGET>> get(@NonNull final String link) {
         try {
             final List<TARGET> list = Optional.ofNullable(cache.get(link))
                 .orElseThrow()
