@@ -14,4 +14,11 @@ public final class ProductCacheManagerTest {
     void setup() {
         productCacheManager = new CacheManager<>(Comparator.comparing(Product::getDescription), Product::getId);
     }
+
+    private List<Product> getProductsByIndexes(final int ...indexes) {
+        final Product[] productsToReturn = new Product[indexes.length];
+        for (int i = 0; i < productsToReturn.length; i++)
+            productsToReturn[i] = Resources.PRODUCTS_SAMPLE.get(indexes[i]);
+        return Arrays.asList(productsToReturn);
+    }
 }
