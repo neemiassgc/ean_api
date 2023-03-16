@@ -38,6 +38,21 @@ public final class ProductCacheManagerTest {
         });
     }
 
+    @Test
+    void when_a_key_is_not_found_then_should_return_an_empty_optional() {
+        final List<Product> beta = getProductsByIndexes(1, 0, 6);
+        final List<Product> omega = getProductsByIndexes(8, 10, 13, 2, 5);
+        final List<Product> zeta = getProductsByIndexes(0, 4, 2, 1, 11, 9, 6);
+        productCacheManager.put("beta", beta);
+        productCacheManager.put("zeta", zeta);
+        productCacheManager.put("omega", omega);
+
+        final Optional<List<Product>> actualListOfProducts = productCacheManager.get("sigma");
+
+        assertThat(actualListOfProducts).isNotNull();
+        assertThat(actualListOfProducts).isEmpty();
+    }
+
     private List<Product> getProductsByIndexes(final int ...indexes) {
         final Product[] productsToReturn = new Product[indexes.length];
         for (int i = 0; i < productsToReturn.length; i++)
