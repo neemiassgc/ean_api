@@ -45,4 +45,8 @@ public final class CacheManager<TARGET, KEY> {
                 return Optional.of(item);
         return Optional.empty();
     }
+
+    public void evictAll() {
+        source.clear();
+    }
 }
