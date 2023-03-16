@@ -1,5 +1,7 @@
 package com.api.configuration;
 
+import com.api.entity.Product;
+import com.api.service.CacheManager;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -20,8 +22,10 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.UUID;
 
 @Configuration
 public class BeansConfiguration {
@@ -83,5 +87,10 @@ public class BeansConfiguration {
             .rootUri("https://apex.savegnago.com.br/apexmobile")
             .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
             .build();
+    }
+
+    @Bean
+    public CacheManager<Product, UUID> productCacheManager() {
+        return new CacheManager<>(Comparator.comparing(Product::getDescription), Product::getId);
     }
 }
