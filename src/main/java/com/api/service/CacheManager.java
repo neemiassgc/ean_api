@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class CacheManager<TARGET, KEY> {
@@ -17,6 +18,13 @@ public final class CacheManager<TARGET, KEY> {
     public CacheManager(@NonNull final Comparator<TARGET> targetComparator, @NonNull final Function<TARGET, KEY> keyExtractorFunction) {
         this.source = new TreeSet<>(targetComparator);
         this.keyExtractorFunction = keyExtractorFunction;
+    }
+
+    public Optional<List<TARGET>> sync(@NonNull final String link, @NonNull final Supplier<List<TARGET>> synchronizerSupplier) {
+        if (cache.containsKey(link)) return get(link);
+        final List<TARGET> dataToSync = synchronizerSupplier.get();
+        put(link, dataToSync);
+        return get(link);
     }
 
     public void put(@NonNull final String key, @NonNull List<TARGET> value) {
