@@ -23,6 +23,7 @@ public final class CacheManager<TARGET, KEY> {
     public Optional<List<TARGET>> sync(@NonNull final String link, @NonNull final Supplier<List<TARGET>> synchronizerSupplier) {
         if (cache.containsKey(link)) return get(link);
         final List<TARGET> dataToSync = synchronizerSupplier.get();
+        if (Objects.isNull(dataToSync) || dataToSync.isEmpty()) return Optional.empty();
         put(link, dataToSync);
         return get(link);
     }
@@ -35,8 +36,7 @@ public final class CacheManager<TARGET, KEY> {
 
     private Optional<List<TARGET>> get(@NonNull final String link) {
         try {
-            final List<TARGET> list = Optional.ofNullable(cache.get(link))
-                .orElseThrow()
+            final List<TARGET> list = cache.get(link)
                 .stream()
                 .map(key -> findByKey(key).orElseThrow())
                 .collect(Collectors.toList());
