@@ -27,13 +27,13 @@ public final class CacheManager<TARGET, KEY> {
         return get(link);
     }
 
-    public void put(@NonNull final String key, @NonNull List<TARGET> value) {
+    private void put(@NonNull final String key, @NonNull List<TARGET> value) {
         source.addAll(value);
         final List<KEY> keyList = value.stream().map(keyExtractorFunction).collect(Collectors.toList());
         cache.put(key, keyList);
     }
 
-    public Optional<List<TARGET>> get(@NonNull final String link) {
+    private Optional<List<TARGET>> get(@NonNull final String link) {
         try {
             final List<TARGET> list = Optional.ofNullable(cache.get(link))
                 .orElseThrow()
