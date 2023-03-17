@@ -74,6 +74,17 @@ public final class ProductCacheManagerTest {
 
         assertThat(actualState).isTrue();
     }
+
+    @Test
+    void should_return_false_if_a_key_does_not_exist_in_the_cache() {
+        final List<Product> products = getProductsByIndexes(0, 4, 2, 1, 11, 9, 6);
+        productCacheManager.put("products", products);
+
+        final boolean actualState = productCacheManager.containsKey("zeta");
+
+        assertThat(actualState).isFalse();
+    }
+
     private List<Product> getProductsByIndexes(final int ...indexes) {
         final Product[] productsToReturn = new Product[indexes.length];
         for (int i = 0; i < productsToReturn.length; i++)
