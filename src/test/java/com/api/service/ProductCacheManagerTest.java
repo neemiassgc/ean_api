@@ -2,27 +2,34 @@ package com.api.service;
 
 import com.api.Resources;
 import com.api.entity.Product;
-import static org.assertj.core.api.Assertions.*;
+import com.api.service.interfaces.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
 public final class ProductCacheManagerTest {
 
     private CacheManager<Product, UUID> productCacheManager;
+    private ProductService productService;
 
     @BeforeEach
     void setup() {
         productCacheManager = new CacheManager<>(Comparator.comparing(Product::getDescription), Product::getId);
+        productService = mock(ProductService.class);
     }
 
     @Test
     void given_a_key_should_return_all_products_from_cache_in_the_order() {
-        final List<Product> eightProducts = getProductsByIndexes(0, 10, 4, 7, 9, 2, 3, 11);
+        given(productService.findAllWithLatestPrice())
+            .willReturn(getProductsByIndexes(0, 10, 4, 7, 9, 2, 3, 11));
         final String key = "eight";
 
-        final Optional<List<Product>> actualProducts = productCacheManager.sync(key, () -> eightProducts);
+        final Optional<List<Product>> actualProducts = productCacheManager.sync(key, productService::findAllWithLatestPrice);
 
         assertThat(actualProducts).isNotNull();
         assertThat(actualProducts).isPresent();
@@ -35,6 +42,9 @@ public final class ProductCacheManagerTest {
                     "BISC ROSQ MARILAN 350G INT", "MILHO VDE PREDILECTA 170G LT"
                 );
         });
+
+        verify(productService, times(1)).findAllWithLatestPrice();
+        verify(productService, only()).findAllWithLatestPrice();
     }
 
     @Test
