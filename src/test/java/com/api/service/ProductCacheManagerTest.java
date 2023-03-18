@@ -83,6 +83,18 @@ public final class ProductCacheManagerTest {
         assertThat(actualState).isFalse();
     }
 
+    @Test
+    void when_evictAll_is_invoked_then_should_clean_the_whole_cache() {
+        given(productService.findAllWithLatestPrice())
+            .willReturn(getProductsByIndexes(0, 10, 4, 7, 9, 2, 3, 11));
+        productCacheManager.sync("products", productService::findAllWithLatestPrice);
+        productCacheManager.evictAll();
+        productCacheManager.sync("products", productService::findAllWithLatestPrice);
+        productCacheManager.sync("products", productService::findAllWithLatestPrice);
+
+        verify(productService, times(2)).findAllWithLatestPrice();
+    }
+
     private List<Product> getProductsByIndexes(final int ...indexes) {
         final Product[] productsToReturn = new Product[indexes.length];
         for (int i = 0; i < productsToReturn.length; i++)
