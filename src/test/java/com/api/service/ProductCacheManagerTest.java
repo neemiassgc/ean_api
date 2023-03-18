@@ -21,9 +21,8 @@ public final class ProductCacheManagerTest {
     void given_a_key_should_return_all_products_from_cache_in_the_order() {
         final List<Product> eightProducts = getProductsByIndexes(0, 10, 4, 7, 9, 2, 3, 11);
         final String key = "eight";
-        productCacheManager.put(key, eightProducts);
 
-        final Optional<List<Product>> actualProducts = productCacheManager.get(key);
+        final Optional<List<Product>> actualProducts = productCacheManager.sync(key, () -> eightProducts);
 
         assertThat(actualProducts).isNotNull();
         assertThat(actualProducts).isPresent();
@@ -39,21 +38,16 @@ public final class ProductCacheManagerTest {
     }
 
     @Test
-    void when_a_key_is_not_found_then_should_return_an_empty_optional() {
-        final List<Product> beta = getProductsByIndexes(1, 0, 6);
-        final List<Product> omega = getProductsByIndexes(8, 10, 13, 2, 5);
-        final List<Product> zeta = getProductsByIndexes(0, 4, 2, 1, 11, 9, 6);
-        productCacheManager.put("beta", beta);
-        productCacheManager.put("zeta", zeta);
-        productCacheManager.put("omega", omega);
-
-        final Optional<List<Product>> actualListOfProducts = productCacheManager.get("sigma");
+    void when_list_to_sync_is_empty_then_should_return_an_empty_optional() {
+        final Optional<List<Product>> actualListOfProducts = productCacheManager.sync("sigma", Collections::emptyList);
 
         assertThat(actualListOfProducts).isNotNull();
         assertThat(actualListOfProducts).isEmpty();
     }
 
     @Test
+    void when_null_is_passed_in_to_sync_then_should_return_an_empty_optional() {
+        final Optional<List<Product>> actualListOfProducts = productCacheManager.sync("sigma", () -> null);
 
         assertThat(actualListOfProducts).isNotNull();
         assertThat(actualListOfProducts).isEmpty();
@@ -62,7 +56,7 @@ public final class ProductCacheManagerTest {
     @Test
     void should_return_true_if_a_key_exists_in_the_cache() {
         final List<Product> products = getProductsByIndexes(0, 4, 2, 1, 11, 9, 6);
-        productCacheManager.put("products", products);
+        productCacheManager.sync("products", () -> products);
 
         final boolean actualState = productCacheManager.containsKey("products");
 
@@ -72,7 +66,7 @@ public final class ProductCacheManagerTest {
     @Test
     void should_return_false_if_a_key_does_not_exist_in_the_cache() {
         final List<Product> products = getProductsByIndexes(0, 4, 2, 1, 11, 9, 6);
-        productCacheManager.put("products", products);
+        productCacheManager.sync("products", () -> products);
 
         final boolean actualState = productCacheManager.containsKey("zeta");
 
