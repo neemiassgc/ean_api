@@ -56,6 +56,7 @@ public final class CacheManager<TARGET, KEY> {
 
     public void evictAll() {
         source.clear();
+        cache.clear();
     }
 
     public boolean containsKey(final String key) {
