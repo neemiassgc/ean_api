@@ -54,12 +54,6 @@ public final class ProductCacheManagerTest {
     }
 
     @Test
-    void if_an_id_does_not_match_any_products_in_the_cache_then_should_return_empty_optional() {
-        final List<Product> products = getProductsByIndexes(0, 4, 2, 1, 11, 9, 6);
-        productCacheManager.put("products", products);
-        productCacheManager.evictAll();
-
-        final Optional<List<Product>> actualListOfProducts = productCacheManager.get("products");
 
         assertThat(actualListOfProducts).isNotNull();
         assertThat(actualListOfProducts).isEmpty();
