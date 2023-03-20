@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class CacheManager<TARGET, KEY> {
+public class CacheManager<TARGET, KEY> {
 
     private final Map<KEY, TARGET> sourceBucket = new HashMap<>();
     private final Function<TARGET, KEY> keyExtractorFunction;
