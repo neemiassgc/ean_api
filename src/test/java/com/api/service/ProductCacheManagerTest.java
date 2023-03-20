@@ -19,7 +19,7 @@ public final class ProductCacheManagerTest {
 
     @BeforeEach
     void setup() {
-        productCacheManager = new CacheManager<>(Comparator.comparing(Product::getDescription), Product::getId);
+        productCacheManager = new CacheManager<>(Product::getId);
         productService = mock(ProductService.class);
     }
 

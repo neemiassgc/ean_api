@@ -93,11 +93,11 @@ public class BeansConfiguration {
 
     @Bean
     public CacheManager<Product, UUID> productCacheManager() {
-        return new CacheManager<>(Comparator.comparing(Product::getDescription), Product::getId);
+        return new CacheManager<>(Product::getId);
     }
 
     @Bean
     public CacheManager<Price, UUID> priceCacheManager() {
-        return new CacheManager<>(Comparator.comparing(Price::getId), Price::getId);
+        return new CacheManager<>(Price::getId);
     }
 }

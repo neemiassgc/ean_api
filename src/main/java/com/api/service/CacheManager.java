@@ -11,12 +11,11 @@ import java.util.stream.Collectors;
 
 public final class CacheManager<TARGET, KEY> {
 
-    private final Set<TARGET> source;
+    private final Map<KEY, TARGET> sourceBucket = new HashMap<>();
     private final Function<TARGET, KEY> keyExtractorFunction;
     private final ConcurrentMap<String, List<KEY>> cache = new ConcurrentHashMap<>();
 
-    public CacheManager(@NonNull final Comparator<TARGET> targetComparator, @NonNull final Function<TARGET, KEY> keyExtractorFunction) {
-        this.source = new TreeSet<>(targetComparator);
+    public CacheManager(@NonNull final Function<TARGET, KEY> keyExtractorFunction) {
         this.keyExtractorFunction = keyExtractorFunction;
     }
 
@@ -28,17 +27,18 @@ public final class CacheManager<TARGET, KEY> {
         return get(link);
     }
 
-    private void put(@NonNull final String key, @NonNull List<TARGET> value) {
-        source.addAll(value);
-        final List<KEY> keyList = value.stream().map(keyExtractorFunction).collect(Collectors.toList());
-        cache.put(key, keyList);
+    private void put(@NonNull final String key, @NonNull List<TARGET> listOfData) {
+        for (final TARGET target : listOfData)
+            sourceBucket.put(keyExtractorFunction.apply(target), target);
+        final List<KEY> listOfKeys = listOfData.stream().map(keyExtractorFunction).collect(Collectors.toList());
+        cache.put(key, listOfKeys);
     }
 
     private Optional<List<TARGET>> get(@NonNull final String link) {
         try {
             final List<TARGET> list = cache.get(link)
                 .stream()
-                .map(key -> findByKey(key).orElseThrow())
+                .map(key -> Optional.of(sourceBucket.get(key)).orElseThrow())
                 .collect(Collectors.toList());
             return Optional.of(list);
         }
@@ -47,15 +47,8 @@ public final class CacheManager<TARGET, KEY> {
         }
     }
 
-    private Optional<TARGET> findByKey(final KEY key) {
-        for (final TARGET item : source)
-            if (keyExtractorFunction.apply(item).equals(key))
-                return Optional.of(item);
-        return Optional.empty();
-    }
-
     public void evictAll() {
-        source.clear();
+        sourceBucket.clear();
         cache.clear();
     }
 
