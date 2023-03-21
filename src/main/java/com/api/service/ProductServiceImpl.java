@@ -18,10 +18,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.BiFunction;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,10 +28,16 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductExternalService productExternalService;
+    private final CacheManager<Product, UUID> productCacheManager;
+    private final long[] totalOfItems = new long[1];
 
     @Transactional(propagation = Propagation.REQUIRED)
     public SimpleProductWithStatus getByBarcodeAndSaveIfNecessary(@NonNull final String barcode) {
-        final Optional<Product> productOptional = productRepository.findByBarcode(barcode);
+        final Optional<Product> productOptional =
+            productCacheManager.sync(
+                barcode,
+                () -> productRepository.findByBarcode(barcode).map(List::of).orElse(Collections.emptyList())
+            ).map(productList -> productList.get(0));
 
         if (productOptional.isPresent())
             return productOptional.get().toSimpleProductWithStatus(HttpStatus.OK);
@@ -48,50 +52,65 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void save(@NonNull final Product product) {
         productRepository.save(product);
+        productCacheManager.evictAll();
     }
 
     @Override
     public List<Product> findAllWithLatestPrice() {
-        return productRepository.findAllWithLastPrice();
+        return productCacheManager
+            .sync("withLatestPrice", productRepository::findAllWithLastPrice)
+            .orElse(Collections.emptyList());
     }
 
     @Override
     public List<Product> findAll(@NonNull Sort sort) {
-        return productRepository.findAll(sort);
+        return productCacheManager
+            .sync(sort.toString(), () -> productRepository.findAll(sort))
+            .orElse(Collections.emptyList());
     }
 
     @Override
     public Page<Product> findAll(@NonNull Pageable pageable) {
-        return productRepository.findAll(pageable);
+        final String key = String.format("pag=%s-%s", pageable.getPageNumber(), pageable.getPageSize());
+        final List<Product> listOfProducts = productCacheManager
+            .sync(key, () -> {
+                final Page<Product> productPage = productRepository.findAll(pageable);
+                totalOfItems[0] = productPage.getTotalElements();
+                return productPage.getContent();
+            })
+            .orElse(Collections.emptyList());
+        return new PageImpl<>(listOfProducts, pageable, totalOfItems[0]);
     }
 
     @Override
     public Page<Product> findAllByDescriptionIgnoreCaseContaining(@NonNull String description, @NonNull Pageable pageable) {
-        return returnABlankPageIfEmptyOrAPageFilled(
-            description,
-            () -> productRepository.findAllByDescriptionIgnoreCaseContaining(description, pageable)
-        );
+        return getAllBySettings(description, pageable, productRepository::findAllByDescriptionIgnoreCaseContaining);
     }
 
     @Override
     public Page<Product> findAllByDescriptionIgnoreCaseStartingWith(String description, Pageable pageable) {
-        return returnABlankPageIfEmptyOrAPageFilled(
-            description,
-            () -> productRepository.findAllByDescriptionIgnoreCaseStartingWith(description, pageable)
-        );
+        return getAllBySettings(description, pageable, productRepository::findAllByDescriptionIgnoreCaseEndingWith);
     }
 
     @Override
     public Page<Product> findAllByDescriptionIgnoreCaseEndingWith(String description, Pageable pageable) {
-        return returnABlankPageIfEmptyOrAPageFilled(
-            description,
-            () -> productRepository.findAllByDescriptionIgnoreCaseEndingWith(description, pageable)
-        );
+        return getAllBySettings(description, pageable, productRepository::findAllByDescriptionIgnoreCaseEndingWith);
     }
 
-    private Page<Product> returnABlankPageIfEmptyOrAPageFilled(final String expression, final Supplier<Page<Product>> pageSupplier) {
-        return expression.isEmpty() ?
-            new PageImpl<>(Collections.emptyList()) :
-            pageSupplier.get();
+    private Page<Product> getAllBySettings(
+        final String expression,
+        final Pageable pageable,
+        final BiFunction<String, Pageable, Page<Product>> pageBiFunction
+    ) {
+        if (expression.isEmpty()) return new PageImpl<>(Collections.emptyList());
+        final String key = String.format("pag=%s-%s", pageable.getPageNumber(), pageable.getPageSize());
+        final List<Product> listOfProducts = productCacheManager
+            .sync(key, () -> {
+                final Page<Product> productPage = pageBiFunction.apply(expression, pageable);
+                totalOfItems[0] = productPage.getTotalElements();
+                return productPage.getContent();
+            })
+            .orElse(Collections.emptyList());
+        return new PageImpl<>(listOfProducts, pageable, totalOfItems[0]);
     }
 }
