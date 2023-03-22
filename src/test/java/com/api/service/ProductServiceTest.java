@@ -44,6 +44,11 @@ public class ProductServiceTest {
         private final String BARCODE = "7891000055120";
         private final Product EXPECTED_PRODUCT = Resources.PRODUCTS_SAMPLE.get(0);
 
+        @BeforeEach
+        void mock_to_clean_cache() {
+            willDoNothing().given(productCacheManager).evictAll();
+        }
+
         @Test
         @DisplayName("Should throw NullPointerException")
         void if_barcode_is_null_then_should_throw_an_exception() {
