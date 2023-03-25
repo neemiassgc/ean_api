@@ -33,14 +33,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public SimpleProductWithStatus getByBarcodeAndSaveIfNecessary(@NonNull final String barcode) {
-        final Optional<Product> productOptional =
+        final Optional<List<Product>> productListOptional =
             productCacheManager.sync(
                 barcode,
                 () -> productRepository.findByBarcode(barcode).map(List::of).orElse(Collections.emptyList())
-            ).map(productList -> productList.get(0));
+            );
 
-        if (productOptional.isPresent())
-            return productOptional.get().toSimpleProductWithStatus(HttpStatus.OK);
+        if (productListOptional.isPresent())
+            return productListOptional.get().get(0).toSimpleProductWithStatus(HttpStatus.OK);
 
         final Product newProduct = productExternalService.fetchByBarcode(barcode)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
