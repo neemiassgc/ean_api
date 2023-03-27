@@ -89,7 +89,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> findAllByDescriptionIgnoreCaseStartingWith(String description, Pageable pageable) {
-        return getAllBySettings(description, pageable, productRepository::findAllByDescriptionIgnoreCaseEndingWith);
+        return getAllBySettings(description, pageable, productRepository::findAllByDescriptionIgnoreCaseStartingWith);
     }
 
     @Override
