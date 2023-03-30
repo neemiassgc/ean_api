@@ -103,7 +103,7 @@ public class ProductServiceImpl implements ProductService {
         final BiFunction<String, Pageable, Page<Product>> pageBiFunction
     ) {
         if (expression.isEmpty()) return new PageImpl<>(Collections.emptyList());
-        final String key = String.format("pag=%s-%s", pageable.getPageNumber(), pageable.getPageSize());
+        final String key = String.format("%s-pag=%s-%s", expression, pageable.getPageNumber(), pageable.getPageSize());
         final List<Product> listOfProducts = productCacheManager
             .sync(key, () -> {
                 final Page<Product> productPage = pageBiFunction.apply(expression, pageable);
