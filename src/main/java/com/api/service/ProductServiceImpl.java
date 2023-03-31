@@ -71,15 +71,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> findAll(@NonNull Pageable pageable) {
-        final String key = String.format("pag=%s-%s", pageable.getPageNumber(), pageable.getPageSize());
-        final List<Product> listOfProducts = productCacheManager
-            .sync(key, () -> {
-                final Page<Product> productPage = productRepository.findAll(pageable);
-                totalOfItems[0] = productPage.getTotalElements();
-                return productPage.getContent();
-            })
-            .orElse(Collections.emptyList());
-        return new PageImpl<>(listOfProducts, pageable, totalOfItems[0]);
+        return getAllBySettings("all", pageable, (__, ___) -> productRepository.findAll(pageable));
     }
 
     @Override
@@ -103,7 +95,9 @@ public class ProductServiceImpl implements ProductService {
         final BiFunction<String, Pageable, Page<Product>> pageBiFunction
     ) {
         if (expression.isEmpty()) return new PageImpl<>(Collections.emptyList());
-        final String key = String.format("%s-pag=%s-%s", expression, pageable.getPageNumber(), pageable.getPageSize());
+        final String key = expression.equals("all") ?
+            String.format("pag=%s-%s", pageable.getPageNumber(), pageable.getPageSize()) :
+            String.format("%s-pag=%s-%s", expression, pageable.getPageNumber(), pageable.getPageSize());
         final List<Product> listOfProducts = productCacheManager
             .sync(key, () -> {
                 final Page<Product> productPage = pageBiFunction.apply(expression, pageable);
