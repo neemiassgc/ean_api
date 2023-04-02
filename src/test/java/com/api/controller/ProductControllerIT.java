@@ -396,4 +396,9 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$").isEmpty());
         }
     }
+
+    @Nested
+    class FieldValidatorsTest {
+        
+    }
 }
