@@ -8,9 +8,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static com.api.controller.ProductControllerTestHelper.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -406,9 +406,14 @@ public class ProductControllerIT {
         class GetByBarcodeTest {
 
             @Test
-            void getByBarcodeTest() throws Exception {
-                mockMvc.perform(MockMvcRequestBuilders.get("/api/products/091874859203")).andDo(MockMvcResultHandlers.print());
-
+            @DisplayName("GET /api/products/18908 -> BAD_REQUEST 400")
+            void when_barcode_is_less_than_13_then_should_return_a_violation() throws Exception {
+                final String invalidBarcode = "18908";
+                mockMvc.perform(get("/api/products/"+invalidBarcode))
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.violations[0].field").value(invalidBarcode))
+                    .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must has 13 characters"));
             }
         }
     }
