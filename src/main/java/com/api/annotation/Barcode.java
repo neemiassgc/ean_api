@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@Pattern(regexp = "\\d{13}", message = "barcode must contain only numbers")
+@Pattern(regexp = "\\d+", message = "barcode must contain only numbers")
 @Size(min = 13, max = 13, message = "barcode must has 13 characters")
 @NotBlank(message = "barcode must not be blank")
 @Target({ElementType.PARAMETER, ElementType.FIELD})
