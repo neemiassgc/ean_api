@@ -8,6 +8,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import static com.api.controller.ProductControllerTestHelper.*;
 import static org.hamcrest.Matchers.*;
@@ -399,6 +401,15 @@ public class ProductControllerIT {
 
     @Nested
     class FieldValidatorsTest {
-        
+
+        @Nested
+        class GetByBarcodeTest {
+
+            @Test
+            void getByBarcodeTest() throws Exception {
+                mockMvc.perform(MockMvcRequestBuilders.get("/api/products/091874859203")).andDo(MockMvcResultHandlers.print());
+
+            }
+        }
     }
 }
