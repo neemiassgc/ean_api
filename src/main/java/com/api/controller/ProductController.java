@@ -1,6 +1,7 @@
 package com.api.controller;
 
 import com.api.annotation.Barcode;
+import com.api.annotation.ValidExpression;
 import com.api.component.DomainUtils;
 import com.api.entity.Product;
 import com.api.projection.CustomPagination;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -59,7 +61,7 @@ public class ProductController {
     @GetMapping(path = "/products", params = {"pag", "contains"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllContainingDescription(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
-        @RequestParam("contains") @NotNull String contains
+        @RequestParam("contains") @ValidExpression String contains
     ) {
         final ProductData productData =
             new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseContaining(contains, pageable));
@@ -72,7 +74,7 @@ public class ProductController {
     @GetMapping(path = "/products", params = {"pag", "starts-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllStartingWithDescription(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
-        @RequestParam("starts-with") @NotNull String startsWith
+        @RequestParam("starts-with") @ValidExpression String startsWith
     ) {
         final ProductData productData =
             new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageable));
@@ -85,7 +87,7 @@ public class ProductController {
     @GetMapping(path = "/products", params = {"pag", "ends-with"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllEndingWithDescription(
         @RequestParam(name = "pag") @Pattern(regexp = "\\d{1,2}-\\d{1,2}", message = "must match digit-digit") String pag,
-        @RequestParam("ends-with") @NotNull String endsWith
+        @RequestParam("ends-with") @ValidExpression String endsWith
     ) {
         final ProductData productData =
             new ProductData(pag, pageable -> productService.findAllByDescriptionIgnoreCaseEndingWith(endsWith, pageable));
