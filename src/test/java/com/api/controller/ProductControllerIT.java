@@ -437,6 +437,18 @@ public class ProductControllerIT {
                     .andExpect(jsonPath("$.violations[0].field").value(invalidBarcode))
                     .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must contain only numbers"));
             }
+
+            @Test
+            @DisplayName("GET /api/products/17802a")
+            void should_return_bad_request_when_barcode_contains_any_violations() throws Exception {
+                final String invalidBarcode = "17802a";
+                mockMvc.perform(get("/api/products/" + invalidBarcode))
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.violations[*].field", everyItem(equalTo(invalidBarcode))))
+                    .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must have 13 characters"))
+                    .andExpect(jsonPath("$.violations[1].violationMessage").value("barcode must contain only numbers"));
+            }
         }
     }
 }
