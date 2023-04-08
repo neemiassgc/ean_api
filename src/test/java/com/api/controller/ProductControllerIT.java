@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -392,10 +393,7 @@ public class ProductControllerIT {
             @DisplayName("GET /api/products/18908 -> BAD_REQUEST 400")
             void when_barcode_is_less_than_13_then_should_return_a_violation() throws Exception {
                 final String invalidBarcode = "18908";
-                mockMvc.perform(get("/api/products/"+invalidBarcode))
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.violations[0].field").value(invalidBarcode))
+                testWithBarcodeTemplate(invalidBarcode)
                     .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must have 13 characters"));
             }
 
@@ -403,10 +401,7 @@ public class ProductControllerIT {
             @DisplayName("GET /api/products/1927384019283145 -> BAD_REQUEST 400")
             void when_barcode_is_greater_than_13_then_should_return_a_violation() throws Exception {
                 final String invalidBarcode = "1927384019283145";
-                mockMvc.perform(get("/api/products/"+invalidBarcode))
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.violations[0].field").value(invalidBarcode))
+                testWithBarcodeTemplate(invalidBarcode)
                     .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must have 13 characters"));
             }
 
@@ -414,10 +409,7 @@ public class ProductControllerIT {
             @DisplayName("GET /api/products/7alfpm439ayra -> BAD_REQUEST 400")
             void when_barcode_contains_letters_then_should_return_a_violation() throws Exception {
                 final String invalidBarcode = "7alfpm439ayra";
-                mockMvc.perform(get("/api/products/" + invalidBarcode))
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.violations[0].field").value(invalidBarcode))
+                testWithBarcodeTemplate(invalidBarcode)
                     .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must contain only numbers"));
             }
 
@@ -425,12 +417,20 @@ public class ProductControllerIT {
             @DisplayName("GET /api/products/17802a")
             void should_return_bad_request_when_barcode_contains_any_violations() throws Exception {
                 final String invalidBarcode = "17802a";
-                mockMvc.perform(get("/api/products/" + invalidBarcode))
+                testWithBarcodeTemplate(invalidBarcode)
+                    .andExpect(jsonPath("$.violations[*].violationMessage",
+                        containsInAnyOrder(
+                            equalTo("barcode must have 13 characters"),
+                            equalTo("barcode must contain only numbers")
+                        )
+                    ));
+            }
+
+            private ResultActions testWithBarcodeTemplate(final String barcode) throws Exception {
+                return mockMvc.perform(get("/api/products/"+barcode))
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.violations[*].field", everyItem(equalTo(invalidBarcode))))
-                    .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must have 13 characters"))
-                    .andExpect(jsonPath("$.violations[1].violationMessage").value("barcode must contain only numbers"));
+                    .andExpect(jsonPath("$.violations[*].field", everyItem(equalTo(barcode))));
             }
         }
     }
