@@ -193,7 +193,7 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.violations[*].field", everyItem(is(violatedBarcode))))
                 .andExpect(jsonPath(
                     "$.violations[*].violationMessage",
-                    containsInAnyOrder("barcode must has 13 characters", "barcode must contain only numbers")
+                    containsInAnyOrder("barcode must have 13 characters", "barcode must contain only numbers")
                 ));
         }
     }
@@ -413,7 +413,7 @@ public class ProductControllerIT {
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.violations[0].field").value(invalidBarcode))
-                    .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must has 13 characters"));
+                    .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must have 13 characters"));
             }
 
             @Test
@@ -424,7 +424,7 @@ public class ProductControllerIT {
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.violations[0].field").value(invalidBarcode))
-                    .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must has 13 characters"));
+                    .andExpect(jsonPath("$.violations[0].violationMessage").value("barcode must have 13 characters"));
             }
 
             @Test

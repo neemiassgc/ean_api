@@ -70,7 +70,7 @@ public class PriceControllerIT {
             .andExpect(jsonPath("$.violations[*].field", everyItem(is(problematicBarcode))))
             .andExpect(jsonPath(
                 "$.violations[*].violationMessage",
-                containsInAnyOrder("barcode must contain only numbers", "barcode must has 13 characters")
+                containsInAnyOrder("barcode must contain only numbers", "barcode must have 13 characters")
             ));
     }
 
