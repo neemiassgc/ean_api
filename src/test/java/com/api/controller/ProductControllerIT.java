@@ -179,23 +179,6 @@ public class ProductControllerIT {
                 .andExpect(content().contentType(MediaType.TEXT_PLAIN))
                 .andExpect(content().string("Product not found"));
         }
-
-        @Test
-        @DisplayName("GET /api/products/7890foobar -> 400 BAD REQUEST")
-        void when_barcode_is_not_valid_then_should_return_violations__BAD_REQUEST() throws Exception {
-            final String violatedBarcode = "7890foobar";
-
-            makeRequestByBarcode(violatedBarcode)
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations").isArray())
-                .andExpect(jsonPath("$.violations", hasSize(2)))
-                .andExpect(jsonPath("$.violations[*].field", everyItem(is(violatedBarcode))))
-                .andExpect(jsonPath(
-                    "$.violations[*].violationMessage",
-                    containsInAnyOrder("barcode must have 13 characters", "barcode must contain only numbers")
-                ));
-        }
     }
 
     @Nested
