@@ -433,5 +433,10 @@ public class ProductControllerIT {
                     .andExpect(jsonPath("$.violations[*].field", everyItem(equalTo(barcode))));
             }
         }
+
+        @Nested
+        class GetAllContainingDescriptionTest {
+            
+        }
     }
 }
