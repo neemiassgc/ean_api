@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static com.api.controller.ProductControllerTestHelper.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -454,41 +453,19 @@ public class ProductControllerIT {
             @Test
             @DisplayName("GET /api/products?pag=0-6&contains=all -> 400 BAD_REQUEST")
             void when_contains_param_is_all_then_should_return_a_violation() throws Exception {
-                mockMvc.perform(get("/api/products?pag=0-6&contains=all")
-                    .accept(MediaType.ALL)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field").value("all"))
-                .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression cannot contain 'all'"));
+                testViolationsInContains("all", "Expression cannot contain 'all'");
             }
 
             @Test
             @DisplayName("GET /api/produdcts?pag=0-6&contains=bi -> 400 BAD_REQUEST")
             void when_contains_param_is_less_than_3_then_should_return_a_violation() throws Exception {
-                mockMvc.perform(get("/api/products?pag=0-6&contains=bi")
-                    .accept(MediaType.ALL)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field").value("bi"))
-                .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression length must be between 3 and 16"));
+                testViolationsInContains("bi", "Expression length must be between 3 and 16");
             }
 
             @Test
             @DisplayName("GET /api/products?pag=0-6&contains=black and white triangle -> 400 BAD_REQUEST")
             void when_contains_param_is_greater_than_16_then_should_return_a_violation() throws Exception {
-                final String contains = "black and white triangle";
-                mockMvc.perform(get("/api/products?pag=0-6&contains="+contains)
-                    .accept(MediaType.ALL)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field").value(contains))
-                .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression length must be between 3 and 16"));
+                testViolationsInContains("black and white triangle", "Expression length must be between 3 and 16");
             }
 
             @Test
@@ -505,6 +482,17 @@ public class ProductControllerIT {
                     "must match digit-digit",
                     "Expression length must be between 3 and 16"
                 )));
+            }
+
+            private void testViolationsInContains(final String contains, final String expectedViolation) throws Exception {
+                mockMvc.perform(get("/api/products?pag=0-6&contains="+contains)
+                    .accept(MediaType.ALL)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field").value(contains))
+                .andExpect(jsonPath("$.violations[0].violationMessage").value(expectedViolation));
             }
         }
     }
