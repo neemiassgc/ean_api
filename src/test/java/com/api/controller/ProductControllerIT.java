@@ -490,6 +490,22 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.violations[0].field").value(contains))
                 .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression length must be between 3 and 16"));
             }
+
+            @Test
+            @DisplayName("GET /api/products?pag=0-6&contains=lo -> 400 BAD_REQUEST")
+            void when_the_inputs_are_invalid_then_should_return_violations() throws Exception {
+                mockMvc.perform(get("/api/products?pag=0--6&contains=lo")
+                    .accept(MediaType.ALL)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.violations[*]").value(hasSize(2)))
+                .andExpect(jsonPath("$.violations[*].field").value(contains("0--6", "lo")))
+                .andExpect(jsonPath("$.violations[*].violationMessage").value(contains(
+                    "must match digit-digit",
+                    "Expression length must be between 3 and 16"
+                )));
+            }
         }
     }
 }
