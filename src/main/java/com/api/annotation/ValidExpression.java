@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @NotNull
-@Size(min = 3, max = 16, message = "Expression must be between 3 and 16")
+@Size(min = 3, max = 16, message = "Expression length must be between 3 and 16")
 @Target(ElementType.PARAMETER)
 @Retention(RUNTIME)
 @Constraint(validatedBy = {ExpressionValidator.class})
