@@ -476,6 +476,20 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.violations[0].field").value("bi"))
                 .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression length must be between 3 and 16"));
             }
+
+            @Test
+            @DisplayName("GET /api/products?pag=0-6&contains=black and white triangle -> 400 BAD_REQUEST")
+            void when_contains_param_is_greater_than_16_then_should_return_a_violation() throws Exception {
+                final String contains = "black and white triangle";
+                mockMvc.perform(get("/api/products?pag=0-6&contains="+contains)
+                    .accept(MediaType.ALL)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field").value(contains))
+                .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression length must be between 3 and 16"));
+            }
         }
     }
 }
