@@ -511,6 +511,12 @@ public class ProductControllerIT {
             void should_return_a_violation_when_endsWith_param_is_all() throws Exception {
                 testParamViolation("ends-with", "all", "Expression cannot contain 'all'");
             }
+
+            @Test
+            @DisplayName("GET /api/products?pag=0-6&ends-with=ti -> 400 BAD_REQUEST")
+            void when_endsWith_param_is_less_than_3_then_should_respond_with_a_violation() throws Exception {
+                testParamViolation("ends-with", "ti", "Expression length must be between 3 and 16");
+            }
         }
 
         private void testParamViolation(final String paramName, final String paramValue, final String expectedViolation) throws Exception {
