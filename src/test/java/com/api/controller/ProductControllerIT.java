@@ -489,11 +489,13 @@ public class ProductControllerIT {
         class GetAllStartingDescriptionTest {
 
             @Test
+            @DisplayName("GET /api/products?pag=0-6&starts-with=po -> 400 BAD_REQUEST")
             void when_startsWith_param_is_less_than_6_then_should_return_a_violation() throws Exception {
                 testParamViolation("starts-with", "po", "Expression length must be between 3 and 16");
             }
 
             @Test
+            @DisplayName("GET /api/products?pag=0-6&starts-with=some words for some tests -> 400 BAD_REQUEST")
             void when_startsWith_param_is_greater_than_16_then_should_return_a_violation() throws Exception {
                 testParamViolation("starts-with", "some words for some tests", "Expression length must be between 3 and 16");
             }
