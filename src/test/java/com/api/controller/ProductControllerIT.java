@@ -506,6 +506,11 @@ public class ProductControllerIT {
         @Nested
         class GetAllEndingWithDescriptionTest {
 
+            @Test
+            @DisplayName("GET /api/products?pag=0-6&ends-with=all -> 400 BAD_REQUEST")
+            void should_return_a_violation_when_endsWith_param_is_all() throws Exception {
+                testParamViolation("ends-with", "all", "Expression cannot contain 'all'");
+            }
         }
 
         private void testParamViolation(final String paramName, final String paramValue, final String expectedViolation) throws Exception {
