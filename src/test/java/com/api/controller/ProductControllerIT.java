@@ -476,7 +476,7 @@ public class ProductControllerIT {
         }
 
         @Nested
-        class GetAllStartingDescriptionTest {
+        class GetAllStartingWithDescriptionTest {
 
             @Test
             @DisplayName("GET /api/products?pag=0-6&starts-with=po -> 400 BAD_REQUEST")
