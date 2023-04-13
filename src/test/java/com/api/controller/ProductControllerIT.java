@@ -492,6 +492,11 @@ public class ProductControllerIT {
             void when_startsWith_param_is_less_than_6_then_should_return_a_violation() throws Exception {
                 testParamViolation("starts-with", "po", "Expression length must be between 3 and 16");
             }
+
+            @Test
+            void when_startsWith_param_is_greater_than_16_then_should_return_a_violation() throws Exception {
+                testParamViolation("starts-with", "some words for some tests", "Expression length must be between 3 and 16");
+            }
         }
 
         private void testParamViolation(final String paramName, final String paramValue, final String expectedViolation) throws Exception {
