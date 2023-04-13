@@ -505,6 +505,22 @@ public class ProductControllerIT {
             void should_return_a_violation_if_startsWith_param_is_all_() throws Exception {
                 testParamViolation("starts-with", "all", "Expression cannot contain 'all'");
             }
+
+            @Test
+            @DisplayName("GET /api/products?pag=0--6&starts_with=qi -> 400 BAD_REQUEST")
+            void when_there_are_any_violations_then_should_respond_with_bad_request() throws Exception {
+                mockMvc.perform(get("/api/products?pag=0--6&starts-with=qi")
+                    .accept(MediaType.ALL)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.violations[*]").value(hasSize(2)))
+                .andExpect(jsonPath("$.violations[*].field").value(containsInAnyOrder("0--6", "qi")))
+                .andExpect(jsonPath("$.violations[*].violationMessage").value(containsInAnyOrder(
+                    "must match digit-digit",
+                    "Expression length must be between 3 and 16"
+                )));
+            }
         }
 
         private void testParamViolation(final String paramName, final String paramValue, final String expectedViolation) throws Exception {
