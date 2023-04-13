@@ -503,6 +503,11 @@ public class ProductControllerIT {
             }
         }
 
+        @Nested
+        class GetAllEndingWithDescriptionTest {
+
+        }
+
         private void testParamViolation(final String paramName, final String paramValue, final String expectedViolation) throws Exception {
             mockMvc.perform(get(String.format("/api/products?pag=0-6&%s=%s", paramName, paramValue))
                 .accept(MediaType.ALL)
