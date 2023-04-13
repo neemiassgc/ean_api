@@ -469,19 +469,9 @@ public class ProductControllerIT {
             }
 
             @Test
-            @DisplayName("GET /api/products?pag=0-6&contains=lo -> 400 BAD_REQUEST")
+            @DisplayName("GET /api/products?pag=0-6&contains=qi -> 400 BAD_REQUEST")
             void when_the_inputs_are_invalid_then_should_return_violations() throws Exception {
-                mockMvc.perform(get("/api/products?pag=0--6&contains=lo")
-                    .accept(MediaType.ALL)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations[*]").value(hasSize(2)))
-                .andExpect(jsonPath("$.violations[*].field").value(contains("0--6", "lo")))
-                .andExpect(jsonPath("$.violations[*].violationMessage").value(contains(
-                    "must match digit-digit",
-                    "Expression length must be between 3 and 16"
-                )));
+                testWithTwoParamViolations("contains");
             }
         }
 
@@ -509,17 +499,7 @@ public class ProductControllerIT {
             @Test
             @DisplayName("GET /api/products?pag=0--6&starts_with=qi -> 400 BAD_REQUEST")
             void when_there_are_any_violations_then_should_respond_with_bad_request() throws Exception {
-                mockMvc.perform(get("/api/products?pag=0--6&starts-with=qi")
-                    .accept(MediaType.ALL)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations[*]").value(hasSize(2)))
-                .andExpect(jsonPath("$.violations[*].field").value(containsInAnyOrder("0--6", "qi")))
-                .andExpect(jsonPath("$.violations[*].violationMessage").value(containsInAnyOrder(
-                    "must match digit-digit",
-                    "Expression length must be between 3 and 16"
-                )));
+               testWithTwoParamViolations("starts-with");
             }
         }
 
@@ -532,6 +512,20 @@ public class ProductControllerIT {
             .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
             .andExpect(jsonPath("$.violations[0].field").value(paramValue))
             .andExpect(jsonPath("$.violations[0].violationMessage").value(expectedViolation));
+        }
+
+        private void testWithTwoParamViolations(final String paramName) throws Exception {
+            mockMvc.perform(get("/api/products?pag=0--6&"+paramName+"=qi")
+                .accept(MediaType.ALL)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.violations[*]").value(hasSize(2)))
+            .andExpect(jsonPath("$.violations[*].field").value(containsInAnyOrder("0--6", "qi")))
+            .andExpect(jsonPath("$.violations[*].violationMessage").value(containsInAnyOrder(
+                "must match digit-digit",
+                "Expression length must be between 3 and 16"
+            )));
         }
     }
 }
