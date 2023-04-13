@@ -453,19 +453,19 @@ public class ProductControllerIT {
             @Test
             @DisplayName("GET /api/products?pag=0-6&contains=all -> 400 BAD_REQUEST")
             void when_contains_param_is_all_then_should_return_a_violation() throws Exception {
-                testViolationsInContains("all", "Expression cannot contain 'all'");
+                testParamViolation("contains", "all", "Expression cannot contain 'all'");
             }
 
             @Test
             @DisplayName("GET /api/produdcts?pag=0-6&contains=bi -> 400 BAD_REQUEST")
             void when_contains_param_is_less_than_3_then_should_return_a_violation() throws Exception {
-                testViolationsInContains("bi", "Expression length must be between 3 and 16");
+                testParamViolation("contains", "bi", "Expression length must be between 3 and 16");
             }
 
             @Test
             @DisplayName("GET /api/products?pag=0-6&contains=black and white triangle -> 400 BAD_REQUEST")
             void when_contains_param_is_greater_than_16_then_should_return_a_violation() throws Exception {
-                testViolationsInContains("black and white triangle", "Expression length must be between 3 and 16");
+                testParamViolation("contains", "black and white triangle", "Expression length must be between 3 and 16");
             }
 
             @Test
@@ -483,17 +483,6 @@ public class ProductControllerIT {
                     "Expression length must be between 3 and 16"
                 )));
             }
-
-            private void testViolationsInContains(final String contains, final String expectedViolation) throws Exception {
-                mockMvc.perform(get("/api/products?pag=0-6&contains="+contains)
-                    .accept(MediaType.ALL)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field").value(contains))
-                .andExpect(jsonPath("$.violations[0].violationMessage").value(expectedViolation));
-            }
         }
 
         @Nested
@@ -501,16 +490,19 @@ public class ProductControllerIT {
 
             @Test
             void when_startsWith_param_is_less_than_6_then_should_return_a_violation() throws Exception {
-                final String startsWith = "po";
-                mockMvc.perform(get("/api/products?pag=0-6&starts-with="+startsWith)
-                    .accept(MediaType.ALL)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field").value(startsWith))
-                .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression length must be between 3 and 16"));
+                testParamViolation("starts-with", "po", "Expression length must be between 3 and 16");
             }
+        }
+
+        private void testParamViolation(final String paramName, final String paramValue, final String expectedViolation) throws Exception {
+            mockMvc.perform(get(String.format("/api/products?pag=0-6&%s=%s", paramName, paramValue))
+                .accept(MediaType.ALL)
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
+            .andExpect(jsonPath("$.violations[0].field").value(paramValue))
+            .andExpect(jsonPath("$.violations[0].violationMessage").value(expectedViolation));
         }
     }
 }
