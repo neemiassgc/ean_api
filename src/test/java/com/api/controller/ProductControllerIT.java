@@ -517,6 +517,12 @@ public class ProductControllerIT {
             void when_endsWith_param_is_less_than_3_then_should_respond_with_a_violation() throws Exception {
                 testParamViolation("ends-with", "ti", "Expression length must be between 3 and 16");
             }
+
+            @Test
+            @DisplayName("GET /api/products?pag=0-6&ends-with=this must be over 16 -> 400 BAD_REQUEST")
+            void when_endsWith_param_is_greater_than_16_then_should_respond_with_a_violation() throws Exception {
+                testParamViolation("ends-with", "this must be over 16", "Expression length must be between 3 and 16");
+            }
         }
 
         private void testParamViolation(final String paramName, final String paramValue, final String expectedViolation) throws Exception {
