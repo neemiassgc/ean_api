@@ -498,7 +498,19 @@ public class ProductControllerIT {
 
         @Nested
         class GetAllStartingDescriptionTest {
-            
+
+            @Test
+            void when_startsWith_param_is_less_than_6_then_should_return_a_violation() throws Exception {
+                final String startsWith = "po";
+                mockMvc.perform(get("/api/products?pag=0-6&starts-with="+startsWith)
+                    .accept(MediaType.ALL)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field").value(startsWith))
+                .andExpect(jsonPath("$.violations[0].violationMessage").value("Expression length must be between 3 and 16"));
+            }
         }
     }
 }
