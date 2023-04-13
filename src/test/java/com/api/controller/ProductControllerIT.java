@@ -495,5 +495,10 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.violations[0].violationMessage").value(expectedViolation));
             }
         }
+
+        @Nested
+        class GetAllStartingDescriptionTest {
+            
+        }
     }
 }
