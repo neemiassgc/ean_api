@@ -71,8 +71,8 @@ public class ProductServiceIT {
                 assertThat(simpleProduct.getBarcode()).isEqualTo("7894321724027");
                 assertThat(simpleProduct.getSequenceCode()).isEqualTo(5418);
             });
-            assertThat(productRepository.count()).isEqualTo(12);
-            assertThat(priceRepository.count()).isEqualTo(67);
+            assertThat(productRepository.count()).isEqualTo(17);
+            assertThat(priceRepository.count()).isEqualTo(86);
         }
 
         @Test
@@ -105,8 +105,8 @@ public class ProductServiceIT {
 
         productServiceUnderTest.save(newProduct);
 
-        assertThat(productRepository.count()).isEqualTo(12);
-        assertThat(priceRepository.count()).isEqualTo(67);
+        assertThat(productRepository.count()).isEqualTo(17);
+        assertThat(priceRepository.count()).isEqualTo(86);
     }
 
     @Nested
@@ -118,7 +118,7 @@ public class ProductServiceIT {
             final List<Product> actualProductList =
                 productServiceUnderTest.findAllWithLatestPrice();
 
-            assertThat(actualProductList).hasSize(11);
+            assertThat(actualProductList).hasSize(16);
             assertThat(actualProductList).extracting(Product::getPrices)
                 .allMatch(prices -> prices.size() == 1);
         }
@@ -131,11 +131,15 @@ public class ProductServiceIT {
             final List<Product> actualProducts =
                 productServiceUnderTest.findAll(orderBySequenceCodeDesc);
 
-            assertThat(actualProducts).hasSize(11);
-            assertThat(actualProducts).flatExtracting(Product::getPrices).hasSize(66);
+            assertThat(actualProducts).hasSize(16);
+            assertThat(actualProducts).flatExtracting(Product::getPrices).hasSize(85);
             assertThat(actualProducts)
                 .extracting(Product::getSequenceCode)
-                .containsExactly(142862, 137513, 134262, 120983, 113249, 105711, 93556, 29250, 9785, 2909, 1184);
+                .containsExactly(
+                    142862, 137513, 134262, 120983, 119759, 114084, 113249,
+                    105711, 93556, 92997, 29250, 19601, 11367, 9785, 2909, 1184
+                );
+
         }
 
         @Test
@@ -154,7 +158,7 @@ public class ProductServiceIT {
     }
 
     @Nested
-    class FindAllByUsernameIgnoreCaseContainingTest {
+    class FindAllByDescriptionIgnoreCaseContainingTest {
 
         @Test
         @DisplayName("Should return a page with two products by username")
@@ -190,34 +194,34 @@ public class ProductServiceIT {
     class FindAllByDescriptionIgnoreCaseStartingWithTest {
 
         @Test
-        @DisplayName("Should return a page with three products")
-        void should_return_a_page_with_three_products() {
+        @DisplayName("Should return a page with two products with more one page remaining")
+        void should_return_a_page_with_two_products_with_more_one_page_remaining() {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable aPageWithTheThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
-            final String startsWith = "b";
+            final Pageable pageWithTwoProducts = PageRequest.of(0, 2, orderByDescriptionAsc);
+            final String startsWith = "beb";
 
             final Page<Product> actualPage = productServiceUnderTest
-                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheThreeProducts);
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageWithTwoProducts);
 
             assertThat(actualPage).isNotNull();
-            assertThat(actualPage.getTotalPages()).isOne();
+            assertThat(actualPage.getTotalPages()).isEqualTo(2);
             assertThat(actualPage.getTotalElements()).isEqualTo(3);
-            assertThat(actualPage.getContent()).hasSize(3);
+            assertThat(actualPage.getContent()).hasSize(2);
             assertThat(actualPage.getContent())
                 .extracting(Product::getSequenceCode)
-                .containsExactly(93556, 142862, 113249);
-            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(21);
+                .containsExactly(119759, 92997);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(8);
         }
 
         @Test
         @DisplayName("When startsWith does not match anything then should return an empty page")
         void when_startsWith_does_not_match_anything_then_should_return_an_empty_page() {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable aPageWithTheThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
+            final Pageable pageWithThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
             final String startsWith = "crystal";
 
             final Page<Product> actualPage = productServiceUnderTest
-                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheThreeProducts);
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageWithThreeProducts);
 
             assertThat(actualPage).isNotNull();
             assertThat(actualPage).isEmpty();
@@ -228,11 +232,11 @@ public class ProductServiceIT {
         @DisplayName("When startsWith is empty then should return an empty page")
         void when_startsWith_is_empty_then_should_return_an_empty_page() {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
-            final Pageable aPageWithTheThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
+            final Pageable pageWithThreeProducts = PageRequest.of(0, 3, orderByDescriptionAsc);
             final String startsWith = "";
 
             final Page<Product> actualPage = productServiceUnderTest
-                    .findAllByDescriptionIgnoreCaseStartingWith(startsWith, aPageWithTheThreeProducts);
+                .findAllByDescriptionIgnoreCaseStartingWith(startsWith, pageWithThreeProducts);
 
             assertThat(actualPage).isNotNull();
             assertThat(actualPage).isEmpty();
@@ -245,11 +249,11 @@ public class ProductServiceIT {
     class FindAllByDescriptionIgnoreCaseEndingWithTest {
 
         @Test
-        @DisplayName("Should return a page with two products that end with a")
-        void should_return_a_page_with_two_products_that_end_with_a() {
+        @DisplayName("Should return one page with two products that end with laranja")
+        void should_return_one_page_with_two_products_that_end_with_laranja() {
             final Sort orderByDescriptionAsc = Sort.by("description").ascending();
             final Pageable firstPageWithTwoProducts = PageRequest.of(0, 2).withSort(orderByDescriptionAsc);
-            final String endsWith = "a";
+            final String endsWith = "laranja";
 
             final Page<Product> actualPage =
                 productServiceUnderTest.findAllByDescriptionIgnoreCaseEndingWith(endsWith, firstPageWithTwoProducts);
@@ -261,8 +265,8 @@ public class ProductServiceIT {
             assertThat(actualPage.getNumberOfElements()).isEqualTo(2);
             assertThat(actualPage.getContent()).hasSize(2);
             assertThat(actualPage.getContent())
-                .extracting(Product::getSequenceCode).containsExactly(120983, 9785);
-            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(11);
+                .extracting(Product::getSequenceCode).containsExactly(11367, 19601);
+            assertThat(actualPage.getContent()).flatExtracting(Product::getPrices).hasSize(6);
         }
 
         @Test

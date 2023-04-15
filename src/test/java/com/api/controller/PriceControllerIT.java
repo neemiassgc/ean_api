@@ -61,7 +61,7 @@ public class PriceControllerIT {
     @Test
     @DisplayName("GET /api/prices?barcode=78975348526 - 400 BAD REQUEST")
     void should_return_constraint_violations_for_barcode_field() throws Exception {
-        final String problematicBarcode = "78975348526";
+        final String problematicBarcode = "7897534852ab";
 
         makeRequestWithBarcode(problematicBarcode)
             .andExpect(status().isBadRequest())
