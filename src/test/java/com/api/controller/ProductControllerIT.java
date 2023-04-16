@@ -116,11 +116,26 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.currentPage").value(2))
                 .andExpect(jsonPath("$.totalOfPages").value(3))
                 .andExpect(jsonPath("$.totalOfItems").value(11))
+
+        @Test
+        @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
+        void should_return_the_last_page_with_one_product__OK() throws Exception {
+            final String lastPageWithOneProduct = "3-5";
+
+            makeRequestWithPage(lastPageWithOneProduct)
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.currentPage").value(3))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
+                .andExpect(jsonPath("$.totalOfItems").value(16))
                 .andExpect(jsonPath("$.currentCountOfItems").value(1))
                 .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpectAll(ContentTester.builder()
-                    .withExpectedBarcodeSet("7891962057620")
-                    .test()
+                .andExpectAll(
+                    ContentTester
+                        .builder()
+                        .withExpectedBarcodeSet("7891962057620").test()
                 );
         }
 
