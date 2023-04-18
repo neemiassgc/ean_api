@@ -35,17 +35,17 @@ public class ProductControllerIT {
         @DisplayName("GET /api/products -> 200 OK")
         void when_getAll_should_return_all_products__OK() throws Exception {
             final String[] expectedBarcodeList = {
-                "7891000055120", "7897534852624", "7896336010058",
-                "7898279792299", "7896045104482", "7891962047560",
-                "7896656800018", "7896004004501", "7891098010575",
-                "7896036093085", "7891962057620"
+                "7891000055120", "7897534852624", "7896336010058", "7898279792299",
+                "7896000594198", "7892840812737", "7896045104482", "7891962047560",
+                "7896656800018", "7896004004501", "7891098010575", "7894000840079",
+                "7896214532108", "7898080641618", "7896036093085", "7891962057620"
             };
 
             makeRequest()
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(11)))
+                .andExpect(jsonPath("$", hasSize(16)))
                 .andExpect(jsonPath("$[*].barcode", contains(expectedBarcodeList)))
                 .andExpect(jsonPath("$[*].links[0].rel", everyItem(equalTo("prices"))))
                 .andExpect(jsonPath("$[*].links[0].href", contains(concatWithUrl(Constants.PRICES_URL, expectedBarcodeList))))
@@ -58,8 +58,8 @@ public class ProductControllerIT {
         void should_return_the_first_page_with_five_products__OK() throws Exception {
             final String firstPageWithFiveProducts = "0-5";
             final String[] expectedBarcodeList = {
-                "7891000055120", "7897534852624", "7896336010058",
-                "7898279792299", "7896045104482"
+                "7891000055120", "7897534852624",
+                "7896336010058", "7898279792299", "7896000594198"
             };
 
             makeRequestWithPage(firstPageWithFiveProducts)
@@ -68,9 +68,9 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(5)))
                 .andExpect(jsonPath("$.currentPage").value(0))
-                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
-                .andExpect(jsonPath("$.totalOfItems").value(11))
+                .andExpect(jsonPath("$.totalOfItems").value(16))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpectAll(ContentTester.builder()
                     .withNextPage("1-5")
@@ -83,8 +83,8 @@ public class ProductControllerIT {
         void should_return_the_second_page_with_five_products__OK() throws Exception {
             final String secondPageWithFiveProducts = "1-5";
             final String[] expectedBarcodeList = {
-                "7891962047560", "7896656800018", "7896004004501",
-                "7891098010575", "7896036093085"
+                "7892840812737", "7896045104482", "7891962047560",
+                "7896656800018", "7896004004501"
             };
 
             makeRequestWithPage(secondPageWithFiveProducts)
@@ -93,9 +93,9 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(5)))
                 .andExpect(jsonPath("$.currentPage").value(1))
-                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
                 .andExpect(jsonPath("$.currentCountOfItems").value(5))
-                .andExpect(jsonPath("$.totalOfItems").value(11))
+                .andExpect(jsonPath("$.totalOfItems").value(16))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpectAll(ContentTester.builder()
                     .withExpectedBarcodeSet(expectedBarcodeList)
@@ -105,17 +105,26 @@ public class ProductControllerIT {
 
         @Test
         @DisplayName("GET /api/products?pag=2-5 -> 200 OK")
-        void should_return_the_third_page_with_one_product__OK() throws Exception {
-            final String thirdPageWithOneProduct = "2-5";
+        void should_return_the_third_page_with_five_products__OK() throws Exception {
+            final String thirdPageWithFiveProducts = "2-5";
 
-            makeRequestWithPage(thirdPageWithOneProduct)
+            makeRequestWithPage(thirdPageWithFiveProducts)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(5)))
                 .andExpect(jsonPath("$.currentPage").value(2))
-                .andExpect(jsonPath("$.totalOfPages").value(3))
-                .andExpect(jsonPath("$.totalOfItems").value(11))
+                .andExpect(jsonPath("$.totalOfPages").value(4))
+                .andExpect(jsonPath("$.totalOfItems").value(16))
+                .andExpect(jsonPath("$.currentCountOfItems").value(5))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpectAll(
+                    ContentTester.builder().withExpectedBarcodeSet(
+                        "7891098010575", "7894000840079",
+                        "7896214532108", "7898080641618", "7896036093085"
+                    ).withNextPage("3-5").test()
+                );
+        }
 
         @Test
         @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
@@ -140,9 +149,9 @@ public class ProductControllerIT {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
+        @DisplayName("GET /api/products?pag=4-5 -> 200 OK")
         void when_the_page_is_too_big_should_not_return_anything__OK() throws Exception {
-            final String fourthPage = "3-5";
+            final String fourthPage = "4-5";
 
             makeRequestWithPage(fourthPage)
                 .andExpect(status().isOk())
@@ -200,31 +209,35 @@ public class ProductControllerIT {
     class GetAllContainingDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=0-2&contains=500g -> 200 OK")
-        void should_response_a_page_with_two_products__OK() throws Exception {
-            final String contains = "500g";
-            final String firstPageWithTwoProducts = "0-2";
+        @DisplayName("GET /api/products?pag=0-1&contains=400g -> 200 OK")
+        void should_respond_with_the_fist_page_with_one_product__OK() throws Exception {
+            final String contains = "400g";
+            final String firstPageWithOneProduct = "0-1";
 
-            makeRequestWithPageAndContains(firstPageWithTwoProducts, contains)
+            makeRequestWithPageAndContains(firstPageWithOneProduct, contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.currentPage").value(0))
-                .andExpect(jsonPath("$.totalOfPages").value(1))
-                .andExpect(jsonPath("$.currentCountOfItems").value(2))
-                .andExpect(jsonPath("$.totalOfItems").value(2))
-                .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7898279792299", "7896656800018").test());
+                .andExpect(jsonPath("$.totalOfPages").value(3))
+                .andExpect(jsonPath("$.currentCountOfItems").value(1))
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpectAll(
+                    ContentTester.builder()
+                        .withExpectedBarcodeSet("7896336010058")
+                        .withNextPage("1-1&contains=400g").test()
+                );
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=1-1&contains=400g -> 200 OK")
-        void should_response_a_page_with_one_product__OK() throws Exception {
+        @DisplayName("GET /api/products?pag=1-2&contains=400g -> 200 OK")
+        void should_respond_with_the_second_page_with_one_product__OK() throws Exception {
             final String contains = "400g";
-            final String secondPageWithOneProduct = "1-1";
+            final String secondPageWithTwoProducts = "1-2";
 
-            makeRequestWithPageAndContains(secondPageWithOneProduct, contains)
+            makeRequestWithPageAndContains(secondPageWithTwoProducts, contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
@@ -232,14 +245,13 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.currentPage").value(1))
                 .andExpect(jsonPath("$.totalOfPages").value(2))
                 .andExpect(jsonPath("$.currentCountOfItems").value(1))
-                .andExpect(jsonPath("$.totalOfItems").value(2))
-                .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7891962057620").test());
+                .andExpect(jsonPath("$.totalOfItems").value(3))
+                .andExpect(jsonPath("$.hasNext").value(false));
         }
 
         @Test
         @DisplayName("GET /api/products?pag=1-1&contains= -> 200 OK")
-        void should_response_an_empty_page__OK() throws Exception {
+        void should_respond_with_an_empty_page__OK() throws Exception {
             final String contains = "";
             final String secondPageWithOneProduct = "1-1";
 
@@ -250,25 +262,16 @@ public class ProductControllerIT {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=0-1&contains=400g -> 200 OK")
-        void should_return_a_page_with_one_product__OK() throws Exception {
+        @DisplayName("GET /api/products?pag=3-2&contains=400g -> 200 OK")
+        void when_there_are_no_products_to_return_then_should_respond_with_nothing__OK() throws Exception {
             final String contains = "400g";
-            final String secondPageWithOneProduct = "0-1";
+            final String thirdPageWithTwoProducts = "3-2";
 
-            makeRequestWithPageAndContains(secondPageWithOneProduct, contains)
+            makeRequestWithPageAndContains(thirdPageWithTwoProducts, contains)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.currentPage").value(0))
-                .andExpect(jsonPath("$.totalOfPages").value(2))
-                .andExpect(jsonPath("$.currentCountOfItems").value(1))
-                .andExpect(jsonPath("$.totalOfItems").value(2))
-                .andExpect(jsonPath("$.hasNext").value(true))
-                .andExpectAll(ContentTester.builder()
-                    .withExpectedBarcodeSet("7896336010058")
-                    .withNextPage("1-1&contains=400g").test()
-                );
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", empty()));
         }
     }
 
@@ -276,11 +279,11 @@ public class ProductControllerIT {
     class GetAllStartingWithDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=0-2&starts-with=b -> 200 OK")
+        @DisplayName("GET /api/products?pag=0-2&starts-with=beb -> 200 OK")
         void should_return_the_first_page_with_two_products__OK() throws Exception {
             final String firstPageWithTwoProducts = "0-2";
 
-            makeRequestWithPageAndStartsWith(firstPageWithTwoProducts, "b")
+            makeRequestWithPageAndStartsWith(firstPageWithTwoProducts, "beb")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
@@ -291,17 +294,17 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpectAll(ContentTester.builder()
-                    .withExpectedBarcodeSet("7898279792299", "7896045104482")
-                    .withNextPage("1-2&starts-with=b").test()
+                    .withExpectedBarcodeSet("7896000594198", "7892840812737")
+                    .withNextPage("1-2&starts-with=beb").test()
                 );
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=1-2&starts-with=b -> 200 OK")
+        @DisplayName("GET /api/products?pag=1-2&starts-with=beb -> 200 OK")
         void should_return_the_second_page_with_one_product__OK() throws Exception {
             final String secondPageWithOneProduct = "1-2";
 
-            makeRequestWithPageAndStartsWith(secondPageWithOneProduct, "b")
+            makeRequestWithPageAndStartsWith(secondPageWithOneProduct, "beb")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
@@ -311,8 +314,9 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.currentCountOfItems").value(1))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpect(jsonPath("$.content[0].description").value("BISC CEREALE BAUDUC 170G CACAU E CAST"))
-                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7891962047560").test());
+                .andExpect(jsonPath("$.content[0].description").value("BEB LACT 3 CORACOES 260ML PINGADO"))
+                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7896045104482").test());
+        }
         }
 
         @Test
@@ -332,10 +336,10 @@ public class ProductControllerIT {
     class GetAllEndingWithDescriptionTest {
 
         @Test
-        @DisplayName("GET /api/products?pag=0-2&ends-with=a -> 200 OK")
+        @DisplayName("GET /api/products?pag=0-2&ends-with=laranja -> 200 OK")
         void should_return_the_first_page_with_two_products__OK() throws Exception {
             final String firstPageWithTwoProducts = "0-2";
-            final String endsWith = "a";
+            final String endsWith = "laranja";
 
             makeRequestWithPageAndEndsWith(firstPageWithTwoProducts, endsWith)
                 .andExpect(status().isOk())
@@ -348,18 +352,18 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpectAll(ContentTester.builder()
-                    .withExpectedBarcodeSet("7896336010058", "7891098010575")
-                    .withNextPage("1-2&ends-with=a").test()
+                    .withExpectedBarcodeSet("7894000840079", "7896214532108")
+                    .withNextPage("1-2&ends-with=laranja").test()
                 );
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=1-2&ends-with=a -> 200 OK")
-        void should_return_the_last_page_with_one_product__OK() throws Exception {
-            final String lastPageWithOneProduct = "1-2";
-            final String endsWith = "a";
+        @DisplayName("GET /api/products?pag=1-2&ends-with=laranja -> 200 OK")
+        void should_return_the_seconds_page_with_one_product__OK() throws Exception {
+            final String secondPageWithOneProduct = "1-2";
+            final String endsWith = "laranja";
 
-            makeRequestWithPageAndEndsWith(lastPageWithOneProduct, endsWith)
+            makeRequestWithPageAndEndsWith(secondPageWithOneProduct, endsWith)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
@@ -369,7 +373,7 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.currentCountOfItems").value(1))
                 .andExpect(jsonPath("$.totalOfItems").value(3))
                 .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7896036093085").test());
+                .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7898080641618").test());
         }
 
         @Test
@@ -385,10 +389,10 @@ public class ProductControllerIT {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=1-3&ends-with= -> 200 OK")
-        void when_ends_with_is_empty_then_should_return_an_empty_json__OK() throws Exception {
+        @DisplayName("GET /api/products?pag=1-3&ends-with=mango -> 200 OK")
+        void when_ends_with_is_does_not_match_anything_then_should_return_an_empty_json__OK() throws Exception {
             final String secondPageWithThreeProducts = "1-2";
-            final String endsWith = "";
+            final String endsWith = "mango";
 
             makeRequestWithPageAndEndsWith(secondPageWithThreeProducts, endsWith)
                 .andExpect(status().isOk())
