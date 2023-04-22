@@ -250,14 +250,14 @@ public class ProductControllerIT {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=1-1&contains= -> 200 OK")
-        void should_respond_with_an_empty_page__OK() throws Exception {
-            final String contains = "";
-            final String secondPageWithOneProduct = "1-1";
+        @DisplayName("GET /api/products?pag=4-2&contains=beb -> 200 OK")
+        void when_the_pagination_is_out_of_bounds_then_should_return_nothing_as_an_empty_array__OK() throws Exception {
+            final String fourthPageWithTwoProducts = "4-2";
 
-            makeRequestWithPageAndContains(secondPageWithOneProduct, contains)
+            makeRequestWithPageAndStartsWith(fourthPageWithTwoProducts, "beb")
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
         }
 
@@ -317,6 +317,17 @@ public class ProductControllerIT {
                 .andExpect(jsonPath("$.content[0].description").value("BEB LACT 3 CORACOES 260ML PINGADO"))
                 .andExpectAll(ContentTester.builder().withExpectedBarcodeSet("7896045104482").test());
         }
+
+        @Test
+        @DisplayName("GET /api/products?pag=4-2&starts-with=beb -> 200 OK")
+        void when_the_pagination_is_out_of_bounds_then_should_return_nothing_as_an_empty_array__OK() throws Exception {
+            final String fourthPageWithTwoProducts = "4-2";
+
+            makeRequestWithPageAndStartsWith(fourthPageWithTwoProducts, "beb")
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
         }
 
         @Test
@@ -377,14 +388,15 @@ public class ProductControllerIT {
         }
 
         @Test
-        @DisplayName("GET /api/products?pag=1-3&ends-with=mango -> 200 OK")
-        void when_ends_with_is_does_not_match_anything_then_should_return_an_empty_json__OK() throws Exception {
-            final String secondPageWithThreeProducts = "1-2";
-            final String endsWith = "mango";
+        @DisplayName("GET /api/products?pag=5-2&ends-with=laranja")
+        void when_pagination_is_out_of_bounds_then_should_respond_with_nothing_as_an_empty_array() throws Exception {
+            final String fifthPageWithTwoProducts = "5-2";
+            final String endsWith = "laranja";
 
-            makeRequestWithPageAndEndsWith(secondPageWithThreeProducts, endsWith)
+            makeRequestWithPageAndEndsWith(fifthPageWithTwoProducts, endsWith)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
         }
 
