@@ -3,6 +3,7 @@ package com.api.service;
 import com.api.entity.Price;
 import com.api.entity.Product;
 import com.api.repository.PriceRepository;
+import org.apache.tomcat.util.digester.ObjectCreateRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static java.time.Month.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,10 +31,13 @@ final class PriceServiceImplTest {
 
     private PriceRepository priceRepositoryMock;
     private PriceServiceImpl priceServiceUnderTest;
+    private CacheManager<Price, UUID> priceCacheManager;
 
     @BeforeEach
     void setup() {
-        priceServiceUnderTest = new PriceServiceImpl(priceRepositoryMock = mock(PriceRepository.class));
+        priceRepositoryMock = mock(PriceRepository.class);
+        priceCacheManager = mock(CacheManager.class);
+        priceServiceUnderTest = new PriceServiceImpl(priceRepositoryMock, priceCacheManager);
     }
 
     @Nested
@@ -45,6 +50,8 @@ final class PriceServiceImplTest {
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(priceRepositoryMock, priceCacheManager);
         }
 
         @Test
@@ -52,8 +59,15 @@ final class PriceServiceImplTest {
         void when_id_does_not_exist_then_should_throw_an_exception() {
             final UUID nonExistentId = UUID.fromString("4843ca41-2532-4247-bae4-16e61b8108cc");
             given(priceRepositoryMock.findById(eq(nonExistentId))).willReturn(Optional.empty());
+            given(priceCacheManager.sync(eq(nonExistentId.toString()), any(Supplier.class)))
+                .willAnswer(invocation -> {
+                    invocation.getArgument(1, Supplier.class).get();
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Price not found");
+                });
+            given(priceCacheManager.containsKey(eq(nonExistentId.toString()))).willReturn(false);
 
             final Throwable actualThrowable = catchThrowable(() -> priceServiceUnderTest.findById(nonExistentId));
+            final boolean isCached = priceCacheManager.containsKey(nonExistentId.toString());
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
@@ -61,9 +75,12 @@ final class PriceServiceImplTest {
                 assertThat(exception.getReason()).isEqualTo("Price not found");
                 assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
             });
+            assertThat(isCached).isFalse();
 
             verify(priceRepositoryMock, times(1)).findById(eq(nonExistentId));
-            verify(priceRepositoryMock, only()).findById(eq(nonExistentId));
+            verify(priceCacheManager, times(1)).sync(eq(nonExistentId.toString()), any(Supplier.class));
+            verify(priceCacheManager, times(1)).containsKey(eq(nonExistentId.toString()));
+            verifyNoMoreInteractions(priceRepositoryMock, priceCacheManager);
         }
 
         @Test
@@ -72,14 +89,21 @@ final class PriceServiceImplTest {
             final UUID existingId = UUID.fromString("5b17f3d7-5fd7-4564-a994-23613d993a57");
             final Price expectedPrice = Resources.LIST_OF_PRICES.get(0);
             given(priceRepositoryMock.findById(eq(existingId))).willReturn(Optional.of(expectedPrice));
+            given(priceCacheManager.sync(eq(existingId.toString()), any(Supplier.class)))
+                .willAnswer(invocation -> Optional.of(invocation.getArgument(1, Supplier.class).get()));
+            given(priceCacheManager.containsKey(eq(existingId.toString()))).willReturn(true);
 
             final Price actualPrice = priceServiceUnderTest.findById(existingId);
+            final boolean isCached = priceCacheManager.containsKey(existingId.toString());
 
             assertThat(actualPrice).isNotNull();
             assertThat(actualPrice).isEqualTo(expectedPrice);
+            assertThat(isCached).isTrue();
 
             verify(priceRepositoryMock, times(1)).findById(eq(existingId));
-            verify(priceRepositoryMock, only()).findById(eq(existingId));
+            verify(priceCacheManager, times(1)).containsKey(eq(existingId.toString()));
+            verify(priceCacheManager, times(1)).sync(eq(existingId.toString()), any(Supplier.class));
+            verifyNoMoreInteractions(priceRepositoryMock, priceCacheManager);
         }
     }
 
@@ -97,6 +121,8 @@ final class PriceServiceImplTest {
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(priceRepositoryMock, priceCacheManager);
         }
 
         @Test
@@ -107,6 +133,8 @@ final class PriceServiceImplTest {
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(priceRepositoryMock, priceCacheManager);
         }
 
         @Test
@@ -117,8 +145,12 @@ final class PriceServiceImplTest {
             orderedPrices.sort(Resources.ORDER_BY_INSTANT_DESC);
             given(priceRepositoryMock.findByProductBarcode(eq(BARCODE), eq(orderByInstantDesc)))
                 .willReturn(orderedPrices);
+            given(priceCacheManager.sync(eq(BARCODE+orderByInstantDesc), any(Supplier.class)))
+                .willAnswer(invocation -> Optional.of(invocation.getArgument(1, Supplier.class).get()));
+            given(priceCacheManager.containsKey(eq(BARCODE+orderByInstantDesc))).willReturn(true);
 
             final List<Price> actualPrices = priceServiceUnderTest.findByProductBarcode(BARCODE, orderByInstantDesc);
+            final boolean cached = priceCacheManager.containsKey(BARCODE+orderByInstantDesc);
 
             assertThat(actualPrices).isNotNull();
             assertThat(actualPrices).hasSize(5);
@@ -127,9 +159,12 @@ final class PriceServiceImplTest {
                 .extracting(Price::getInstant)
                 .map(Resources::extractMonthFromInstant)
                 .containsExactly(MAY, APRIL, MARCH, FEBRUARY, JANUARY);
+            assertThat(cached).isTrue();
 
             verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(BARCODE), eq(orderByInstantDesc));
-            verify(priceRepositoryMock, only()).findByProductBarcode(eq(BARCODE), eq(orderByInstantDesc));
+            verify(priceCacheManager, times(1)).sync(eq(BARCODE+orderByInstantDesc), any(Supplier.class));
+            verify(priceCacheManager, times(1)).containsKey(eq(BARCODE+orderByInstantDesc));
+            verifyNoMoreInteractions(priceRepositoryMock, priceCacheManager);
         }
 
         @Test
@@ -137,21 +172,32 @@ final class PriceServiceImplTest {
         void when_product_barcode_does_not_exist_then_should_throw_an_exception() {
             final String nonExistentBarcode = "3817304916283";
             final Sort orderByInstantDesc = Sort.by("instant").descending();
+            final String key = nonExistentBarcode+orderByInstantDesc;
             given(priceRepositoryMock.findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc)))
-                    .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyList());
+            given(priceCacheManager.sync(eq(key), any(Supplier.class)))
+                .willAnswer(invocation -> {
+                    invocation.getArgument(1, Supplier.class).get();
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Price not found");
+                });
+            given(priceCacheManager.containsKey(eq(key))).willReturn(false);
 
             final Throwable actualThrowable = catchThrowable(() ->
                     priceServiceUnderTest.findByProductBarcode(nonExistentBarcode, orderByInstantDesc));
+            final boolean cached = priceCacheManager.containsKey(key);
 
             assertThat(actualThrowable).isNotNull();
             assertThat(actualThrowable).isInstanceOf(ResponseStatusException.class);
             assertThat((ResponseStatusException) actualThrowable).satisfies(exception -> {
-                assertThat(exception.getReason()).isEqualTo("Product not found");
+                assertThat(exception.getReason()).isEqualTo("Price not found");
                 assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
             });
+            assertThat(cached).isFalse();
 
             verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc));
-            verify(priceRepositoryMock, only()).findByProductBarcode(eq(nonExistentBarcode), eq(orderByInstantDesc));
+            verify(priceCacheManager, times(1)).sync(eq(key), any(Supplier.class));
+            verify(priceCacheManager, times(1)).containsKey(eq(key));
+            verifyNoMoreInteractions(priceRepositoryMock, priceCacheManager);
         }
 
         @Test
@@ -159,12 +205,17 @@ final class PriceServiceImplTest {
         void given_a_pageable_then_should_return_only_the_first_three_prices() {
             final Sort orderByInstantDesc = Sort.by("instant").descending();
             final Pageable theFirstThreePrices = PageRequest.of(0, 3).withSort(orderByInstantDesc);
+            final String key = BARCODE+"-pag=0-3";
             final List<Price> expectedPrices = new ArrayList<>(Resources.LIST_OF_PRICES.subList(0, 3));
             expectedPrices.sort(Resources.ORDER_BY_INSTANT_DESC);
             given(priceRepositoryMock.findByProductBarcode(eq(BARCODE), eq(theFirstThreePrices)))
                 .willReturn(expectedPrices);
+            given(priceCacheManager.sync(eq(key), any(Supplier.class)))
+                .willAnswer(invocation -> Optional.of(invocation.getArgument(1, Supplier.class).get()));
+            given(priceCacheManager.containsKey(eq(key))).willReturn(true);
 
             final List<Price> actualPrices = priceServiceUnderTest.findByProductBarcode(BARCODE, theFirstThreePrices);
+            final boolean cached = priceCacheManager.containsKey(key);
 
             assertThat(actualPrices).hasSize(3);
             // Checking ordering
@@ -174,7 +225,9 @@ final class PriceServiceImplTest {
                 .containsExactly(APRIL, FEBRUARY, JANUARY);
 
             verify(priceRepositoryMock, times(1)).findByProductBarcode(eq(BARCODE), eq(theFirstThreePrices));
-            verify(priceRepositoryMock, only()).findByProductBarcode(eq(BARCODE), eq(theFirstThreePrices));
+            verify(priceCacheManager, times(1)).sync(eq(key), any(Supplier.class));
+            verify(priceCacheManager, times(1)).containsKey(eq(key));
+            verifyNoMoreInteractions(priceRepositoryMock, priceCacheManager);
         }
     }
 
