@@ -28,18 +28,23 @@ public class PriceServiceIT {
     @Autowired
     private PriceService priceService;
 
+    @Autowired
+    private CacheManager<Price, UUID> priceCacheManager;
+
     @Nested
     final class FindByIdTest {
 
         @Test
         @DisplayName("Should return a price")
-        void when_id_exist_the_should_return_a_price() {
+        void when_id_exist_then_should_return_a_price() {
             final UUID existentUuid = UUID.fromString("9423f8be-2a4f-4baa-b457-6a904bf633f0");
 
             final Price actualPrice = priceService.findById(existentUuid);
+            final boolean cached = priceCacheManager.containsKey(existentUuid.toString());
 
             assertThat(actualPrice).isNotNull();
             assertThat(actualPrice.getValue()).isEqualTo(new BigDecimal("12.70"));
+            assertThat(cached).isTrue();
         }
 
         @Test
@@ -48,8 +53,10 @@ public class PriceServiceIT {
             final UUID nonExisting = UUID.fromString("e236e904-49f0-41b0-b3aa-c9f582f38fc1");
 
             final Throwable actualThrowable = catchThrowable(() -> priceService.findById(nonExisting));
+            final boolean cached = priceCacheManager.containsKey(nonExisting.toString());
 
             checkResponseStatusExceptionWithMessage(actualThrowable, "Price not found");
+            assertThat(cached).isFalse();
         }
     }
 
@@ -65,17 +72,22 @@ public class PriceServiceIT {
             final String nonExistingBarcode = "7891000055121";
 
             final Throwable actualThrowable =
-                    catchThrowable(() -> priceService.findByProductBarcode(nonExistingBarcode, ORDER_BY_INSTANT_DESC));
+                catchThrowable(() -> priceService.findByProductBarcode(nonExistingBarcode, ORDER_BY_INSTANT_DESC));
+            final boolean cached = priceCacheManager.containsKey(nonExistingBarcode);
+
 
             checkResponseStatusExceptionWithMessage(actualThrowable, "Product not found");
+            assertThat(cached).isFalse();
         }
 
         @Test
         void should_return_prices_ordered_by_its_instant_desc() {
             final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, ORDER_BY_INSTANT_DESC);
+            final boolean cached = priceCacheManager.containsKey(BARCODE+ ORDER_BY_INSTANT_DESC);
 
             assertThat(actualPrices).hasSize(10);
             checkOrderingWithAllPrices(actualPrices);
+            assertThat(cached).isTrue();
         }
 
         @Test
@@ -83,9 +95,11 @@ public class PriceServiceIT {
             final Pageable theFirstThreePrices = PageRequest.of(0, 3, ORDER_BY_INSTANT_DESC);
 
             final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, theFirstThreePrices);
+            final boolean cached = priceCacheManager.containsKey(BARCODE+"-pag=0-3");
 
             assertThat(actualPrices).hasSize(3);
             checkOrderingWithPrices(actualPrices, "12.70", "19.00", "16.50");
+            assertThat(cached).isTrue();
         }
 
         @Test
@@ -94,9 +108,12 @@ public class PriceServiceIT {
             final Pageable overMaxPageSize = PageRequest.of(0, 12, ORDER_BY_INSTANT_DESC);
 
             final List<Price> actualPrices = priceService.findByProductBarcode(BARCODE, overMaxPageSize);
+            final boolean cached = priceCacheManager.containsKey(BARCODE+"-pag=0-12");
+
 
             assertThat(actualPrices).hasSize(10);
             checkOrderingWithAllPrices(actualPrices);
+            assertThat(cached).isTrue();
         }
 
         @Test
@@ -106,8 +123,10 @@ public class PriceServiceIT {
 
             final Throwable actualThrowable =
                 catchThrowable(() -> priceService.findByProductBarcode(BARCODE, overMaxPageSize));
+            final boolean cached = priceCacheManager.containsKey(BARCODE+"-pag=2-5");
 
             checkResponseStatusExceptionWithMessage(actualThrowable, "Product not found");
+            assertThat(cached).isFalse();
         }
     }
 
