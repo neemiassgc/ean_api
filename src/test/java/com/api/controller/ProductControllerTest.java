@@ -1,7 +1,7 @@
 package com.api.controller;
 
 import com.api.Resources;
-import com.api.component.Constants;
+import com.api.utility.Constants;
 import com.api.projection.SimpleProductWithStatus;
 import com.api.service.interfaces.ProductService;
 import org.junit.jupiter.api.BeforeEach;

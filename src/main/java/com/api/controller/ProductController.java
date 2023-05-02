@@ -2,7 +2,7 @@ package com.api.controller;
 
 import com.api.annotation.Barcode;
 import com.api.annotation.ValidExpression;
-import com.api.component.DomainUtils;
+import com.api.utility.DomainUtils;
 import com.api.entity.Product;
 import com.api.projection.CustomPagination;
 import com.api.projection.SimpleProduct;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.api.component.DomainUtils.calculateNextPage;
+import static com.api.utility.DomainUtils.calculateNextPage;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 

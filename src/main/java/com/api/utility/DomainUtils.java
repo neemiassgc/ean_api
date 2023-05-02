@@ -1,4 +1,4 @@
-package com.api.component;
+package com.api.utility;
 
 import com.api.entity.Product;
 import lombok.NonNull;

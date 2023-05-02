@@ -1,6 +1,6 @@
 package com.api.controller;
 
-import com.api.component.Constants;
+import com.api.utility.Constants;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;

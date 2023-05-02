@@ -1,4 +1,4 @@
-package com.api.component;
+package com.api.utility;
 
 public final class Constants {
 

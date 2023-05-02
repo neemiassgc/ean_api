@@ -1,8 +1,8 @@
 package com.api.controller;
 
 import com.api.Resources;
-import com.api.component.Constants;
-import com.api.component.DomainUtils;
+import com.api.utility.Constants;
+import com.api.utility.DomainUtils;
 import com.api.entity.Product;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
