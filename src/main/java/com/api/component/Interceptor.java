@@ -2,12 +2,15 @@ package com.api.component;
 
 import com.api.entity.Product;
 import com.api.service.CacheManager;
+import com.api.utility.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,8 +33,18 @@ public class Interceptor implements HandlerInterceptor {
             }
         }
 
-        response.addHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
-        response.addHeader("ETag", freshEtag);
+        if (request.getRequestURI().equals("/api/prices")) {
+            final ZoneId timezone = ZoneId.of(Constants.TIMEZONE);
+            final LocalDate tomorrow = LocalDate.now(timezone).plusDays(1);
+            final LocalTime fiveAm = LocalTime.of(5, 0);
+            final ZonedDateTime tomorrowAtFiveAm = ZonedDateTime.of( LocalDateTime.of(tomorrow, fiveAm), timezone);
+            final long differenceInSeconds = ChronoUnit.SECONDS.between(ZonedDateTime.now(timezone), tomorrowAtFiveAm);
+            response.addHeader("Cache-Control", "max-age="+differenceInSeconds);
+        }
+        else {
+            response.addHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
+            response.addHeader("ETag", freshEtag);
+        }
         return true;
     }
 }
