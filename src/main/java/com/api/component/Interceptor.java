@@ -22,17 +22,17 @@ public class Interceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        final Optional<String> staleEtagOptional = Optional.ofNullable(request.getHeader("If-None-Match"));
-        final String freshEtag = productCacheManager.getRef().toString().replace("-", "");
-        if (staleEtagOptional.isPresent()) {
-            final String staleEtag = staleEtagOptional.get();
-            if (staleEtag.equals(freshEtag)) {
-                response.addHeader("ETag", staleEtag);
-                response.setStatus(304);
-                return false;
-            }
-        }
+        if (checkIfETagsMatch(request, response)) return false;
 
+        if (!addCacheControlIfURIContainsPrices(request, response)) {
+            final String freshEtag = productCacheManager.getRef().toString().replace("-", "");
+            response.addHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
+            response.addHeader("ETag", freshEtag);
+        }
+        return true;
+    }
+
+    private boolean addCacheControlIfURIContainsPrices(final HttpServletRequest request, final HttpServletResponse response) {
         if (request.getRequestURI().equals("/api/prices")) {
             final ZoneId timezone = ZoneId.of(Constants.TIMEZONE);
             final LocalDate tomorrow = LocalDate.now(timezone).plusDays(1);
@@ -40,11 +40,22 @@ public class Interceptor implements HandlerInterceptor {
             final ZonedDateTime tomorrowAtFiveAm = ZonedDateTime.of( LocalDateTime.of(tomorrow, fiveAm), timezone);
             final long differenceInSeconds = ChronoUnit.SECONDS.between(ZonedDateTime.now(timezone), tomorrowAtFiveAm);
             response.addHeader("Cache-Control", "max-age="+differenceInSeconds);
+            return true;
         }
-        else {
-            response.addHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
-            response.addHeader("ETag", freshEtag);
+        return false;
+    }
+
+    private boolean checkIfETagsMatch(final HttpServletRequest request, final HttpServletResponse response) {
+        final Optional<String> staleEtagOptional = Optional.ofNullable(request.getHeader("If-None-Match"));
+        final String freshEtag = productCacheManager.getRef().toString().replace("-", "");
+        if (staleEtagOptional.isPresent()) {
+            final String staleEtag = staleEtagOptional.get();
+            if (staleEtag.equals(freshEtag)) {
+                response.addHeader("ETag", staleEtag);
+                response.setStatus(304);
+                return true;
+            }
         }
-        return true;
+        return false;
     }
 }
