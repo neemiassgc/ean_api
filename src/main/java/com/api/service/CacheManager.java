@@ -1,5 +1,8 @@
 package com.api.service;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.lang.NonNull;
 
 import java.util.*;
@@ -14,6 +17,10 @@ public class CacheManager<TARGET, KEY> {
     private final Map<KEY, TARGET> sourceBucket = new HashMap<>();
     private final Function<TARGET, KEY> keyExtractorFunction;
     private final ConcurrentMap<String, List<KEY>> cache = new ConcurrentHashMap<>();
+
+    @Getter
+    @Setter(AccessLevel.PRIVATE)
+    private UUID ref = UUID.randomUUID();
 
     public CacheManager(@NonNull final Function<TARGET, KEY> keyExtractorFunction) {
         this.keyExtractorFunction = keyExtractorFunction;
@@ -50,6 +57,7 @@ public class CacheManager<TARGET, KEY> {
     public void evictAll() {
         sourceBucket.clear();
         cache.clear();
+        setRef(UUID.randomUUID());
     }
 
     public boolean containsKey(final String key) {
