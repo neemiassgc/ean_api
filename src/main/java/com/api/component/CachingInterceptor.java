@@ -33,7 +33,7 @@ public class CachingInterceptor implements HandlerInterceptor {
     }
 
     private boolean addCacheControlIfURIContainsPrices(final HttpServletRequest request, final HttpServletResponse response) {
-        if (request.getRequestURI().equals("/api/prices")) {
+        if (request.getRequestURI().contains("/api/prices")) {
             final ZoneId timezone = ZoneId.of(Constants.TIMEZONE);
             final LocalDate tomorrow = LocalDate.now(timezone).plusDays(1);
             final LocalTime fiveAm = LocalTime.of(5, 0);
