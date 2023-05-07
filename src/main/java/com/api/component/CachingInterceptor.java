@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
-public class Interceptor implements HandlerInterceptor {
+public class CachingInterceptor implements HandlerInterceptor {
 
     @Autowired
     private CacheManager<Product, UUID> productCacheManager;
