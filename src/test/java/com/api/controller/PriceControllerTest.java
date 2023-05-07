@@ -1,10 +1,18 @@
 package com.api.controller;
 
 import com.api.entity.Price;
+import com.api.entity.Product;
+import com.api.service.CacheManager;
 import com.api.service.interfaces.PriceService;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,22 +26,22 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static com.api.controller.PriceControllerTestHelper.*;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-import static com.api.controller.PriceControllerTestHelper.*;
 
 @WebMvcTest(value = {PriceController.class, GlobalErrorHandlingController.class})
+@AutoConfigureMockMvc(printOnlyOnFailure = false)
 public class PriceControllerTest {
 
     @MockBean
     private PriceService priceService;
 
+    @Autowired
     private MockMvc mockMvc;
 
     private final List<Price> usefulPrices = List.of(
@@ -61,8 +69,6 @@ public class PriceControllerTest {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = standaloneSetup(new PriceController(priceService), new GlobalErrorHandlingController())
-        .alwaysDo(print()).build();
         PriceControllerTestHelper.mockMvc = mockMvc;
     }
 
@@ -156,5 +162,14 @@ public class PriceControllerTest {
 
         verify(priceService, times(1)).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
         verify(priceService, only()).findByProductBarcode(eq(targetBarcode), eq(orderByInstantDesc));
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public CacheManager<Product, UUID> productCacheManager() {
+            return new CacheManager<>(Product::getId);
+        }
     }
 }
