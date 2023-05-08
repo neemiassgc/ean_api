@@ -4,8 +4,10 @@ import com.api.entity.Product;
 import com.api.service.CacheManager;
 import com.api.utility.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,14 +24,19 @@ public class CachingInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (checkIfETagsMatch(request, response)) return false;
+        return !checkIfETagsMatch(request, response);
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        if (response.getStatus() == HttpStatus.BAD_REQUEST.value()
+            || response.getStatus() == HttpStatus.NOT_FOUND.value()) return;
 
         if (!addCacheControlIfURIContainsPrices(request, response)) {
             final String freshEtag = productCacheManager.getRef().toString().replace("-", "");
             response.addHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
             response.addHeader("ETag", freshEtag);
         }
-        return true;
     }
 
     private boolean addCacheControlIfURIContainsPrices(final HttpServletRequest request, final HttpServletResponse response) {
