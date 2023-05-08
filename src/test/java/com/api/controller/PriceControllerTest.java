@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import static com.api.controller.PriceControllerTestHelper.*;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -81,6 +81,8 @@ public class PriceControllerTest {
 
         makeRequestByUuid(uuid+"")
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", matchesRegex("^max-age=\\d{2,}$")))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.value").value("16.75"));
 
@@ -98,6 +100,8 @@ public class PriceControllerTest {
 
         makeRequestByUuid(uuid+"")
             .andExpect(status().isNotFound())
+            .andExpect(header().doesNotExist("ETag"))
+            .andExpect(header().doesNotExist("Cache-Control"))
             .andExpect(content().contentType(MediaType.TEXT_PLAIN))
             .andExpect(content().string("Price not found"));
 
@@ -116,6 +120,7 @@ public class PriceControllerTest {
 
         makeRequestWithBarcode(targetBarcode)
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", matchesRegex("^max-age=\\d{2,}$")))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$", hasSize(5)))
@@ -137,6 +142,7 @@ public class PriceControllerTest {
 
         makeRequestWithBarcodeAndLimit(targetBarcode, 3)
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", matchesRegex("^max-age=\\d{2,}$")))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$", hasSize(3)))
@@ -157,6 +163,8 @@ public class PriceControllerTest {
 
         makeRequestWithBarcode(targetBarcode)
             .andExpect(status().isNotFound())
+            .andExpect(header().doesNotExist("ETag"))
+            .andExpect(header().doesNotExist("Cache-Control"))
             .andExpect(content().contentType(MediaType.TEXT_PLAIN))
             .andExpect(content().string("Product not found"));
 
