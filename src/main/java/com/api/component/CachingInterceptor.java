@@ -5,6 +5,7 @@ import com.api.service.CacheManager;
 import com.api.utility.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -23,12 +24,12 @@ public class CachingInterceptor implements HandlerInterceptor {
     private CacheManager<Product, UUID> productCacheManager;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
         return !checkIfETagsMatch(request, response);
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+    public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, ModelAndView modelAndView) {
         if (response.getStatus() == HttpStatus.BAD_REQUEST.value()
             || response.getStatus() == HttpStatus.NOT_FOUND.value()) return;
 
