@@ -34,6 +34,8 @@ public class PriceControllerIT {
     void should_return_a_price_by_its_id_with_200() throws Exception {
         makeRequestByUuid("5ad12c1a-2103-407c-adcc-832e3f99fb5b")
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", matchesRegex("^max-age=\\d{2,}$")))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.value").value(18.40))
             .andExpect(jsonPath("$.instant").value("2021-09-09T16:50:10.554Z"));
@@ -44,6 +46,8 @@ public class PriceControllerIT {
     void when_a_price_does_not_exist_then_should_return_404_not_found() throws Exception {
         makeRequestByUuid("5ad12c1a-2103-407c-adcc-832e3f99fa9a")
             .andExpect(status().isNotFound())
+            .andExpect(header().doesNotExist("Cache-Control"))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.TEXT_PLAIN))
             .andExpect(content().string("Price not found"));
     }
@@ -53,6 +57,8 @@ public class PriceControllerIT {
     void should_return_all_prices_for_a_barcode() throws Exception {
         makeRequestWithBarcode("7897534852624")
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", matchesRegex("^max-age=\\d{2,}$")))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(jsonPath("$[*].value", contains(5.65, 9.90, 10.75, 7.50)));
@@ -65,6 +71,8 @@ public class PriceControllerIT {
 
         makeRequestWithBarcode(problematicBarcode)
             .andExpect(status().isBadRequest())
+            .andExpect(header().doesNotExist("Cache-Control"))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.violations", hasSize(2)))
             .andExpect(jsonPath("$.violations[*].field", everyItem(is(problematicBarcode))))
@@ -79,6 +87,8 @@ public class PriceControllerIT {
     void should_return_only_three_prices_for_a_barcode() throws Exception {
         makeRequestWithBarcodeAndLimit("7897534852624", 3)
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", matchesRegex("^max-age=\\d{2,}$")))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$", hasSize(3)))
             .andExpect(jsonPath("$[*].value", contains(5.65, 9.90, 10.75)));
@@ -89,6 +99,8 @@ public class PriceControllerIT {
     void if_there_are_no_prices_for_a_barcode_then_return_not_found() throws Exception {
         makeRequestWithBarcodeAndLimit("7897534852836", 3)
             .andExpect(status().isNotFound())
+            .andExpect(header().doesNotExist("Cache-Control"))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.TEXT_PLAIN))
             .andExpect(content().string("Product not found"));
     }
@@ -100,6 +112,8 @@ public class PriceControllerIT {
 
         makeRequestWithBarcodeAndLimit("7897534852624", -3)
             .andExpect(status().isBadRequest())
+            .andExpect(header().doesNotExist("Cache-Control"))
+            .andExpect(header().doesNotExist("ETag"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.violations", hasSize(1)))
             .andExpect(jsonPath("$.violations[0].field").value(negativeLimit))
