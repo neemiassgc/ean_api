@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -604,5 +605,20 @@ class ProductControllerTest {
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithThreeProducts));
             verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithThreeProducts));
         }
+
+    void testUriWithIfNoneMatch(final String uri) throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+            .get(uri)
+            .accept(MediaType.ALL_VALUE)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .header("If-None-Match", "bbd074a4e28b46dfb10a2fd55d11685b")
+        )
+        .andExpect(header().string("Etag", equalTo("bbd074a4e28b46dfb10a2fd55d11685b")))
+        .andExpect(content().string(emptyString()))
+        .andExpect(status().isNotModified());
+
+        verify(productCacheManager, times(1)).getRef();
+        verifyNoMoreInteractions(productCacheManager);
+        verifyNoInteractions(productService);
     }
 }
