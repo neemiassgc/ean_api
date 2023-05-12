@@ -1,9 +1,12 @@
 package com.api.controller;
 
 import com.api.Resources;
-import com.api.utility.Constants;
+import com.api.component.CachingInterceptor;
+import com.api.entity.Product;
 import com.api.projection.SimpleProductWithStatus;
+import com.api.service.CacheManager;
 import com.api.service.interfaces.ProductService;
+import com.api.utility.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,9 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import static com.api.controller.ProductControllerTestHelper.*;
 import static org.hamcrest.Matchers.contains;
@@ -35,12 +40,18 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
+    @MockBean
+    private CacheManager<Product, UUID> productCacheManager;
+
     @BeforeEach
     void setUp() {
+        given(productCacheManager.getRef()).willReturn(UUID.fromString("bbd074a4-e28b-46df-b10a-2fd55d11685b"));
+
         ProductControllerTestHelper.mockMvc = standaloneSetup(
             new ProductController(productService),
             new GlobalErrorHandlingController()
         )
+        .addInterceptors(new CachingInterceptor(productCacheManager))
         .alwaysDo(print()).build();
     }
 
@@ -62,6 +73,8 @@ class ProductControllerTest {
             };
             makeRequest()
                 .andExpect(status().isOk())
+                .andExpect(header().string("ETag", equalTo("bbd074a4e28b46dfb10a2fd55d11685b")))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", hasSize(18)))
@@ -82,6 +95,32 @@ class ProductControllerTest {
                 );
 
             verify(productService, times(1)).findAll((ArgumentMatchers.any(Sort.class)));
+        }
+
+        @Test
+        @DisplayName("Should respond with NOT_MODIFIED 304")
+        void should_respond_with_NOT_MODIFIED() throws Exception {
+            final String[] uris =  new String[] {
+                "/api/products?pag=0-3",
+                "/api/products?pag=1-3",
+                "/api/products?pag=2-3",
+                "/api/products/7896336010058",
+                "/api/products"
+            };
+            for (final String uri : uris) {
+                mockMvc.perform(
+                    MockMvcRequestBuilders
+                        .get(uri)
+                        .header("If-None-Match", "bbd074a4e28b46dfb10a2fd55d11685b")
+                )
+                .andExpect(header().string("Etag", equalTo("bbd074a4e28b46dfb10a2fd55d11685b")))
+                .andExpect(content().string(emptyString()))
+                .andExpect(status().isNotModified());
+
+                verify(productCacheManager, times(1)).getRef();
+                verifyNoMoreInteractions(productCacheManager);
+                verifyNoInteractions(productService);
+            }
         }
 
         @Test
