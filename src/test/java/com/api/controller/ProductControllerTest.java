@@ -648,6 +648,12 @@ class ProductControllerTest {
         }
 
         @Test
+        @DisplayName("When if-none-match header matches then GET /api/products?pag=0-3&ends-with= -> 304 NOT MODIFIED")
+        void when_endsWith_is_empty_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products?pag=0-3&ends-with=");
+        }
+
+        @Test
         @DisplayName("GET /api/products?pag=0-3&ends-with=toddy -> 200 OK")
         void when_endsWith_does_not_match_anything_then_should_return_an_empty_json__OK() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
