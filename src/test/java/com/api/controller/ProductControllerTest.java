@@ -344,6 +344,12 @@ class ProductControllerTest {
 
             verify(productService, times(1)).getByBarcodeAndSaveIfNecessary(eq(targetBarcode));
         }
+
+        @Test
+        @DisplayName("When if-none-match header matches then GET /api/products/7891000055120 -> 304 NOT MODIFIED")
+        void when_the_product_is_found_should_return_a_product_but_must_return_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products/7891000055120");
+        }
     }
 
     @Nested
