@@ -99,29 +99,9 @@ class ProductControllerTest {
         }
 
         @Test
-        @DisplayName("Should respond with NOT_MODIFIED 304")
-        void should_respond_with_NOT_MODIFIED() throws Exception {
-            final String[] uris =  new String[] {
-                "/api/products?pag=0-3",
-                "/api/products?pag=1-3",
-                "/api/products?pag=2-3",
-                "/api/products/7896336010058",
-                "/api/products"
-            };
-            for (final String uri : uris) {
-                mockMvc.perform(
-                    MockMvcRequestBuilders
-                        .get(uri)
-                        .header("If-None-Match", "bbd074a4e28b46dfb10a2fd55d11685b")
-                )
-                .andExpect(header().string("Etag", equalTo("bbd074a4e28b46dfb10a2fd55d11685b")))
-                .andExpect(content().string(emptyString()))
-                .andExpect(status().isNotModified());
-
-                verify(productCacheManager, times(1)).getRef();
-                verifyNoMoreInteractions(productCacheManager);
-                verifyNoInteractions(productService);
-            }
+        @DisplayName("When if-none-match header matches then GET /api/products -> 304 NOT MODIFIED")
+        void should_return_all_products_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products");
         }
 
         @Test
