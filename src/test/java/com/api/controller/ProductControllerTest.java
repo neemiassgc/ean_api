@@ -490,6 +490,12 @@ class ProductControllerTest {
         }
 
         @Test
+        @DisplayName("When if-none-match header matches then GET /api/products?pag=0-2&starts-with=bisc -> 304 NOT MODIFIED")
+        void should_return_the_first_page_with_two_products_that_start_with_bisc_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products?pag=0-2&starts-with=bisc");
+        }
+
+        @Test
         @DisplayName("GET /api/products?pag=0-5&starts-with= -> 200 OK")
         void when_startsWith_is_empty_then_should_return_an_empty_json__OK() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
