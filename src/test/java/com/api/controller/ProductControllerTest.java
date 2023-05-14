@@ -391,6 +391,12 @@ class ProductControllerTest {
         }
 
         @Test
+        @DisplayName("When if-none-match header matches then GET /api/products?pag=0-2&contains=500g -> 304 NOT MODIFIED")
+        void should_return_the_first_page_with_two_products_that_contain_500g_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products?pag=0-2&contains=500g");
+        }
+
+        @Test
         @DisplayName("GET /api/products?pag-1-1&contains= -> 200 OK")
         void when_contains_is_empty_then_should_return_an_empty_json__OK() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
