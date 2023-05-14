@@ -675,6 +675,14 @@ class ProductControllerTest {
             verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithThreeProducts));
         }
 
+        @Test
+        @DisplayName("When if-none-match header matches then GET /api/products?pag=0-3&ends-with=toddy -> 304 NOT MODIFIED")
+        void when_endsWith_does_not_match_anything_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products?pag=0-3&ends-with=toddy");
+        }
+
+    }
+
     void testUriWithIfNoneMatch(final String uri) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
             .get(uri)
