@@ -445,6 +445,12 @@ class ProductControllerTest {
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct));
             verify(productService, only()).findAllByDescriptionIgnoreCaseContaining(eq(contains), eq(secondPageWithOneProduct));
         }
+
+        @Test
+        @DisplayName("When if-none-match header matches then GET /api/products?pag-1-1&contains= -> 304 NOT_MODIFIED")
+        void when_contains_does_not_match_anything_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products?pag-1-1&contains=");
+        }
     }
 
     @Nested
