@@ -215,6 +215,12 @@ class ProductControllerTest {
         }
 
         @Test
+        @DisplayName("When if-none-match header matches then GET /api/products?pag=2-5 -> 304 NOT MODIFIED")
+        void should_return_the_third_page_with_five_products_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products?pag=2-5");
+        }
+
+        @Test
         @DisplayName("GET /api/products?pag=3-5 -> 200 OK")
         void should_return_the_fourth_page_with_three_products() throws Exception {
             final Sort orderByDescriptionAsc = getDefaultSorting();
