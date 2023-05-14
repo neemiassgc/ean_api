@@ -580,9 +580,14 @@ class ProductControllerTest {
                     .withNextPage("1-1&ends-with="+endsWith).test()
                 );
 
-
             verify(productService, times(1)).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct));
             verify(productService, only()).findAllByDescriptionIgnoreCaseEndingWith(eq(endsWith), eq(firstPageWithOneProduct));
+        }
+
+        @Test
+        @DisplayName("When if-none-match header matches then GET /api/products?pag=0-1&ends-with=choc -> 304 NOT MODIFIED")
+        void should_return_a_page_with_one_product_that_end_with_choc_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
+            testUriWithIfNoneMatch("/api/products?pag=0-1&ends-with=choc");
         }
 
         @Test
