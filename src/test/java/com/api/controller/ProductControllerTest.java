@@ -101,7 +101,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products -> 304 NOT MODIFIED")
         void should_return_all_products_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products");
+            testUriWithIfNoneMatchAndVerify("/api/products");
         }
 
         @Test
@@ -139,7 +139,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-5 -> 304 NOT MODIFIED")
         void should_return_the_first_page_with_five_products_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-5");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-5");
         }
 
         @Test
@@ -178,7 +178,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=1-5 -> 304 NOT MODIFIED")
         void should_return_the_second_page_with_five_products_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=1-5");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=1-5");
         }
 
         @Test
@@ -217,7 +217,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=2-5 -> 304 NOT MODIFIED")
         void should_return_the_third_page_with_five_products_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=2-5");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=2-5");
         }
 
         @Test
@@ -249,7 +249,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=3-5 -> 304 NOT MODIFIED")
         void should_return_the_fourth_page_with_three_products_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=3-5");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=3-5");
         }
 
         @Test
@@ -276,7 +276,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=4-5 -> 304 NOT MODIFIED")
         void when_pag_is_over_the_limits_then_should_return_an_empty_array_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=4-5");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=4-5");
         }
 
         @Test
@@ -348,7 +348,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products/7891000055120 -> 304 NOT MODIFIED")
         void when_the_product_is_found_should_return_a_product_but_must_return_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products/7891000055120");
+            testUriWithIfNoneMatchAndVerify("/api/products/7891000055120");
         }
     }
 
@@ -393,7 +393,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-2&contains=500g -> 304 NOT MODIFIED")
         void should_return_the_first_page_with_two_products_that_contain_500g_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-2&contains=500g");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-2&contains=500g");
         }
 
         @Test
@@ -421,7 +421,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag-1-1&contains= -> 304 NOT_MODIFIED")
         void when_contains_is_empty_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag-1-1&contains= ");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag-1-1&contains= ");
         }
 
         @Test
@@ -449,7 +449,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag-1-1&contains= -> 304 NOT_MODIFIED")
         void when_contains_does_not_match_anything_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag-1-1&contains=");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag-1-1&contains=");
         }
     }
 
@@ -492,7 +492,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-2&starts-with=bisc -> 304 NOT MODIFIED")
         void should_return_the_first_page_with_two_products_that_start_with_bisc_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-2&starts-with=bisc");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-2&starts-with=bisc");
         }
 
         @Test
@@ -520,7 +520,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-5&starts-with= -> 304 NOT MODIFIED")
         void when_startsWith_is_empty_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-5&starts-with=");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-5&starts-with=");
         }
 
         @Test
@@ -548,7 +548,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-5&startsWith=cheese -> 304 NOT MODIFIED")
         void when_startsWith_does_not_match_anything_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-5&startsWith=cheese");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-5&startsWith=cheese");
         }
     }
 
@@ -587,7 +587,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-1&ends-with=choc -> 304 NOT MODIFIED")
         void should_return_a_page_with_one_product_that_end_with_choc_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-1&ends-with=choc");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-1&ends-with=choc");
         }
 
         @Test
@@ -622,7 +622,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=1-1&ends-with=choc -> 304 NOT MODIFIED")
         void should_return_the_last_page_with_one_product_that_end_with_choc_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=1-1&ends-with=choc");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=1-1&ends-with=choc");
         }
 
         @Test
@@ -650,7 +650,7 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-3&ends-with= -> 304 NOT MODIFIED")
         void when_endsWith_is_empty_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-3&ends-with=");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-3&ends-with=");
         }
 
         @Test
@@ -678,22 +678,12 @@ class ProductControllerTest {
         @Test
         @DisplayName("When if-none-match header matches then GET /api/products?pag=0-3&ends-with=toddy -> 304 NOT MODIFIED")
         void when_endsWith_does_not_match_anything_then_should_return_an_empty_json_but_must_return_nothing_with_NOT_MODIFIED() throws Exception {
-            testUriWithIfNoneMatch("/api/products?pag=0-3&ends-with=toddy");
+            testUriWithIfNoneMatchAndVerify("/api/products?pag=0-3&ends-with=toddy");
         }
-
     }
 
-    void testUriWithIfNoneMatch(final String uri) throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-            .get(uri)
-            .accept(MediaType.ALL_VALUE)
-            .characterEncoding(StandardCharsets.UTF_8)
-            .header("If-None-Match", "bbd074a4e28b46dfb10a2fd55d11685b")
-        )
-        .andExpect(header().string("Etag", equalTo("bbd074a4e28b46dfb10a2fd55d11685b")))
-        .andExpect(content().string(emptyString()))
-        .andExpect(status().isNotModified());
-
+    void testUriWithIfNoneMatchAndVerify(final String uri) throws Exception {
+        testUriWithIfNoneMatch(uri);
         verify(productCacheManager, times(1)).getRef();
         verifyNoMoreInteractions(productCacheManager);
         verifyNoInteractions(productService);

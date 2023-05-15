@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -21,7 +22,8 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 final class ProductControllerTestHelper {
 
@@ -162,5 +164,17 @@ final class ProductControllerTestHelper {
 
             return resultMatcherList.toArray(ResultMatcher[]::new);
         }
+    }
+
+    static void testUriWithIfNoneMatch(final String uri) throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+            .get(uri)
+            .accept(MediaType.ALL_VALUE)
+            .characterEncoding(StandardCharsets.UTF_8)
+            .header("If-None-Match", "bbd074a4e28b46dfb10a2fd55d11685b")
+        )
+        .andExpect(header().string("Etag", equalTo("bbd074a4e28b46dfb10a2fd55d11685b")))
+        .andExpect(content().string(emptyString()))
+        .andExpect(status().isNotModified());
     }
 }
