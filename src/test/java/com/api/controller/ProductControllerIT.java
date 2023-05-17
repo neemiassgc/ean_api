@@ -1,5 +1,7 @@
 package com.api.controller;
 
+import com.api.entity.Product;
+import com.api.service.CacheManager;
 import com.api.utility.Constants;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static com.api.controller.ProductControllerTestHelper.*;
@@ -635,6 +639,44 @@ public class ProductControllerIT {
                 "must match digit-digit",
                 "Expression length must be between 3 and 16"
             )));
+        }
+    }
+
+    @Test
+    @DisplayName("All URIs should respond with 304 not_modified if If-None-Match header matches")
+    void when_If_None_Match_header_matches_then_should_respond_with_304_not_modified(
+        @Autowired CacheManager<Product, UUID> productCacheManager
+    ) throws Exception {
+        final String etagId = productCacheManager.getRef().toString().replace("-", "");
+        final String[] uris = {
+            "/api/products",
+            "/api/products?pag=0-5",
+            "/api/products?pag=1-5",
+            "/api/products?pag=2-5",
+            "/api/products?pag=3-5",
+            "/api/products?pag=4-5",
+            "/api/products/7891000055120",
+            "/api/products/7891000055129",
+            "/api/products?pag=0-1&contains=400g",
+            "/api/products?pag=1-2&contains=400g",
+            "/api/products?pag=3-2&contains=400g",
+            "/api/products?pag=4-2&contains=beb",
+            "/api/products?pag=0-2&starts-with=beb",
+            "/api/products?pag=1-2&starts-with=beb",
+            "/api/products?pag=4-2&starts-with=beb",
+            "/api/products?pag=2-5&starts-with=torr",
+            "/api/products?pag=0-2&ends-with=laranja",
+            "/api/products?pag=5-2&ends-with=laranja",
+            "/api/products?pag=1-3&ends-with=mango",
+        };
+
+        for (String uri : uris) {
+            mockMvc.perform(
+                get(uri).header("If-None-Match", etagId)
+            )
+            .andExpect(status().isNotModified())
+            .andExpect(header().string("ETag", etagId))
+            .andExpect(content().string(emptyString()));
         }
     }
 }
