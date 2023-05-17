@@ -43,6 +43,8 @@ public class ProductControllerIT {
 
             makeRequest()
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", hasSize(16)))
@@ -64,6 +66,8 @@ public class ProductControllerIT {
 
             makeRequestWithPage(firstPageWithFiveProducts)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(5)))
@@ -89,6 +93,8 @@ public class ProductControllerIT {
 
             makeRequestWithPage(secondPageWithFiveProducts)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(5)))
@@ -110,6 +116,8 @@ public class ProductControllerIT {
 
             makeRequestWithPage(thirdPageWithFiveProducts)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(5)))
@@ -133,6 +141,8 @@ public class ProductControllerIT {
 
             makeRequestWithPage(lastPageWithOneProduct)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -155,6 +165,8 @@ public class ProductControllerIT {
 
             makeRequestWithPage(fourthPage)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
@@ -167,6 +179,8 @@ public class ProductControllerIT {
 
             makeRequestWithPage(firstPage)
                 .andExpect(status().isBadRequest())
+                .andExpect(header().doesNotExist("ETag"))
+                .andExpect(header().doesNotExist("Cache-Control"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.violations", hasSize(1)))
                 .andExpect(jsonPath("$.violations[0].violationMessage").value("must match digit-digit"));
@@ -183,6 +197,8 @@ public class ProductControllerIT {
 
             makeRequestByBarcode(targetBarcode)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.description").value("ACHOC PO NESCAU 800G"))
                 .andExpect(jsonPath("$.sequenceCode").value(29250))
@@ -200,6 +216,8 @@ public class ProductControllerIT {
 
             makeRequestByBarcode(nonExistingBarcode)
                 .andExpect(status().isNotFound())
+                .andExpect(header().doesNotExist("ETag"))
+                .andExpect(header().doesNotExist("Cache-Control"))
                 .andExpect(content().contentType(MediaType.TEXT_PLAIN))
                 .andExpect(content().string("Product not found"));
         }
@@ -216,6 +234,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndContains(firstPageWithOneProduct, contains)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -239,6 +259,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndContains(secondPageWithTwoProducts, contains)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -256,6 +278,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndStartsWith(fourthPageWithTwoProducts, "beb")
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
@@ -269,6 +293,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndContains(thirdPageWithTwoProducts, contains)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", empty()));
@@ -285,6 +311,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndStartsWith(firstPageWithTwoProducts, "beb")
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -306,6 +334,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndStartsWith(secondPageWithOneProduct, "beb")
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -325,6 +355,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndStartsWith(fourthPageWithTwoProducts, "beb")
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
@@ -338,6 +370,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndStartsWith(thirdPageWithFiveProducts, startsWith)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isEmpty());
         }
@@ -354,6 +388,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndEndsWith(firstPageWithTwoProducts, endsWith)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -376,6 +412,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndEndsWith(secondPageWithOneProduct, endsWith)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -395,6 +433,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndEndsWith(fifthPageWithTwoProducts, endsWith)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
@@ -408,6 +448,8 @@ public class ProductControllerIT {
 
             makeRequestWithPageAndEndsWith(secondPageWithThreeProducts, endsWith)
                 .andExpect(status().isOk())
+                .andExpect(header().exists("ETag"))
+                .andExpect(header().string("Cache-Control", equalTo("no-cache, max-age=0, must-revalidate")))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isEmpty());
         }
@@ -460,6 +502,8 @@ public class ProductControllerIT {
                 return mockMvc.perform(get("/api/products/"+barcode))
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
+                    .andExpect(header().doesNotExist("ETag"))
+                    .andExpect(header().doesNotExist("Cache-Control"))
                     .andExpect(jsonPath("$.violations[*].field", everyItem(equalTo(barcode))));
             }
         }
@@ -472,6 +516,8 @@ public class ProductControllerIT {
                 .accept(MediaType.ALL)
             )
             .andExpect(status().isBadRequest())
+            .andExpect(header().doesNotExist("ETag"))
+            .andExpect(header().doesNotExist("Cache-Control"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
             .andExpect(jsonPath("$.violations[0].field").value("0--2"))
@@ -567,6 +613,8 @@ public class ProductControllerIT {
                 .accept(MediaType.ALL)
             )
             .andExpect(status().isBadRequest())
+            .andExpect(header().doesNotExist("ETag"))
+            .andExpect(header().doesNotExist("Cache-Control"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.violations[*]").value(hasSize(1)))
             .andExpect(jsonPath("$.violations[0].field").value(paramValue))
@@ -578,6 +626,8 @@ public class ProductControllerIT {
                 .accept(MediaType.ALL)
             )
             .andExpect(status().isBadRequest())
+            .andExpect(header().doesNotExist("ETag"))
+            .andExpect(header().doesNotExist("Cache-Control"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.violations[*]").value(hasSize(2)))
             .andExpect(jsonPath("$.violations[*].field").value(containsInAnyOrder("0--6", "qi")))
