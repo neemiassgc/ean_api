@@ -23,7 +23,6 @@ public class JobsRouter {
     public ResponseEntity<HttpStatus> doJob(final @RequestHeader HttpHeaders httpHeaders) {
         final List<String> appEngineCronHeader = httpHeaders.get("X-Appengine-Cron");
         if (Objects.isNull(appEngineCronHeader)) return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
-        for (String header : appEngineCronHeader) System.out.println(header);
         if (appEngineCronHeader.contains("true")) {
             job.execute();
             return ResponseEntity.ok(HttpStatus.OK);
