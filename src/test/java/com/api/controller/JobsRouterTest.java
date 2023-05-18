@@ -16,4 +16,13 @@ public final class JobsRouterTest {
 
     @MockBean
     private Job job;
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public CacheManager<Product, UUID> productCacheManager() {
+            return new CacheManager<>(Product::getId);
+        }
+    }
 }
