@@ -20,13 +20,13 @@ public class JobsRouter {
     private final Job job;
 
     @GetMapping("api/jobs/updatePrices")
-    public ResponseEntity<HttpStatus> doJob(final @RequestHeader HttpHeaders httpHeaders) {
+    public ResponseEntity<String> doJob(final @RequestHeader HttpHeaders httpHeaders) {
         final List<String> appEngineCronHeader = httpHeaders.get("X-Appengine-Cron");
-        if (Objects.isNull(appEngineCronHeader)) return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
+        if (Objects.isNull(appEngineCronHeader)) return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST.name());
         if (appEngineCronHeader.contains("true")) {
             job.execute();
-            return ResponseEntity.ok(HttpStatus.OK);
+            return ResponseEntity.ok(HttpStatus.OK.name());
         }
-        return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST.name());
     }
 }
