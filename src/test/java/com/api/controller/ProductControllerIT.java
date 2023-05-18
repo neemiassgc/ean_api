@@ -668,6 +668,23 @@ public class ProductControllerIT {
             "/api/products?pag=0-2&ends-with=laranja",
             "/api/products?pag=5-2&ends-with=laranja",
             "/api/products?pag=1-3&ends-with=mango",
+            "/api/products/18908",
+            "/api/products/1927384019283145",
+            "/api/products/7alfpm439ayra",
+            "/api/products/17802a",
+            "/api/products?pag=0--2",
+            "/api/products?pag=0-6&contains=all",
+            "/api/produdcts?pag=0-6&contains=bi",
+            "/api/products?pag=0-6&contains=black and white triangle",
+            "/api/products?pag=0-6&contains=qi",
+            "/api/products?pag=0-6&starts-with=po",
+            "/api/products?pag=0-6&starts-with=some words for some tests",
+            "/api/products?pag=0-6&starts-with=all",
+            "/api/products?pag=0--6&starts_with=qi",
+            "/api/products?pag=0-6&ends-with=all",
+            "/api/products?pag=0-6&ends-with=ti",
+            "/api/products?pag=0-6&ends-with=this must be over 16",
+            "/api/products?pag=0--6&ends-with=qi"
         };
 
         for (String uri : uris) {
