@@ -50,6 +50,20 @@ public final class JobsRouterTest {
         verify(job, never()).execute();
     }
 
+    @Test
+    @DisplayName("If X-Appegine-Cron is not set to true then api/jobs/updatePrices -> 400 BAD_REQUEST")
+    void should_not_run_the_job_if_X_Appengine_Cron_header_is_not_true() throws Exception {
+        mockMvc.perform(get(URI)
+            .accept(MediaType.ALL)
+            .header("X-Appengine-Cron", "false")
+            .characterEncoding(StandardCharsets.UTF_8)
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType("text/plain;charset=UTF-8"))
+        .andExpect(content().string("BAD_REQUEST"));
+
+        verify(job, never()).execute();
+    }
 
     @TestConfiguration
     static class TestConfig {
