@@ -11,15 +11,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,6 +77,25 @@ public final class JobsRouterTest {
 
         verify(job, never()).execute();
     }
+
+    @Test
+    @DisplayName("If X-Appegine-Cron is set to true then api/jobs/updatePrices -> 200 Ok")
+    void should_run_the_job_succesfully_when_X_Appengine_Cron_header_is_set_to_true() throws Exception {
+        doNothing().when(job).execute();
+
+        mockMvc.perform(get(URI)
+            .accept(MediaType.ALL)
+            .header("X-Appengine-Cron", "true")
+            .characterEncoding(StandardCharsets.UTF_8)
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("text/plain;charset=UTF-8"))
+        .andExpect(content().string("OK"));
+
+        verify(job, times(1)).execute();
+        verifyNoMoreInteractions(job);
+    }
+
     @TestConfiguration
     static class TestConfig {
 
