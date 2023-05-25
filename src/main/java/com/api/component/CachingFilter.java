@@ -3,6 +3,7 @@ package com.api.component;
 import com.api.entity.Product;
 import com.api.service.CacheManager;
 import com.api.utility.Constants;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -16,10 +17,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CachingFilter implements Filter {
 
-    @Autowired
-    private CacheManager<Product, UUID> productCacheManager;
+    private final CacheManager<Product, UUID> productCacheManager;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
