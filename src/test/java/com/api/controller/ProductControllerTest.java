@@ -1,6 +1,7 @@
 package com.api.controller;
 
 import com.api.Resources;
+import com.api.component.CachingFilter;
 import com.api.component.CachingInterceptor;
 import com.api.entity.Product;
 import com.api.projection.SimpleProductWithStatus;
@@ -18,10 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -53,6 +52,7 @@ class ProductControllerTest {
             new GlobalErrorHandlingController()
         )
         .addInterceptors(new CachingInterceptor(productCacheManager))
+        .addFilters(new CachingFilter(productCacheManager))
         .alwaysDo(print()).build();
     }
 
@@ -684,7 +684,7 @@ class ProductControllerTest {
 
     void testUriWithIfNoneMatchAndVerify(final String uri) throws Exception {
         testUriWithIfNoneMatch(uri);
-        verify(productCacheManager, times(1)).getRef();
+        verify(productCacheManager, times(2)).getRef();
         verifyNoMoreInteractions(productCacheManager);
         verifyNoInteractions(productService);
     }
