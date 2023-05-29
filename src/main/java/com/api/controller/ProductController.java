@@ -2,12 +2,13 @@ package com.api.controller;
 
 import com.api.annotation.Barcode;
 import com.api.annotation.ValidExpression;
-import com.api.utility.DomainUtils;
 import com.api.entity.Product;
 import com.api.projection.CustomPagination;
 import com.api.projection.SimpleProduct;
 import com.api.projection.SimpleProductWithStatus;
+import com.api.service.CacheManager;
 import com.api.service.interfaces.ProductService;
+import com.api.utility.DomainUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.Pattern;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,13 +42,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class ProductController {
 
     private final ProductService productService;
+    private final CacheManager<Product, UUID> productCacheManager;
 
     @GetMapping(path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAll() {
         List<EntityModel<SimpleProduct>> responseBody =
             mapAndAddLinks(productService.findAll(Sort.by("description").ascending()));
 
-        return ResponseEntity.ok(responseBody);
+        return ResponseEntity.ok().headers(getCachingHeaders()).body(responseBody);
     }
 
     @GetMapping(path = "/products", params = "pag", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -104,7 +108,7 @@ public class ProductController {
         pagedModel.addIf(productPage.hasNext(),
             () -> linkTo(function.apply(methodOn(ProductController.class))).withRel("Next page"));
 
-        return ResponseEntity.ok(pagedModel);
+        return ResponseEntity.ok().headers(getCachingHeaders()).body(pagedModel);
     }
 
     @GetMapping(path = "/products/{barcode}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -118,7 +122,17 @@ public class ProductController {
         final EntityModel<SimpleProduct> simpleProductModel =
             EntityModel.of(simpleProductWithStatus.getSimpleProduct()).add(linkToPrices, linkToSelf);
 
-        return ResponseEntity.status(simpleProductWithStatus.getHttpStatus()).body(simpleProductModel);
+        return ResponseEntity
+            .status(simpleProductWithStatus.getHttpStatus())
+            .headers(getCachingHeaders())
+            .body(simpleProductModel);
+    }
+
+    private HttpHeaders getCachingHeaders() {
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setCacheControl("no-cache, max-age=0, must-revalidate");
+        httpHeaders.setETag(productCacheManager.getRef().toString().replace("-", ""));
+        return httpHeaders;
     }
 
     private List<EntityModel<SimpleProduct>> mapAndAddLinks(List<Product> inputList) {
