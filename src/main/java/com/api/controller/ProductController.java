@@ -100,7 +100,8 @@ public class ProductController {
     }
 
     private ResponseEntity<?> feedWithLinks(final Page<Product> productPage, final Function<ProductController, ResponseEntity<?>> function) {
-        if (productPage.getContent().isEmpty()) return ResponseEntity.ok(Collections.emptyList());
+        if (productPage.getContent().isEmpty())
+            return ResponseEntity.ok().headers(getCachingHeaders()).body(Collections.emptyList());
 
         CustomPagination<EntityModel<SimpleProduct>> pagedModel =
             new CustomPagination<>(productPage, mapAndAddLinks(productPage.getContent()));
@@ -131,7 +132,7 @@ public class ProductController {
     private HttpHeaders getCachingHeaders() {
         final HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setCacheControl("no-cache, max-age=0, must-revalidate");
-        httpHeaders.setETag(productCacheManager.getRef().toString().replace("-", ""));
+        httpHeaders.setETag("\""+productCacheManager.getRef().toString().replace("-", "")+"\"");
         return httpHeaders;
     }
 
