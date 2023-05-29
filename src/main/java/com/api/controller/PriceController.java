@@ -6,7 +6,6 @@ import com.api.projection.PriceWithInstant;
 import com.api.service.interfaces.PriceService;
 import com.api.utility.Constants;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -34,11 +33,7 @@ public class PriceController {
 
     @GetMapping(path = "/prices/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PriceWithInstant> searchById(@PathVariable("id") final UUID id) {
-        final CacheControl cacheControl = CacheControl.maxAge(Duration.ofSeconds(calculateCacheControl()));
-        return ResponseEntity.ok()
-            .cacheControl(cacheControl)
-            .body(priceService.findById(id)
-            .toPriceWithInstant());
+        return buildResponse(priceService.findById(id).toPriceWithInstant());
     }
 
     @GetMapping(path = "/prices", params = {"barcode", "limit"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,15 +50,19 @@ public class PriceController {
         .map(Price::toPriceWithInstant)
         .collect(Collectors.toList());
 
-        final CacheControl cacheControl = CacheControl.maxAge(Duration.ofSeconds(calculateCacheControl()));
-        return ResponseEntity.ok()
-            .cacheControl(cacheControl)
-            .body(listOfPrices);
+        return buildResponse(listOfPrices);
     }
 
     @GetMapping(path = "/prices", params = "barcode", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PriceWithInstant>> searchByProductBarcode(@RequestParam("barcode") @Barcode final String barcode) {
         return searchByProductBarcode(barcode, 0);
+    }
+
+    private <B> ResponseEntity<B> buildResponse(final B body) {
+        final CacheControl cacheControl = CacheControl.maxAge(Duration.ofSeconds(calculateCacheControl()));
+        return ResponseEntity.ok()
+            .cacheControl(cacheControl)
+            .body(body);
     }
 
     private long calculateCacheControl() {
