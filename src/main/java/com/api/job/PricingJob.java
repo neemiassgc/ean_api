@@ -2,8 +2,8 @@ package com.api.job;
 
 import com.api.entity.Price;
 import com.api.entity.Product;
-import com.api.service.ProductExternalServiceImpl;
 import com.api.service.interfaces.EmailService;
+import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PricingJob implements Job {
 
-    private final ProductExternalServiceImpl productExternalServiceImpl;
+    private final ProductExternalService productExternalServiceImpl;
     private final ProductService productService;
     private final EmailService emailService;
 
