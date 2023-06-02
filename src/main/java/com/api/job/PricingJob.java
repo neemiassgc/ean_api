@@ -100,6 +100,11 @@ public class PricingJob implements Job {
             .build();
     }
 
+    private Price clonePriceFromProduct(final Product product) {
+        final Price priceToBeCloned = product.getPrices().get(0);
+        return new Price(priceToBeCloned.getValue(), priceToBeCloned.getInstant(), null);
+    }
+
     private boolean checkIfPricesAreEqual(final Price priceA, final Price priceB) {
         return priceA.getValue().equals(priceB.getValue());
     }
