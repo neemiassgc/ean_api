@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -74,9 +73,9 @@ public class PricingJob implements Job {
     }
 
     private Info updatePrices() {
-        final List<Product> changedProducts = new ArrayList<>();
+        final List<String> productsWithModifiedPrices = new ArrayList<>();
 
-        final Integer totalOfProducts = transactionTemplate.execute(transactionStatus -> {
+        final Integer totalOfProducts = transactionTemplate.execute(__ -> {
             final List<Product> products = productService.findAllWithLatestPrice();
 
             for (Product product : products) {
@@ -88,16 +87,16 @@ public class PricingJob implements Job {
                     continue;
 
                 product.addPrice(newPrice);
-                changedProducts.add(product);
+                productsWithModifiedPrices.add(product.getDescription());
             }
 
             return products.size();
         });
 
         return Info.builder()
-            .countOfChangedProducts(changedProducts.size())
+            .countOfChangedProducts(productsWithModifiedPrices.size())
             .totalOfProducts(Objects.nonNull(totalOfProducts) ? totalOfProducts : 0)
-            .changedProductDescriptions(changedProducts.stream().map(Product::getDescription).collect(Collectors.toList()))
+            .changedProductDescriptions(productsWithModifiedPrices)
             .build();
     }
 
