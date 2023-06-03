@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -73,31 +74,29 @@ public class PricingJob implements Job {
     }
 
     private Info updatePrices() {
-        final List<Product> products = productService.findAllWithLatestPrice();
         final List<Product> changedProducts = new ArrayList<>();
-        final int totalOfProducts = products.size();
-        int countOfChangedProducts = 0;
 
-        for (Product product : products) {
-            final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
-                .map(fetchedProduct -> {
-                    final Price price = fetchedProduct.getPrices().get(0);
-                    fetchedProduct.removePrice(price);
-                    return price;
-                })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        final Integer totalOfProducts = transactionTemplate.execute(transactionStatus -> {
+            final List<Product> products = productService.findAllWithLatestPrice();
 
-            if (checkIfPricesAreEqual(product.getPrices().get(0), newPrice))
-                continue;
+            for (Product product : products) {
+                final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
+                    .map(this::clonePriceFromProduct)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-            productService.save(product.addPrice(newPrice));
-            countOfChangedProducts++;
-            changedProducts.add(product);
-        }
+                if (checkIfPricesAreEqual(product.getPrices().get(0), newPrice))
+                    continue;
+
+                product.addPrice(newPrice);
+                changedProducts.add(product);
+            }
+
+            return products.size();
+        });
 
         return Info.builder()
-            .countOfChangedProducts(countOfChangedProducts)
-            .totalOfProducts(totalOfProducts)
+            .countOfChangedProducts(changedProducts.size())
+            .totalOfProducts(Objects.nonNull(totalOfProducts) ? totalOfProducts : 0)
             .changedProductDescriptions(changedProducts.stream().map(Product::getDescription).collect(Collectors.toList()))
             .build();
     }
