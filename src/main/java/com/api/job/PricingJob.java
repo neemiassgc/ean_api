@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
@@ -27,6 +28,7 @@ public class PricingJob implements Job {
     private final ProductExternalService productExternalServiceImpl;
     private final ProductService productService;
     private final EmailService emailService;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     public void execute() {
