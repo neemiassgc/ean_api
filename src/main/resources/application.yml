@@ -1,4 +1,9 @@
 spring:
+  jpa:
+    properties:
+      hibernate.jdbc.batch_size: 20
+      hibernate.order_inserts: true
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -15,7 +20,7 @@ spring:
     job-store-type: memory
 
   profiles:
-    active: prod
+    active: dev
 
   hateoas:
     use-hal-as-default-json-media-type: false
