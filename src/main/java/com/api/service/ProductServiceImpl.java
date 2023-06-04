@@ -31,7 +31,6 @@ public class ProductServiceImpl implements ProductService {
     private final CacheManager<Product, UUID> productCacheManager;
     private final long[] totalOfItems = new long[1];
 
-    @Transactional(propagation = Propagation.REQUIRED)
     public SimpleProductWithStatus getByBarcodeAndSaveIfNecessary(@NonNull final String barcode) {
         final Optional<List<Product>> productListOptional =
             productCacheManager.sync(
@@ -49,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
         return newProduct.toSimpleProductWithStatus(HttpStatus.CREATED);
     }
 
-    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
     public void save(@NonNull final Product product) {
         productRepository.save(product);
         productCacheManager.evictAll();
