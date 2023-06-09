@@ -15,18 +15,18 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Transactional(readOnly = true)
+@Transactional
 public class SessionStorageServiceImpl implements SessionStorageService {
 
     private final SessionStorageRepository sessionStorageRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<SessionStorage> findTopBy(@NonNull Sort sort) {
         return sessionStorageRepository.findTopBy(sort);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
     public void save(@NonNull SessionStorage sessionStorage) {
         sessionStorageRepository.save(sessionStorage);
     }
