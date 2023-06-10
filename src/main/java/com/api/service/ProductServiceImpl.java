@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ProductServiceImpl implements ProductService {
 
@@ -48,7 +48,6 @@ public class ProductServiceImpl implements ProductService {
         return newProduct.toSimpleProductWithStatus(HttpStatus.CREATED);
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
     public void save(@NonNull final Product product) {
         productRepository.save(product);
         productCacheManager.evictAll();
