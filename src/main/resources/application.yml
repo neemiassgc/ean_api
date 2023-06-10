@@ -20,7 +20,7 @@ spring:
     job-store-type: memory
 
   profiles:
-    active: dev
+    active: prod
 
   hateoas:
     use-hal-as-default-json-media-type: false
