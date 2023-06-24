@@ -2,6 +2,7 @@ package com.api.controller;
 
 import com.api.job.Job;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Log4j2
 public class JobsRouter {
 
     private final Job job;
@@ -33,6 +35,7 @@ public class JobsRouter {
     }
 
     private void runParallel(final Runnable task) {
+        log.info("Running the job in parallel");
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(task);
         executorService.shutdown();

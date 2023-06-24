@@ -12,13 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -29,7 +27,6 @@ public class PricingJob implements Job {
     private final ProductExternalService productExternalServiceImpl;
     private final ProductService productService;
     private final EmailService emailService;
-    private final TransactionTemplate transactionTemplate;
 
     @Override
     public void execute() {
@@ -75,35 +72,34 @@ public class PricingJob implements Job {
 
     private Info updatePrices() {
         final List<String> productsWithModifiedPrices = new ArrayList<>();
+        final List<Product> products = productService.findAllWithLatestPrice();
 
-        final Integer totalOfProducts = transactionTemplate.execute(__ -> {
-            final List<Product> products = productService.findAllWithLatestPrice();
+        for (Product product : products) {
+            final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
+                .map(this::clonePriceFromProduct)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-            for (Product product : products) {
-                final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
-                    .map(this::clonePriceFromProduct)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
-
-                if (checkIfPricesAreEqual(product.getPrices().get(0), newPrice))
-                    continue;
-
-                product.addPrice(newPrice);
-                productsWithModifiedPrices.add(product.getDescription());
-
-                log.info("Delay of 1 second...");
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                    log.info("Delay Interrupted");
-                }
+            if (checkIfPricesAreEqual(product.getPrices().get(0), newPrice)) {
+                log.info("No price difference found for product: "+product.getBarcode()+"...");
+                continue;
             }
 
-            return products.size();
-        });
+            log.info("Saving price for product with bacode: "+product.getBarcode()+"...");
+            product.addPrice(newPrice);
+            productsWithModifiedPrices.add(product.getDescription());
+            productService.save(product);
+
+            log.info("Delay of 1 second...");
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                log.info("Delay Interrupted");
+            }
+        }
 
         return Info.builder()
             .countOfChangedProducts(productsWithModifiedPrices.size())
-            .totalOfProducts(Objects.nonNull(totalOfProducts) ? totalOfProducts : 0)
+            .totalOfProducts(products.size())
             .changedProductDescriptions(productsWithModifiedPrices)
             .build();
     }
