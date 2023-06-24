@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -24,9 +26,15 @@ public class JobsRouter {
         final List<String> appEngineCronHeader = httpHeaders.get("X-Appengine-Cron");
         if (Objects.isNull(appEngineCronHeader)) return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST.name());
         if (appEngineCronHeader.contains("true")) {
-            job.execute();
+            runParallel(job::execute);
             return ResponseEntity.ok(HttpStatus.OK.name());
         }
         return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST.name());
+    }
+
+    private void runParallel(final Runnable task) {
+        final ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(task);
+        executorService.shutdown();
     }
 }
