@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -88,6 +89,13 @@ public class PricingJob implements Job {
 
                 product.addPrice(newPrice);
                 productsWithModifiedPrices.add(product.getDescription());
+
+                log.info("Delay of 1 second...");
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    log.info("Delay Interrupted");
+                }
             }
 
             return products.size();
