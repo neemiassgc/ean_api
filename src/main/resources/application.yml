@@ -10,15 +10,6 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-  quartz:
-    properties:
-      org:
-        quartz:
-          threadPool:
-            threadCount: 1
-
-    job-store-type: memory
-
   profiles:
     active: prod
 
