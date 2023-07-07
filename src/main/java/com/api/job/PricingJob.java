@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,10 @@ public class PricingJob implements Job {
                 .elapsedTimeInSeconds(elapsedTimeInSeconds)
                 .build()
         );
+    }
+
+    private BigDecimal calculatePercentage(final BigDecimal oldPrice, final BigDecimal newPriceprice) {
+        return oldPrice.subtract(newPriceprice).divide(oldPrice, RoundingMode.DOWN);
     }
 
     private void sendFailureMessage(final String message) {
