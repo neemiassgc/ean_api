@@ -56,6 +56,9 @@ public class PricingJob implements Job {
 
     private BigDecimal calculatePercentage(final BigDecimal oldPrice, final BigDecimal newPriceprice) {
         return oldPrice.subtract(newPriceprice).divide(oldPrice, RoundingMode.DOWN);
+
+    private boolean isNegative(final BigDecimal value) {
+        return value.signum() == -1;
     }
 
     private void sendFailureMessage(final String message) {
