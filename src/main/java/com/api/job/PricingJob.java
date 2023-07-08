@@ -130,13 +130,4 @@ public class PricingJob implements Job {
     private boolean checkIfPricesAreEqual(final Price priceA, final Price priceB) {
         return priceA.getValue().equals(priceB.getValue());
     }
-
-    @Getter
-    @RequiredArgsConstructor
-    @Builder
-    private static class Info {
-        private final List<ProductDetails> productDetailsList;
-        private final int totalOfProducts;
-        private final long elapsedTimeInSeconds;
-    }
 }
