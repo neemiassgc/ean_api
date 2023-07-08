@@ -5,12 +5,12 @@ import com.api.repository.PriceRepository;
 import com.api.service.interfaces.EmailService;
 import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
+import com.api.service.minimal.Info;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Optional;
 
@@ -32,9 +32,6 @@ public class PricingJobIT {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     @MockBean
     private EmailService emailService;
 
@@ -47,7 +44,8 @@ public class PricingJobIT {
 
     @Test
     void should_save_different_unequal_prices() {
-        willDoNothing().given(emailService).sendAuditEmail(anyString());
+        willDoNothing().given(emailService).sendSuccessMessage(any(Info.class));
+        willDoNothing().given(emailService).sendFailureMessage(anyString());
         given(productExternalService.fetchByBarcode(anyString()))
             .willAnswer(invocationOnMock -> {
                 System.out.println("Fetching product with barcode: "+invocationOnMock.getArgument(0, String.class)+"\n");
@@ -61,7 +59,8 @@ public class PricingJobIT {
 
         assertThat(actualAmountOfPrices).isEqualTo(101);
 
-        verify(emailService, times(1)).sendAuditEmail(anyString());
+        verify(emailService, times(1)).sendFailureMessage(anyString());
+        verify(emailService, times(1)).sendSuccessMessage(any(Info.class));
         verify(productExternalService, times(16)).fetchByBarcode(anyString());
         verifyNoMoreInteractions(emailService, productExternalService);
     }

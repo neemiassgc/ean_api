@@ -1,6 +1,5 @@
 package com.api.service.minimal;
 
-import com.api.job.PricingJob;
 import lombok.Builder;
 import lombok.Getter;
 
