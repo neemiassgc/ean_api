@@ -20,6 +20,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -32,7 +34,6 @@ public class PricingJob implements Job {
 
     @Override
     public void execute() {
-        final long startMeasureTime = System.currentTimeMillis();
         final Info info;
 
         try {
@@ -42,16 +43,8 @@ public class PricingJob implements Job {
             sendFailureMessage(e.getMessage());
             throw e;
         }
-        final long elapsedTimeInSeconds = Duration.ofMillis(System.currentTimeMillis() - startMeasureTime).toSeconds();
 
-        sendSuccessMessage(
-            Info.builder()
-                .changedProductDescriptions(info.getChangedProductDescriptions())
-                .countOfChangedProducts(info.getCountOfChangedProducts())
-                .totalOfProducts(info.getTotalOfProducts())
-                .elapsedTimeInSeconds(elapsedTimeInSeconds)
-                .build()
-        );
+        sendSuccessMessage(info);
     }
 
     private String calculateVariablePercentage(final BigDecimal originalPrice, final BigDecimal newPrice) {
@@ -73,19 +66,27 @@ public class PricingJob implements Job {
         emailService.sendAuditEmail(emailMessage);
     }
 
-    private void sendSuccessMessage(final Info info) {
+    public void sendSuccessMessage(final Info info) {
+        final Function<ProductDetails, String> mapperFunction = productDetails ->
+           String.format(
+                "%s | R$%s -> R$%s %s", productDetails.getDescription(),
+                productDetails.getOldPrice(), productDetails.getNewPrice(),
+                calculateVariablePercentage(productDetails.getOldPrice(), productDetails.getNewPrice())
+            );
+
         final String emailMessage =
             "Running job successfully\n\n"+
-            String.format("%d/%d products changed\n\n", info.getCountOfChangedProducts(), info.getTotalOfProducts())+
+            String.format("%d/%d products changed\n\n", info.getProductDetailsList().size(), info.getTotalOfProducts())+
             String.format("Elapsed time: %d seconds\n\n", info.getElapsedTimeInSeconds()) +
-            String.join("\n", info.getChangedProductDescriptions());
+            info.getProductDetailsList().stream().map(mapperFunction).collect(Collectors.joining("\n"));
 
         emailService.sendAuditEmail(emailMessage);
     }
 
     private Info updatePrices() {
-        final List<String> productsWithModifiedPrices = new ArrayList<>();
         final List<Product> products = productService.findAllWithLatestPrice();
+        final List<ProductDetails> productDetailsList = new ArrayList<>(products.size());
+        final long startMeasureTime = System.currentTimeMillis();
 
         for (Product product : products) {
             final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
@@ -99,8 +100,11 @@ public class PricingJob implements Job {
 
             log.info("Saving price for product with bacode: "+product.getBarcode()+"...");
             product.addPrice(newPrice);
-            productsWithModifiedPrices.add(product.getDescription());
             productService.save(product);
+
+            final BigDecimal previousPrice = product.getPrices().get(0).getValue();
+            final BigDecimal lastestPrice = newPrice.getValue();
+            productDetailsList.add(new ProductDetails(product.getDescription(), previousPrice, lastestPrice));
 
             log.info("Delay of 1 second...");
             try {
@@ -110,10 +114,11 @@ public class PricingJob implements Job {
             }
         }
 
+        final long elapsedTimeInSeconds = Duration.ofMillis(System.currentTimeMillis() - startMeasureTime).toSeconds();
         return Info.builder()
-            .countOfChangedProducts(productsWithModifiedPrices.size())
+            .productDetailsList(productDetailsList)
             .totalOfProducts(products.size())
-            .changedProductDescriptions(productsWithModifiedPrices)
+            .elapsedTimeInSeconds(elapsedTimeInSeconds)
             .build();
     }
 
@@ -130,13 +135,13 @@ public class PricingJob implements Job {
     @RequiredArgsConstructor
     @Builder
     private static class Info {
-        private final int countOfChangedProducts;
+        private final List<ProductDetails> productDetailsList;
         private final int totalOfProducts;
         private final long elapsedTimeInSeconds;
     }
-    
+
     @Getter
-    @Builder
+    @RequiredArgsConstructor
     private static class ProductDetails {
         private final String description;
         private final BigDecimal oldPrice;
