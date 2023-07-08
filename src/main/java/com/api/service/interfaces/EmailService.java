@@ -1,6 +1,10 @@
 package com.api.service.interfaces;
 
+import com.api.service.minimal.Info;
+
 public interface EmailService {
 
-    void sendAuditEmail(String message);
+    void sendFailureMessage(String message);
+
+    void sendSuccessMessage(Info info);
 }
