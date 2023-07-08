@@ -139,12 +139,4 @@ public class PricingJob implements Job {
         private final int totalOfProducts;
         private final long elapsedTimeInSeconds;
     }
-
-    @Getter
-    @RequiredArgsConstructor
-    private static class ProductDetails {
-        private final String description;
-        private final BigDecimal oldPrice;
-        private final BigDecimal newPrice;
-    }
 }
