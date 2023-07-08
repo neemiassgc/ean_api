@@ -42,7 +42,7 @@ public class PricingJobIT {
 
     @BeforeEach
     void before() {
-        jobUnderTest = new PricingJob(productExternalService, productService, emailService, transactionTemplate);
+        jobUnderTest = new PricingJob(productExternalService, productService, emailService);
     }
 
     @Test
