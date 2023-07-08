@@ -54,8 +54,12 @@ public class PricingJob implements Job {
         );
     }
 
-    private BigDecimal calculatePercentage(final BigDecimal oldPrice, final BigDecimal newPriceprice) {
-        return oldPrice.subtract(newPriceprice).divide(oldPrice, RoundingMode.DOWN);
+    private String calculateVariablePercentage(final BigDecimal originalPrice, final BigDecimal newPrice) {
+        final BigDecimal fraction = originalPrice.subtract(newPrice).divide(originalPrice, 2, RoundingMode.HALF_EVEN);
+        final BigDecimal oneHundred = new BigDecimal("100");
+        final BigDecimal percentage = fraction.abs().multiply(oneHundred);
+        return (isNegative(fraction) ? ">" : "<")+" ~"+percentage.toBigInteger()+"%";
+    }
 
     private boolean isNegative(final BigDecimal value) {
         return value.signum() == -1;
