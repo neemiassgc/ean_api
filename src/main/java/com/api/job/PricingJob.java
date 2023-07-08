@@ -5,8 +5,8 @@ import com.api.entity.Product;
 import com.api.service.interfaces.EmailService;
 import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
-import lombok.Builder;
-import lombok.Getter;
+import com.api.service.minimal.Info;
+import com.api.service.minimal.ProductDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -40,47 +37,11 @@ public class PricingJob implements Job {
             info = updatePrices();
         }
         catch (Exception e) {
-            sendFailureMessage(e.getMessage());
+            emailService.sendFailureMessage(e.getMessage());
             throw e;
         }
 
-        sendSuccessMessage(info);
-    }
-
-    private String calculateVariablePercentage(final BigDecimal originalPrice, final BigDecimal newPrice) {
-        final BigDecimal fraction = originalPrice.subtract(newPrice).divide(originalPrice, 2, RoundingMode.HALF_EVEN);
-        final BigDecimal oneHundred = new BigDecimal("100");
-        final BigDecimal percentage = fraction.abs().multiply(oneHundred);
-        return (isNegative(fraction) ? ">" : "<")+" ~"+percentage.toBigInteger()+"%";
-    }
-
-    private boolean isNegative(final BigDecimal value) {
-        return value.signum() == -1;
-    }
-
-    private void sendFailureMessage(final String message) {
-        final String emailMessage =
-        "Running job failed\n\n"+
-        "With exception: "+message;
-
-        emailService.sendAuditEmail(emailMessage);
-    }
-
-    public void sendSuccessMessage(final Info info) {
-        final Function<ProductDetails, String> mapperFunction = productDetails ->
-           String.format(
-                "%s | R$%s -> R$%s %s", productDetails.getDescription(),
-                productDetails.getOldPrice(), productDetails.getNewPrice(),
-                calculateVariablePercentage(productDetails.getOldPrice(), productDetails.getNewPrice())
-            );
-
-        final String emailMessage =
-            "Running job successfully\n\n"+
-            String.format("%d/%d products changed\n\n", info.getProductDetailsList().size(), info.getTotalOfProducts())+
-            String.format("Elapsed time: %d seconds\n\n", info.getElapsedTimeInSeconds()) +
-            info.getProductDetailsList().stream().map(mapperFunction).collect(Collectors.joining("\n"));
-
-        emailService.sendAuditEmail(emailMessage);
+        emailService.sendSuccessMessage(info);
     }
 
     private Info updatePrices() {
