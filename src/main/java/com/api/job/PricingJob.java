@@ -5,8 +5,8 @@ import com.api.entity.Product;
 import com.api.service.interfaces.EmailService;
 import com.api.service.interfaces.ProductExternalService;
 import com.api.service.interfaces.ProductService;
-import lombok.Builder;
-import lombok.Getter;
+import com.api.service.minimal.Info;
+import com.api.service.minimal.ProductDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,49 +31,23 @@ public class PricingJob implements Job {
 
     @Override
     public void execute() {
-        final long startMeasureTime = System.currentTimeMillis();
         final Info info;
 
         try {
             info = updatePrices();
         }
         catch (Exception e) {
-            sendFailureMessage(e.getMessage());
+            emailService.sendFailureMessage(e.getMessage());
             throw e;
         }
-        final long elapsedTimeInSeconds = Duration.ofMillis(System.currentTimeMillis() - startMeasureTime).toSeconds();
 
-        sendSuccessMessage(
-            Info.builder()
-                .changedProductDescriptions(info.getChangedProductDescriptions())
-                .countOfChangedProducts(info.getCountOfChangedProducts())
-                .totalOfProducts(info.getTotalOfProducts())
-                .elapsedTimeInSeconds(elapsedTimeInSeconds)
-                .build()
-        );
-    }
-
-    private void sendFailureMessage(final String message) {
-        final String emailMessage =
-        "Running job failed\n\n"+
-        "With exception: "+message;
-
-        emailService.sendAuditEmail(emailMessage);
-    }
-
-    private void sendSuccessMessage(final Info info) {
-        final String emailMessage =
-            "Running job successfully\n\n"+
-            String.format("%d/%d products changed\n\n", info.getCountOfChangedProducts(), info.getTotalOfProducts())+
-            String.format("Elapsed time: %d seconds\n\n", info.getElapsedTimeInSeconds()) +
-            String.join("\n", info.getChangedProductDescriptions());
-
-        emailService.sendAuditEmail(emailMessage);
+        emailService.sendSuccessMessage(info);
     }
 
     private Info updatePrices() {
-        final List<String> productsWithModifiedPrices = new ArrayList<>();
         final List<Product> products = productService.findAllWithLatestPrice();
+        final List<ProductDetails> productDetailsList = new ArrayList<>(products.size());
+        final long startMeasureTime = System.currentTimeMillis();
 
         for (Product product : products) {
             final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
@@ -86,8 +61,11 @@ public class PricingJob implements Job {
 
             log.info("Saving price for product with bacode: "+product.getBarcode()+"...");
             product.addPrice(newPrice);
-            productsWithModifiedPrices.add(product.getDescription());
             productService.save(product);
+
+            final BigDecimal previousPrice = product.getPrices().get(0).getValue();
+            final BigDecimal lastestPrice = newPrice.getValue();
+            productDetailsList.add(new ProductDetails(product.getDescription(), previousPrice, lastestPrice));
 
             log.info("Delay of 1 second...");
             try {
@@ -97,10 +75,11 @@ public class PricingJob implements Job {
             }
         }
 
+        final long elapsedTimeInSeconds = Duration.ofMillis(System.currentTimeMillis() - startMeasureTime).toSeconds();
         return Info.builder()
-            .countOfChangedProducts(productsWithModifiedPrices.size())
+            .productDetailsList(productDetailsList)
             .totalOfProducts(products.size())
-            .changedProductDescriptions(productsWithModifiedPrices)
+            .elapsedTimeInSeconds(elapsedTimeInSeconds)
             .build();
     }
 
@@ -111,15 +90,5 @@ public class PricingJob implements Job {
 
     private boolean checkIfPricesAreEqual(final Price priceA, final Price priceB) {
         return priceA.getValue().equals(priceB.getValue());
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    @Builder
-    private static class Info {
-        private final int countOfChangedProducts;
-        private final int totalOfProducts;
-        private final long elapsedTimeInSeconds;
-        private final List<String> changedProductDescriptions;
     }
 }
