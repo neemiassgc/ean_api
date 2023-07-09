@@ -67,12 +67,7 @@ public class PricingJob implements Job {
             final BigDecimal lastestPrice = newPrice.getValue();
             productDetailsList.add(new ProductDetails(product.getDescription(), previousPrice, lastestPrice));
 
-            log.info("Delay of 1 second...");
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                log.info("Delay Interrupted");
-            }
+            waitForOneSecond();
         }
 
         final long elapsedTimeInSeconds = Duration.ofMillis(System.currentTimeMillis() - startMeasureTime).toSeconds();
@@ -81,6 +76,15 @@ public class PricingJob implements Job {
             .totalOfProducts(products.size())
             .elapsedTimeInSeconds(elapsedTimeInSeconds)
             .build();
+    }
+
+    private void waitForOneSecond() {
+        log.info("Delay of 1 second...");
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            log.info("Delay Interrupted");
+        }
     }
 
     private Price clonePriceFromProduct(final Product product) {
