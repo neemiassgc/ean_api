@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Log4j2
-public class JobsRouter {
+public class ActionController {
 
     private final Job job;
 

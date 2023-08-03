@@ -27,9 +27,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {JobsRouter.class, GlobalErrorHandlingController.class})
+@WebMvcTest(controllers = {ActionController.class, GlobalErrorHandlingController.class})
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-public final class JobsRouterTest {
+public final class ActionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
