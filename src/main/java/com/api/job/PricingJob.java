@@ -47,40 +47,50 @@ public class PricingJob implements Job {
     private Info updatePrices() {
         final List<Product> products = productService.findAllWithLatestPrice();
         final List<ProductDetails> productDetailsList = new ArrayList<>(products.size());
-        final long startMeasureTime = System.currentTimeMillis();
 
-        for (Product product : products) {
-            final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
-                .map(this::clonePriceFromProduct)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+        final Runnable runnable = () -> {
+            for (Product product : products) {
+                final Price newPrice = productExternalServiceImpl.fetchByBarcode(product.getBarcode())
+                    .map(this::clonePriceFromProduct)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
-            if (checkIfPricesAreEqual(product.getPrices().get(0), newPrice)) {
-                log.info("No price difference found for product: "+product.getBarcode()+"...");
-                continue;
+                if (checkIfPricesAreEqual(product.getPrices().get(0), newPrice)) {
+                    log.info("No price difference found for product: "+product.getBarcode()+"...");
+                    continue;
+                }
+
+                log.info("Saving price for product with bacode: "+product.getBarcode()+"...");
+                product.addPrice(newPrice);
+                productService.save(product);
+
+                final BigDecimal previousPrice = product.getPrices().get(0).getValue();
+                final BigDecimal lastestPrice = newPrice.getValue();
+                productDetailsList.add(new ProductDetails(product.getDescription(), previousPrice, lastestPrice));
+
+                waitForOneSecond();
             }
+        };
 
-            log.info("Saving price for product with bacode: "+product.getBarcode()+"...");
-            product.addPrice(newPrice);
-            productService.save(product);
-
-            final BigDecimal previousPrice = product.getPrices().get(0).getValue();
-            final BigDecimal lastestPrice = newPrice.getValue();
-            productDetailsList.add(new ProductDetails(product.getDescription(), previousPrice, lastestPrice));
-
-            log.info("Delay of 1 second...");
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                log.info("Delay Interrupted");
-            }
-        }
-
-        final long elapsedTimeInSeconds = Duration.ofMillis(System.currentTimeMillis() - startMeasureTime).toSeconds();
         return Info.builder()
             .productDetailsList(productDetailsList)
             .totalOfProducts(products.size())
-            .elapsedTimeInSeconds(elapsedTimeInSeconds)
+            .elapsedTimeInSeconds(executeAndCalculateElapsedTimeInSeconds(runnable))
             .build();
+    }
+
+    private void waitForOneSecond() {
+        log.info("Delay of 1 second...");
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            log.info("Delay Interrupted");
+        }
+    }
+
+    public long executeAndCalculateElapsedTimeInSeconds(final Runnable runnable) {
+        final long startMeasureTime = System.currentTimeMillis();
+        runnable.run();
+        return Duration.ofMillis(System.currentTimeMillis() - startMeasureTime).toSeconds();
     }
 
     private Price clonePriceFromProduct(final Product product) {

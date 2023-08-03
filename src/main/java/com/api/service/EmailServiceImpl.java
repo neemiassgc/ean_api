@@ -5,6 +5,7 @@ import com.api.service.minimal.ProductDetails;
 import com.api.utility.Constants;
 import com.api.service.interfaces.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class EmailServiceImpl implements EmailService {
 
@@ -73,5 +75,6 @@ public class EmailServiceImpl implements EmailService {
         simpleMailMessage.setText(message);
 
         javaMailSender.send(simpleMailMessage);
+        log.info("An email with information about updated products has benn sent");
     }
 }
