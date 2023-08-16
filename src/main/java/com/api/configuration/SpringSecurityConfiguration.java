@@ -16,7 +16,9 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         http.headers().cacheControl().disable();
 
-        http.authorizeRequests().anyRequest().denyAll();
+        http.cors().disable();
+        http.authorizeRequests().mvcMatchers("/warmup").permitAll();
+        http.authorizeRequests().anyRequest().authenticated();
         http.httpBasic();
     }
 }
