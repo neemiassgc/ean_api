@@ -1,11 +1,9 @@
 package com.api.configuration;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 
 @Configuration
 public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -16,9 +14,10 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         http.headers().cacheControl().disable();
 
-        http.cors().disable();
-        http.authorizeRequests().mvcMatchers("/warmup").permitAll();
-        http.authorizeRequests().anyRequest().authenticated();
-        http.httpBasic();
+        http.authorizeRequests().mvcMatchers("/hit").permitAll();
+        http.authorizeRequests().mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+        http.authorizeRequests().anyRequest().hasAnyAuthority("SCOPE_admin");
+        http.httpBasic().disable();
+        http.oauth2ResourceServer().jwt();
     }
 }
