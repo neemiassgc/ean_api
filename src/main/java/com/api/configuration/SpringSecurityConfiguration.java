@@ -27,10 +27,9 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
 
         http.headers().cacheControl().disable();
-
-        http.authorizeRequests().mvcMatchers("/hit").permitAll();
+        
         http.authorizeRequests().mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll();
-        http.authorizeRequests().anyRequest().hasAnyAuthority("SCOPE_admin");
+        http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_admin");
         http.httpBasic().disable();
         http.oauth2ResourceServer().jwt();
     }
