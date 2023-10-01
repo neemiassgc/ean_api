@@ -41,7 +41,6 @@ public class ActionController {
 
     @GetMapping("hit")
     @ResponseStatus(HttpStatus.OK)
-    @CrossOrigin
     public String hit() {
         return "OK";
     }
