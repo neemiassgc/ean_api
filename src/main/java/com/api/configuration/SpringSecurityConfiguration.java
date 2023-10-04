@@ -3,6 +3,7 @@ package com.api.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -39,6 +40,7 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
         source.registerCorsConfiguration("/**", corsConfiguration);
 
         http.cors().configurationSource(source);
+        http.authorizeRequests().mvcMatchers(HttpMethod.GET, "/api/jobs/updatePrices").permitAll();
         http.authorizeRequests().mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll();
         http.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_admin");
         http.httpBasic().disable();
