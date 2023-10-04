@@ -16,6 +16,12 @@ spring:
   hateoas:
     use-hal-as-default-json-media-type: false
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/security}
+
 
 server:
   port: ${PORT}
