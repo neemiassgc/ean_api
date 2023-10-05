@@ -17,6 +17,9 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 
@@ -24,10 +27,8 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import java.time.Duration;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Configuration
 public class BeansConfiguration {
@@ -99,5 +100,20 @@ public class BeansConfiguration {
     @Bean
     public CacheManager<Price, UUID> priceCacheManager() {
         return new CacheManager<>(Price::getId);
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        final CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addAllowedMethod("*");
+        final List<String> allowedOrigins = Arrays
+            .stream(System.getenv("WEB_ORIGINS").split(","))
+            .map(String::trim).collect(Collectors.toList());
+        corsConfiguration.setAllowedOrigins(allowedOrigins);
+        corsConfiguration.addExposedHeader("WWW-Authenticate");
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+        return source;
     }
 }
