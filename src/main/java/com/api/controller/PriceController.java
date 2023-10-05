@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/api")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@CrossOrigin
 public class PriceController {
 
     private final PriceService priceService;

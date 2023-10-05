@@ -38,7 +38,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping(path = "/api")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Validated
-@CrossOrigin
 public class ProductController {
 
     private final ProductService productService;
